@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyasn1.type.constraint &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="模块代码" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>pyasn1.type.constraint 源代码</h1><div class="highlight"><pre>
+<span></span><span class="c1">#</span>
+<span class="c1">#   ASN.1 subtype constraints classes.</span>
+<span class="c1">#</span>
+<span class="c1">#   Constraints are relatively rare, but every ASN1 object</span>
+<span class="c1">#   is doing checks all the time for whether they have any</span>
+<span class="c1">#   constraints and whether they are applicable to the object.</span>
+<span class="c1">#</span>
+<span class="c1">#   What we&#39;re going to do is define objects/functions that</span>
+<span class="c1">#   can be called unconditionally if they are present, and that</span>
+<span class="c1">#   are simply not present if there are no constraints.</span>
+<span class="c1">#</span>
+<span class="c1">#   Original concept and code by Mike C. Fletcher.</span>
+<span class="c1">#</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">pyasn1.type</span> <span class="kn">import</span> <span class="n">error</span>
+
+<span class="k">class</span> <span class="nc">AbstractConstraint</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base-class for constraint objects</span>
+
+<span class="sd">       Constraints should be stored in a simple sequence in the</span>
+<span class="sd">       namespace of their client Asn1Item sub-classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_valueMap</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setValues</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hashedValues</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_testValue</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span>
+               <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> failed at: </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+            <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">])</span>
+        <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">other</span> <span class="ow">and</span> <span class="bp">True</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">==</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">!=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">&lt;</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">&lt;=</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">&gt;</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">&gt;=</span> <span class="n">other</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hashedValues</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__hashedValues</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hashedValues</span>
+
+    <span class="k">def</span> <span class="nf">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="n">values</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c1"># Constraints derivation logic</span>
+    <span class="k">def</span> <span class="nf">getValueMap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valueMap</span>
+    <span class="k">def</span> <span class="nf">isSuperTypeOf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">otherConstraint</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">otherConstraint</span><span class="o">.</span><span class="n">getValueMap</span><span class="p">()</span> <span class="ow">or</span> \
+               <span class="n">otherConstraint</span> <span class="ow">is</span> <span class="bp">self</span> <span class="ow">or</span> <span class="n">otherConstraint</span> <span class="o">==</span> <span class="bp">self</span>
+    <span class="k">def</span> <span class="nf">isSubTypeOf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">otherConstraint</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">otherConstraint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valueMap</span> <span class="ow">or</span> \
+               <span class="n">otherConstraint</span> <span class="ow">is</span> <span class="bp">self</span> <span class="ow">or</span> <span class="n">otherConstraint</span> <span class="o">==</span> <span class="bp">self</span>
+
+<span class="k">class</span> <span class="nc">SingleValueConstraint</span><span class="p">(</span><span class="n">AbstractConstraint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value must be part of defined values constraint&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="c1"># XXX index vals for performance?</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ContainedSubtypeConstraint</span><span class="p">(</span><span class="n">AbstractConstraint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value must satisfy all of defined set of constraints&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">:</span>
+            <span class="n">c</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ValueRangeConstraint</span><span class="p">(</span><span class="n">AbstractConstraint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value must be within start and stop values (inclusive)&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">PyAsn1Error</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: bad constraint values&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,)</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">PyAsn1Error</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: screwed constraint values (start &gt; stop): </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">AbstractConstraint</span><span class="o">.</span><span class="n">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        
+<span class="k">class</span> <span class="nc">ValueSizeConstraint</span><span class="p">(</span><span class="n">ValueRangeConstraint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;len(value) must be within start and stop values (inclusive)&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">or</span> <span class="n">l</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">PermittedAlphabetConstraint</span><span class="p">(</span><span class="n">SingleValueConstraint</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+<span class="c1"># This is a bit kludgy, meaning two op modes within a single constraing</span>
+<span class="k">class</span> <span class="nc">InnerTypeConstraint</span><span class="p">(</span><span class="n">AbstractConstraint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value must satisfy type and presense constraints&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__singleTypeConstraint</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__singleTypeConstraint</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multipleTypeConstraint</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multipleTypeConstraint</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">constraint</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multipleTypeConstraint</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;ABSENT&#39;</span><span class="p">:</span>   <span class="c1"># XXX presense is not checked!</span>
+                <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">constraint</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__multipleTypeConstraint</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__singleTypeConstraint</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__multipleTypeConstraint</span><span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__singleTypeConstraint</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="n">AbstractConstraint</span><span class="o">.</span><span class="n">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+<span class="c1"># Boolean ops on constraints </span>
+
+<span class="k">class</span> <span class="nc">ConstraintsExclusion</span><span class="p">(</span><span class="n">AbstractConstraint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value must not fit the single constraint&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">PyAsn1Error</span><span class="p">(</span><span class="s1">&#39;Single constraint expected&#39;</span><span class="p">)</span>
+        <span class="n">AbstractConstraint</span><span class="o">.</span><span class="n">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">AbstractConstraintSet</span><span class="p">(</span><span class="n">AbstractConstraint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value must not satisfy the single constraint&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">)</span>
+
+    <span class="c1"># Constraints inclusion in sets</span>
+    
+    <span class="k">def</span> <span class="nf">_setValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_valueMap</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_valueMap</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">getValueMap</span><span class="p">())</span>
+
+<span class="k">class</span> <span class="nc">ConstraintsIntersection</span><span class="p">(</span><span class="n">AbstractConstraintSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value must satisfy all constraints&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">:</span>
+            <span class="n">v</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">ConstraintsUnion</span><span class="p">(</span><span class="n">AbstractConstraintSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value must satisfy at least one constraint&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_testValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">v</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">ValueConstraintError</span><span class="p">(</span>
+            <span class="s1">&#39;all of </span><span class="si">%s</span><span class="s1"> failed for </span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="p">)</span>
+
+<span class="c1"># XXX</span>
+<span class="c1"># add tests for type check</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

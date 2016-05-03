@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LDAP Operations &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="The BIND operation" href="bind.html" />
+    <link rel="prev" title="Connection metrics" href="metrics.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ldap-operations">
+<h1>LDAP Operations<a class="headerlink" href="#ldap-operations" title="永久链接至标题">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bind.html">The BIND operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bind.html#simple-bind">Simple Bind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bind.html#anonymous-bind">Anonymous Bind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bind.html#starttls">StartTLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bind.html#sasl">SASL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bind.html#ntlm">NTLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bind.html#ldapi-ldap-over-ipc">LDAPI (LDAP over IPC)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bind.html#bind-as-a-different-user-while-the-connection-is-open">Bind as a different user while the Connection is open</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bind.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="unbind.html">The UNBIND operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="unbind.html#notice-of-disconnection">Notice of Disconnection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unbind.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="add.html">The ADD operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="add.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="delete.html">The DELETE operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="delete.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modify.html">The MODIFY operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modify.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modifydn.html">The MODIFY-DN operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modifydn.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="searches.html">The SEARCH operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#the-ldap-filter">The LDAP filter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#not-and-and-or">NOT, AND and OR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#search-scope-and-aliases">Search scope and aliases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#checked-attributes">Checked Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#search-constraints">Search constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#simple-paged-search">Simple paged search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#response">Response</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#entries">Entries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searches.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="compare.html">The COMPARE operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="compare.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="abandon.html">The ABANDON operation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extended.html">The EXTENDED operation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extended.html#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="metrics.html" title="上一章">Connection metrics</a></li>
+      <li>Next: <a href="bind.html" title="下一章">The BIND operation</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/operations.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/operations.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

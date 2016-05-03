@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Abstraction Layer &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="LDIF (LDAP Data Interchange Format)" href="ldif.html" />
+    <link rel="prev" title="Extended Microsoft operations" href="microsoft.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="abstraction-layer">
+<h1>Abstraction Layer<a class="headerlink" href="#abstraction-layer" title="永久链接至标题">¶</a></h1>
+<p>The ldap3.abstract package is a tool to abstract access to LDAP data. It has a <em>simplified query language</em> for performing search operations
+and a bunch of objects to define the structure of LDAP entries.
+The abstraction layer is useful at command line to perform searches without having to write complex filters and in programs when LDAP is used to record
+structured data.</p>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="永久链接至标题">¶</a></h2>
+<p>To use the abstraction layer you must describe LDAP objects definition using the ObjectDef and AttrDef classes, than you create a Reader object for the
+ObjectDef you have defined and you perform search operations using a simplified query language.
+All classes can be imported from the ldap3 package:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">ObjectDef</span><span class="p">,</span> <span class="n">AttrDef</span><span class="p">,</span> <span class="n">Reader</span><span class="p">,</span> <span class="n">Entry</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">OperationalAttribute</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="objectdef-class">
+<h2>ObjectDef class<a class="headerlink" href="#objectdef-class" title="永久链接至标题">¶</a></h2>
+<p>The ObjectDef class is used to define an abstract LDAP object.
+When creating a new ObjectDef instance you can optionally specify the LDAP class(es) of the entries you will get back in a search.
+The object class(es) will be automatically added to the query filter:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">person</span> <span class="o">=</span> <span class="n">ObjectDef</span><span class="p">(</span><span class="s1">&#39;inetOrgPerson&#39;</span><span class="p">)</span>
+<span class="n">engineer</span> <span class="o">=</span> <span class="n">ObjectDef</span><span class="p">([</span><span class="s1">&#39;inetOrgPerson&#39;</span><span class="p">,</span> <span class="s1">&#39;auxEngineer&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Once you have defined an ObjectDef instance you can add the attributes definition with the add() method of ObjectDef. You can also use the += operator as a shortcut.
+AttrDef(s) can be removed with the remove() method or using the -= operator.</p>
+<p>ObjectDef is an iterable that returns each AttrDef object (the whole AttrDef object, not only the key).
+AttrDefs can be accessed either as a dictionary or as a property, spaces are removed and keys are not case sensitive:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cn_attr_def</span> <span class="o">=</span> <span class="n">person</span><span class="p">[</span><span class="s1">&#39;Common Name&#39;</span><span class="p">]</span>
+<span class="n">cn_attr_def</span> <span class="o">=</span> <span class="n">person</span><span class="p">[</span><span class="s1">&#39;commonName&#39;</span><span class="p">]</span>  <span class="c1"># same as above</span>
+<span class="n">cn_attr_def</span> <span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">CommonName</span>  <span class="c1"># same as above</span>
+</pre></div>
+</div>
+<p>This eases the use at interactive prompt where you don&#8217;t have to remember the case of the attribute name. <em>Autocompletion feature</em> is enabled, so you can get
+a list of all defined attributes as property just pressing TAB at the interactive prompt.</p>
+<p>Each class has a useful representation that summarize the istance status. You can access it directly at the interactive prompt, or in a program with the str() function.</p>
+</div>
+<div class="section" id="attrdef-class">
+<h2>AttrDef class<a class="headerlink" href="#attrdef-class" title="永久链接至标题">¶</a></h2>
+<p>The AttrDef class is used to define an abstract LDAP attribute.
+AttrDef has a single mandatory parameter, the attribute name, and a number of optional parameters. The &#8216;key&#8217; optional parameter defines a friendly name to use
+while accessing the attribute. A &#8216;description&#8217; parameter can be used for storing additional information on the Attribute. When defining only the attribute name
+you can add it directly to the ObjectDef (the AttrDef is automatically defined):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cn_attribute</span> <span class="o">=</span> <span class="n">AttrDef</span><span class="p">(</span><span class="s1">&#39;cn, description=&#39;</span><span class="n">This</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">internal</span> <span class="n">account</span> <span class="n">name</span><span class="s1">&#39;)</span>
+<span class="n">person</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cn_attribute</span><span class="p">)</span>
+
+<span class="n">person</span> <span class="o">+=</span> <span class="n">AttrDef</span><span class="p">(</span><span class="s1">&#39;cn&#39;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;This is the internal account name&#39;</span><span class="p">)</span>  <span class="c1"># same as above</span>
+<span class="n">person</span> <span class="o">+=</span> <span class="s1">&#39;cn&#39;</span>  <span class="c1"># same as above, without description</span>
+</pre></div>
+</div>
+<p>You can even add a list of attrDefs or attribute names to an ObjectDef:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">person</span> <span class="o">+=</span> <span class="p">[</span><span class="n">AttrDef</span><span class="p">(</span><span class="s1">&#39;cn&#39;</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;Common Name&#39;</span><span class="p">),</span> <span class="n">AttrDef</span><span class="p">(</span><span class="s1">&#39;sn&#39;</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;Surname&#39;</span><span class="p">)]</span>
+<span class="n">person</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;cn&#39;</span><span class="p">,</span> <span class="s1">&#39;sn&#39;</span><span class="p">]</span>  <span class="c1"># as above, but keys are the attribute names</span>
+</pre></div>
+</div>
+<div class="section" id="validation">
+<h3>Validation<a class="headerlink" href="#validation" title="永久链接至标题">¶</a></h3>
+<p>You can specify a &#8216;validate&#8217; parameter to check if the attribute value in a query is valid.
+Two parameters are passed to the callable, the AttrDef.key and the value. The callable must return a boolean allowing or denying the validation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">deps</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;Accounting&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="s1">&#39;Finance&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="s1">&#39;Engineering&#39;</span><span class="p">}</span>
+<span class="c1"># checks that the parameter in query is in a specific range</span>
+<span class="n">valid_department</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">deps</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">else</span> <span class="kc">False</span>
+<span class="n">person</span> <span class="o">+=</span> <span class="n">AttrDef</span><span class="p">(</span><span class="s1">&#39;employeeType&#39;</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;Department&#39;</span><span class="p">,</span> <span class="n">validate</span> <span class="o">=</span> <span class="n">validDepartment</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example the Reader object will raise an exception if values for the &#8216;Department&#8217; are not &#8216;Accounting&#8217;, &#8216;Finance&#8217; or &#8216;Engineering&#8217;.</p>
+</div>
+<div class="section" id="pre-query-transformation">
+<h3>Pre Query transformation<a class="headerlink" href="#pre-query-transformation" title="永久链接至标题">¶</a></h3>
+<p>A &#8216;pre_query&#8217; parameter indicates a callable to perform a transformation on the value to be searched for the attribute defined:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># transform value to be search</span>
+<span class="k">def</span> <span class="nf">get_department_code</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">deps</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">dep</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">dep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="s1">&#39;not a department&#39;</span>
+
+<span class="n">person</span> <span class="o">+=</span> <span class="n">AttrDef</span><span class="p">(</span><span class="s1">&#39;employeeType&#39;</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;Department&#39;</span><span class="p">,</span> <span class="n">pre_query</span> <span class="o">=</span> <span class="n">get_department_code</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When you perform a search with &#8216;Accounting&#8217;, &#8216;Finance&#8217; or &#8216;Engineering&#8217; for the Department key, the real search will be for employeeType = &#8216;A&#8217;, &#8216;F&#8217; or &#8216;E&#8217;.</p>
+</div>
+<div class="section" id="post-query-transformation">
+<h3>Post query transformation<a class="headerlink" href="#post-query-transformation" title="永久链接至标题">¶</a></h3>
+<p>A &#8216;post_query&#8217; parameter indicates a callable to perform a transformation on the returned value:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">get_department_name</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">deps</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;not a department&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">attr</span> <span class="o">==</span> <span class="s1">&#39;Department&#39;</span> <span class="k">else</span> <span class="n">value</span>
+<span class="n">person</span> <span class="o">+=</span> <span class="n">AttrDef</span><span class="p">(</span><span class="s1">&#39;employeeType&#39;</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;Department&#39;</span><span class="p">,</span> <span class="n">post_query</span> <span class="o">=</span> <span class="n">get_department_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When you have an &#8216;A&#8217;, an &#8216;F&#8217;, or an &#8216;E&#8217; in the employeeType attribute you get &#8216;Accounting&#8217;, &#8216;Finance&#8217; or &#8216;Engineering&#8217; in the &#8216;Department&#8217; property
+of the Person entry.</p>
+<p>With a multivalue attribute post_query receives a list of all values in the attribute. You can return an equivalent list or a single string.</p>
+<p>Dereferencing DNs</p>
+<p>With &#8216;dereference_dn&#8217; you can establish a relation between different ObjectDefs. When dereference_dn is set to an ObjectDef the Reader reads the attribute and use its value as
+a DN for an object to be searched (using a temporary Reader) with the specified ObjectDef in the same Connection. The result of the second search is returned
+as value of the first search:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">department</span> <span class="o">=</span> <span class="n">ObjectDef</span><span class="p">(</span><span class="s1">&#39;groupOfNames&#39;</span><span class="p">)</span>
+<span class="n">department</span> <span class="o">+=</span> <span class="s1">&#39;cn&#39;</span>
+<span class="n">department</span> <span class="o">+=</span> <span class="n">AttrDef</span><span class="p">(</span><span class="s1">&#39;member&#39;</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;employeer&#39;</span><span class="p">,</span> <span class="n">dereference_dn</span> <span class="o">=</span> <span class="n">person</span><span class="p">)</span>  <span class="c1"># values of &#39;employeer&#39; will be the &#39;Person&#39; entries members of the found department</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="reader">
+<h2>Reader<a class="headerlink" href="#reader" title="永久链接至标题">¶</a></h2>
+<p>Once you have defined the ObjectDef(s) and the AttrDef(s) you can instance a Reader for the ObjectDef. With it you can perform searches using a simplified
+query language (explained in next paragraph). To execute a different search the reader can be reset to its initial status with the reset() method.</p>
+<p>Reader has the following parameters:</p>
+<ul class="simple">
+<li>&#8216;connection&#8217;: the connection to use.</li>
+<li>&#8216;object_def&#8217;: the ObjectDef used by the Reader instance.</li>
+<li>&#8216;query&#8217;: the simplified query. It can be a standard LDAP filter (see next paragraph).</li>
+<li>&#8216;base&#8217;: the DIT base where to start the search.</li>
+<li>&#8216;components_in_and&#8217;: defines if the query components are in AND (True, default) or in OR (False).</li>
+<li>&#8216;sub_tree&#8217;: specifies if the search must be performed through the whole subtree (True, default) or only in the specified base (False).</li>
+<li>&#8216;get_operational_attributes&#8217;: specifies if the search must return the operational attributes (True) of found entries. Defaults to False.</li>
+<li>&#8216;controls&#8217;: optional controls to use in the search operation.</li>
+</ul>
+<p>Connection is open and closed automatically by the Reader.</p>
+<p>To perform the search you can use any of the following methods:</p>
+<ul class="simple">
+<li>search(): standard search.</li>
+<li>search_level(): force a Level search.</li>
+<li>search_subtree(): force a whole sub-tree search, starting from &#8216;base&#8217;.</li>
+<li>search_object(): force a object search, DN to search must be specified in &#8216;base&#8217;.</li>
+<li>search_size_limit(limit): search with a size limit of &#8216;limit&#8217;.</li>
+<li>search_time_limit(limit): search with a time limit of &#8216;limit&#8217;.</li>
+<li>search_types_only(): standard search but the response will not contain any value.</li>
+<li>search_paged(page_size, criticality): perform a paged search, with &#8216;page_size&#8217; number of entries for each call to this method. If &#8216;criticality&#8217; is True the server aborts the operation if the Simple Paged Search extension is not available, else return the whole result set.</li>
+</ul>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">user</span> <span class="o">=</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">password</span> <span class="o">=</span> <span class="s1">&#39;password&#39;</span><span class="p">)</span>
+<span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;Department: Accounting&#39;</span>  <span class="c1"># explained in next paragraph</span>
+<span class="n">person_reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">person</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="s1">&#39;o=test&#39;</span><span class="p">)</span>
+<span class="n">person_reader</span><span class="o">.</span><span class="n">search</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The result of the search will be found in the &#8216;entries&#8217; property of the person_reader object.</p>
+<p>A Reader object is an iterable that returns the entries found in the last search performed. It also has a useful representation that summarize the Reader
+configuration and status:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">personReader</span><span class="p">)</span>
+<span class="n">CONN</span>   <span class="p">:</span> <span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">server</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">version</span> <span class="mi">3</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="n">closed</span> <span class="o">-</span> <span class="ow">not</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncWaitStrategy</span>
+<span class="n">BASE</span>   <span class="p">:</span> <span class="s1">&#39;o=test&#39;</span> <span class="p">[</span><span class="n">SUB</span><span class="p">]</span>
+<span class="n">DEFS</span>   <span class="p">:</span> <span class="s1">&#39;inetOrgPerson&#39;</span> <span class="p">[</span><span class="n">CommonName</span> <span class="o">&lt;</span><span class="n">cn</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Department</span> <span class="o">&lt;</span><span class="n">employeeType</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Surname</span> <span class="o">&lt;</span><span class="n">sn</span><span class="o">&gt;</span><span class="p">]</span>
+<span class="n">QUERY</span>  <span class="p">:</span> <span class="s1">&#39;Common Name :test-add*, surname:=t*&#39;</span> <span class="p">[</span><span class="n">AND</span><span class="p">]</span>
+<span class="n">PARSED</span> <span class="p">:</span> <span class="s1">&#39;CommonName: =test-add*, Surname: =t*&#39;</span> <span class="p">[</span><span class="n">AND</span><span class="p">]</span>
+<span class="n">ATTRS</span>  <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;cn&#39;</span><span class="p">,</span> <span class="s1">&#39;employeeType&#39;</span><span class="p">,</span> <span class="s1">&#39;sn&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">]</span> <span class="p">[</span><span class="n">OPERATIONAL</span><span class="p">]</span>
+<span class="n">FILTER</span> <span class="p">:</span> <span class="s1">&#39;(&amp;(objectClass=inetOrgPerson)(cn=test-add*)(sn=t*))&#39;</span>
+<span class="n">ENTRIES</span><span class="p">:</span> <span class="mi">1</span> <span class="p">[</span><span class="n">SUB</span><span class="p">]</span> <span class="p">[</span><span class="n">executed</span> <span class="n">at</span><span class="p">:</span> <span class="n">Sun</span> <span class="n">Feb</span>  <span class="mi">9</span> <span class="mi">20</span><span class="p">:</span><span class="mi">43</span><span class="p">:</span><span class="mi">47</span> <span class="mi">2014</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simplified-query-language">
+<h2>Simplified Query Language<a class="headerlink" href="#simplified-query-language" title="永久链接至标题">¶</a></h2>
+<p>In the Reader you can express the query filter using the standard LDAP filter syntax or using a <em>Simplified Query Language</em> that resembles a dictionary structure.
+If you use the standard LDAP filter syntax you must use the real attribute names because the filter is directly passed to the Search operation.</p>
+<p>Tee Simplified Query Language filter is a string of key-values couples separated with a &#8216;,&#8217; (comma), in each of the couples the left part is the attribute key defined
+in an AttrDef object while the right part is the value (or values) to be searched. Parts are separed with a &#8216;:&#8217; (colon). Keys can be prefixed with a &#8216;&amp;&#8217; (AND) or a &#8216;|&#8217; (OR)
+or searching all the values or at least one of them. Values can be prefixed with an optional exclamation mark &#8216;!&#8217; (NOT) for negating the search followed by the needed search
+operator (&#8216;=&#8217;, &#8216;&lt;&#8217;, &#8216;&gt;&#8217;, &#8216;~&#8217;). The default operator is &#8216;=&#8217; and can be omitted. Multiple values are separated by a &#8216;;&#8217; (semi-colon).</p>
+<blockquote>
+<div><p>A few examples:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;CommonName: bob&#39;</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">cn</span><span class="o">=</span><span class="n">bob</span><span class="p">)</span>
+<span class="s1">&#39;CommonName: bob; john; michael&#39;</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">cn</span><span class="o">=</span><span class="n">bob</span><span class="p">)(</span><span class="n">cn</span><span class="o">=</span><span class="n">john</span><span class="p">)(</span><span class="n">cn</span><span class="o">=</span><span class="n">michael</span><span class="p">))</span>
+<span class="s1">&#39;Age: &gt; 21&#39;</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">age</span><span class="o">&gt;=</span><span class="mi">21</span><span class="p">)</span>
+<span class="s1">&#39;&amp;Age: &gt; 21; &lt; 65&#39;</span> <span class="o">-&gt;&amp;</span><span class="p">(</span><span class="n">age</span><span class="o">&lt;=</span><span class="mi">65</span><span class="p">)(</span><span class="n">age</span><span class="o">&gt;=</span><span class="mi">21</span><span class="p">))</span>
+<span class="s1">&#39;Department: != Accounting&#39;&#39; -&gt; (!(EmployeeType=A))</span>
+<span class="s1">&#39;|Department:Accounting; Finance&#39;</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">EmployeeType</span><span class="o">=</span><span class="n">A</span><span class="p">)(</span><span class="n">EmployeeType</span><span class="o">=</span><span class="n">C</span><span class="p">))</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>There are no parentheses in the Simplified Query Language, this means that you cannot mix components with &#8216;&amp;&#8217; (AND)  and &#8216;|&#8217; (OR). You have the &#8216;component_in_and&#8217;
+flag in the Reader object to specify if components are in &#8216;&amp;&#8217; (AND, True value) or in &#8216;|&#8217; (OR, False value). &#8216;component_in_and&#8217; defaults to True:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;CommonName: b*, Department: Engineering&#39;</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">cn</span><span class="o">=</span><span class="n">b</span><span class="o">*</span><span class="p">)(</span><span class="n">EmployeeType</span><span class="o">=</span><span class="n">E</span><span class="s1">&#39;))</span>
+</pre></div>
+</div>
+<p>Object classes defined in the ObjectDef are always included in the filter, so for the previous example the resulting filter is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">objectClass</span><span class="o">=</span><span class="n">inetOrgPerson</span><span class="p">)(</span><span class="n">objectClass</span><span class="o">=</span><span class="n">AuxEngineer</span><span class="p">))(</span><span class="n">cn</span><span class="o">=</span><span class="n">b</span><span class="o">*</span><span class="p">)(</span><span class="n">EmployeeType</span><span class="o">=</span><span class="n">E</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>when using a Reader with the &#8216;engineer&#8217; ObjectDef.</p>
+</div>
+<div class="section" id="entry">
+<h2>Entry<a class="headerlink" href="#entry" title="永久链接至标题">¶</a></h2>
+<p>Entry objects contain the result of the search. You can access entry attributes either as a dictionary or as properties using the AttrDef key you specified in
+the ObjectDef. entry[&#8216;CommonName&#8217;] is the same of entry.CommonName and of entry.commonName or entry.commonname.</p>
+<p>Each Entry has a entry_get_dn() method that returns the distinguished name of the LDAP entry, and a entry_get_reader() method that returns  a reference
+to the Reader used to read the entry.</p>
+<p>Attributes are stored in an internal dictionary with case insensitive access by the key defined in the AttrDef. You can even access the raw attribute with
+the get_raw_attribute(attribute_name) to get an attribute raw value, or get_raw_attributes() to get the whole raw attributes dictionary.
+You can get the whole attribute name list with entry_get_attribute_names(), and the attributes dictionary with entry_get_attributes_dict()</p>
+<p>Entry is a read only object, you cannot modify or add any property to it. It&#8217;s an iterable object that returns an attribute object at each iteration. Note that
+you get back the whole attribute object, not only the key as in a standard dictionary:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">DN: cn=person1,o=test</span>
+<span class="go">    cn: person1</span>
+<span class="go">    givenName: person1_givenname</span>
+<span class="go">    objectClass: inetOrgPerson</span>
+<span class="go">                 organizationalPerson</span>
+<span class="go">                 Person</span>
+<span class="go">                 ndsLoginProperties</span>
+<span class="go">                 Top</span>
+<span class="go">    sn: person1_surname</span>
+<span class="go">    GUID: fd9a0d90-15be-2841-fd82-fd9a0d9015be</span>
+</pre></div>
+</div>
+<p>and each attribute of the entry can be accessed as a dictionary or as a namespace:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GUID</span>
+<span class="go">    GUID: fd9a0d90-15be-2841-fd82-fd9a0d9015be</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GUID</span><span class="o">.</span><span class="n">value</span>
+<span class="go">    &#39;fd9a0d90-15be-2841-fd82-fd9a0d9015be&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GUID</span><span class="o">.</span><span class="n">raw_values</span>
+<span class="go">    [b&#39;\xfd\x9a\r\x90\x15\xbe(A\xfd\x82\xfd\x9a\r\x90\x15\xbe&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GUID</span><span class="o">.</span><span class="n">values</span>
+<span class="go">    [&#39;fd9a0d90-15be-2841-fd82-fd9a0d9015be&#39;]</span>
+</pre></div>
+</div>
+<p>An Entry can be converted to LDIF with the entry.entry_to_ldif() method and to JSON with the entry.entry_to_json() method.
+Entries can be easily printed at the interactive prompt:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">entry_to_ldif</span><span class="p">())</span>
+<span class="go">version: 1</span>
+<span class="go">dn: cn=person1,o=test</span>
+<span class="go">objectClass: inetOrgPerson</span>
+<span class="go">objectClass: organizationalPerson</span>
+<span class="go">objectClass: Person</span>
+<span class="go">objectClass: ndsLoginProperties</span>
+<span class="go">objectClass: Top</span>
+<span class="go">ACL: 2#subtree#cn=person1,o=test#[All Attributes Rights]</span>
+<span class="go">ACL: 6#entry#cn=person1,o=test#loginScript</span>
+<span class="go">ACL: 2#entry#[Public]#messageServer</span>
+<span class="go">ACL: 2#entry#[Root]#groupMembership</span>
+<span class="go">ACL: 6#entry#cn=person1,o=test#printJobConfiguration</span>
+<span class="go">ACL: 2#entry#[Root]#networkAddress</span>
+<span class="go">sn: person1_surname</span>
+<span class="go">cn: person1</span>
+<span class="go">givenName: person1_givenname</span>
+<span class="go">GUID:: +J4sRRpsAEmjlfieLEUabA==</span>
+<span class="go"># total number of entries: 1</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">entry_to_json</span><span class="p">())</span>
+<span class="go">{</span>
+<span class="go">    &quot;attributes&quot;: {</span>
+<span class="go">        &quot;ACL&quot;: [</span>
+<span class="go">            &quot;2#subtree#cn=person1,o=test#[All Attributes Rights]&quot;,</span>
+<span class="go">            &quot;6#entry#cn=person1,o=test#loginScript&quot;,</span>
+<span class="go">            &quot;2#entry#[Public]#messageServer&quot;,</span>
+<span class="go">            &quot;2#entry#[Root]#groupMembership&quot;,</span>
+<span class="go">            &quot;6#entry#cn=person1,o=test#printJobConfiguration&quot;,</span>
+<span class="go">            &quot;2#entry#[Root]#networkAddress&quot;</span>
+<span class="go">        ],</span>
+<span class="go">        &quot;cn&quot;: [</span>
+<span class="go">            &quot;person1&quot;</span>
+<span class="go">        ],</span>
+<span class="go">        &quot;givenName&quot;: [</span>
+<span class="go">            &quot;person1_givenname&quot;</span>
+<span class="go">        ],</span>
+<span class="go">        &quot;GUID&quot;: [</span>
+<span class="go">            &quot;f89e2c45-1a6c-0049-a395-f89e2c451a6c&quot;</span>
+<span class="go">        ],</span>
+<span class="go">        &quot;objectClass&quot;: [</span>
+<span class="go">            &quot;inetOrgPerson&quot;,</span>
+<span class="go">            &quot;organizationalPerson&quot;,</span>
+<span class="go">            &quot;Person&quot;,</span>
+<span class="go">            &quot;ndsLoginProperties&quot;,</span>
+<span class="go">            &quot;Top&quot;</span>
+<span class="go">        ],</span>
+<span class="go">        &quot;sn&quot;: [</span>
+<span class="go">            &quot;person1_surname&quot;</span>
+<span class="go">        ]</span>
+<span class="go">    },</span>
+<span class="go">    &quot;dn&quot;: &quot;cn=person1,o=test&quot;</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>To obtain already formatted values you must request the schema in the Server object with get_info=SCHEMA or get_info=ALL.</p>
+</div>
+<div class="section" id="attribute">
+<h2>Attribute<a class="headerlink" href="#attribute" title="永久链接至标题">¶</a></h2>
+<p>Values found for each attribute are stored in the Attribute object. You can access the &#8216;values&#8217; and the &#8216;raw_values&#8217; lists. You can also get a reference to the
+relevant AttrDef in the &#8216;definition&#8217; property, and to the relevant Entry in the &#8216;entry&#8217; property. You can iterate over the Attribute to get each value:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">person_common_name</span> <span class="o">=</span> <span class="n">person_entry</span><span class="o">.</span><span class="n">CommonName</span>
+<span class="k">for</span> <span class="n">cn</span> <span class="ow">in</span> <span class="n">person_common_name</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cn</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">cn</span><span class="o">.</span><span class="n">raw_values</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the Attribute has a single value you get it in the &#8216;value&#8217; property. This is useful while using the Python interpreter at the interactive prompt. If the Attribute
+has more than one value you get the same &#8216;values&#8217; list in &#8216;value&#8217;. When you want to assign the attribute value to a variable you must use &#8216;value&#8217; (or &#8216;values&#8217; if you always
+want a list):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">my_department</span> <span class="o">=</span> <span class="n">person_entry</span><span class="o">.</span><span class="n">Department</span><span class="o">.</span><span class="n">value</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="operationalattribute">
+<h2>OperationalAttribute<a class="headerlink" href="#operationalattribute" title="永久链接至标题">¶</a></h2>
+<p>The OperationalAttribute class is used to store Operational Attributes read with the &#8216;get_operational_attributes&#8217; of the Reader object set to True. It&#8217;s the same
+of the Attribute class except for the &#8216;definition&#8217; property that is not present. Operational attributes key are prefixed with &#8216;<a href="#id1"><span class="problematic" id="id2">op_</span></a>&#8216;.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Abstraction Layer</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#objectdef-class">ObjectDef class</a></li>
+<li><a class="reference internal" href="#attrdef-class">AttrDef class</a><ul>
+<li><a class="reference internal" href="#validation">Validation</a></li>
+<li><a class="reference internal" href="#pre-query-transformation">Pre Query transformation</a></li>
+<li><a class="reference internal" href="#post-query-transformation">Post query transformation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reader">Reader</a></li>
+<li><a class="reference internal" href="#simplified-query-language">Simplified Query Language</a></li>
+<li><a class="reference internal" href="#entry">Entry</a></li>
+<li><a class="reference internal" href="#attribute">Attribute</a></li>
+<li><a class="reference internal" href="#operationalattribute">OperationalAttribute</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="microsoft.html" title="上一章">Extended Microsoft operations</a></li>
+      <li>Next: <a href="ldif.html" title="下一章">LDIF (LDAP Data Interchange Format)</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/abstraction.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/abstraction.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

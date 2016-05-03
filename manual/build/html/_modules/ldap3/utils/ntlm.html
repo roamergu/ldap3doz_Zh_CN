@@ -1,0 +1,579 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.utils.ntlm &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.utils.ntlm 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2015.04.02</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c1"># NTLMv2 authentication as per [MS-NLMP] (https://msdn.microsoft.com/en-us/library/cc236621.aspx)</span>
+
+<span class="kn">from</span> <span class="nn">struct</span> <span class="kn">import</span> <span class="n">pack</span><span class="p">,</span> <span class="n">unpack</span>
+<span class="kn">from</span> <span class="nn">platform</span> <span class="kn">import</span> <span class="n">system</span><span class="p">,</span> <span class="n">version</span>
+<span class="kn">from</span> <span class="nn">socket</span> <span class="kn">import</span> <span class="n">gethostname</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="nn">hmac</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">urandom</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">locale</span> <span class="kn">import</span> <span class="n">getpreferredencoding</span>
+
+    <span class="n">oem_encoding</span> <span class="o">=</span> <span class="n">getpreferredencoding</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="n">oem_encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span>
+
+<span class="kn">from</span> <span class="nn">..protocol.formatters.formatters</span> <span class="kn">import</span> <span class="n">format_ad_timestamp</span>
+
+<span class="n">NTLM_SIGNATURE</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;NTLMSSP</span><span class="se">\x00</span><span class="s1">&#39;</span>
+<span class="n">NTLM_MESSAGE_TYPE_NTLM_NEGOTIATE</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">NTLM_MESSAGE_TYPE_NTLM_CHALLENGE</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">NTLM_MESSAGE_TYPE_NTLM_AUTHENTICATE</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="n">FLAG_NEGOTIATE_56</span> <span class="o">=</span> <span class="mi">31</span>  <span class="c1"># W</span>
+<span class="n">FLAG_NEGOTIATE_KEY_EXCH</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># V</span>
+<span class="n">FLAG_NEGOTIATE_128</span> <span class="o">=</span> <span class="mi">29</span>  <span class="c1"># U</span>
+<span class="n">FLAG_NEGOTIATE_VERSION</span> <span class="o">=</span> <span class="mi">25</span>  <span class="c1"># T</span>
+<span class="n">FLAG_NEGOTIATE_TARGET_INFO</span> <span class="o">=</span> <span class="mi">23</span>  <span class="c1"># S</span>
+<span class="n">FLAG_REQUEST_NOT_NT_SESSION_KEY</span> <span class="o">=</span> <span class="mi">22</span>  <span class="c1"># R</span>
+<span class="n">FLAG_NEGOTIATE_IDENTIFY</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># Q</span>
+<span class="n">FLAG_NEGOTIATE_EXTENDED_SESSIONSECURITY</span> <span class="o">=</span> <span class="mi">19</span>  <span class="c1"># P</span>
+<span class="n">FLAG_TARGET_TYPE_SERVER</span> <span class="o">=</span> <span class="mi">17</span>  <span class="c1"># O</span>
+<span class="n">FLAG_TARGET_TYPE_DOMAIN</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># N</span>
+<span class="n">FLAG_NEGOTIATE_ALWAYS_SIGN</span> <span class="o">=</span> <span class="mi">15</span>  <span class="c1"># M</span>
+<span class="n">FLAG_NEGOTIATE_OEM_WORKSTATION_SUPPLIED</span> <span class="o">=</span> <span class="mi">13</span>  <span class="c1"># L</span>
+<span class="n">FLAG_NEGOTIATE_OEM_DOMAIN_SUPPLIED</span> <span class="o">=</span> <span class="mi">12</span>  <span class="c1"># K</span>
+<span class="n">FLAG_NEGOTIATE_ANONYMOUS</span> <span class="o">=</span> <span class="mi">11</span>  <span class="c1"># J</span>
+<span class="n">FLAG_NEGOTIATE_NTLM</span> <span class="o">=</span> <span class="mi">9</span>  <span class="c1"># H</span>
+<span class="n">FLAG_NEGOTIATE_LM_KEY</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># G</span>
+<span class="n">FLAG_NEGOTIATE_DATAGRAM</span> <span class="o">=</span> <span class="mi">6</span>  <span class="c1"># F</span>
+<span class="n">FLAG_NEGOTIATE_SEAL</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># E</span>
+<span class="n">FLAG_NEGOTIATE_SIGN</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># D</span>
+<span class="n">FLAG_REQUEST_TARGET</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># C</span>
+<span class="n">FLAG_NEGOTIATE_OEM</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># B</span>
+<span class="n">FLAG_NEGOTIATE_UNICODE</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># A</span>
+
+<span class="n">FLAG_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="n">FLAG_NEGOTIATE_56</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_KEY_EXCH</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_128</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_VERSION</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_TARGET_INFO</span><span class="p">,</span>
+              <span class="n">FLAG_REQUEST_NOT_NT_SESSION_KEY</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_IDENTIFY</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_EXTENDED_SESSIONSECURITY</span><span class="p">,</span>
+              <span class="n">FLAG_TARGET_TYPE_SERVER</span><span class="p">,</span>
+              <span class="n">FLAG_TARGET_TYPE_DOMAIN</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_ALWAYS_SIGN</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_OEM_WORKSTATION_SUPPLIED</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_OEM_DOMAIN_SUPPLIED</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_ANONYMOUS</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_NTLM</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_LM_KEY</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_DATAGRAM</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_SEAL</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_SIGN</span><span class="p">,</span>
+              <span class="n">FLAG_REQUEST_TARGET</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_OEM</span><span class="p">,</span>
+              <span class="n">FLAG_NEGOTIATE_UNICODE</span><span class="p">]</span>
+
+<span class="n">AV_END_OF_LIST</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">AV_NETBIOS_COMPUTER_NAME</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">AV_NETBIOS_DOMAIN_NAME</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">AV_DNS_COMPUTER_NAME</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">AV_DNS_DOMAIN_NAME</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">AV_DNS_TREE_NAME</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">AV_FLAGS</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">AV_TIMESTAMP</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">AV_SINGLE_HOST_DATA</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">AV_TARGET_NAME</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="n">AV_CHANNEL_BINDINGS</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">AV_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="n">AV_END_OF_LIST</span><span class="p">,</span>
+            <span class="n">AV_NETBIOS_COMPUTER_NAME</span><span class="p">,</span>
+            <span class="n">AV_NETBIOS_DOMAIN_NAME</span><span class="p">,</span>
+            <span class="n">AV_DNS_COMPUTER_NAME</span><span class="p">,</span>
+            <span class="n">AV_DNS_DOMAIN_NAME</span><span class="p">,</span>
+            <span class="n">AV_DNS_TREE_NAME</span><span class="p">,</span>
+            <span class="n">AV_FLAGS</span><span class="p">,</span>
+            <span class="n">AV_TIMESTAMP</span><span class="p">,</span>
+            <span class="n">AV_SINGLE_HOST_DATA</span><span class="p">,</span>
+            <span class="n">AV_TARGET_NAME</span><span class="p">,</span>
+            <span class="n">AV_CHANNEL_BINDINGS</span><span class="p">]</span>
+
+<span class="n">AV_FLAG_CONSTRAINED</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">AV_FLAG_INTEGRITY</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">AV_FLAG_TARGET_SPN_UNTRUSTED</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="n">AV_FLAG_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="n">AV_FLAG_CONSTRAINED</span><span class="p">,</span>
+                 <span class="n">AV_FLAG_INTEGRITY</span><span class="p">,</span>
+                 <span class="n">AV_FLAG_TARGET_SPN_UNTRUSTED</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="pack_windows_version"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.pack_windows_version">[文档]</a><span class="k">def</span> <span class="nf">pack_windows_version</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">system</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;windows&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">major_release</span><span class="p">,</span> <span class="n">minor_release</span><span class="p">,</span> <span class="n">build</span> <span class="o">=</span> <span class="n">version</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="n">major_release</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">major_release</span><span class="p">)</span>
+                <span class="n">minor_release</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">minor_release</span><span class="p">)</span>
+                <span class="n">build</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">build</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">major_release</span> <span class="o">=</span> <span class="mi">5</span>
+                <span class="n">minor_release</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">build</span> <span class="o">=</span> <span class="mi">2600</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">major_release</span> <span class="o">=</span> <span class="mi">5</span>
+            <span class="n">minor_release</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">build</span> <span class="o">=</span> <span class="mi">2600</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">major_release</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">minor_release</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">build</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">major_release</span><span class="p">)</span> <span class="o">+</span> \
+           <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">minor_release</span><span class="p">)</span> <span class="o">+</span> \
+           <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">build</span><span class="p">)</span> <span class="o">+</span> \
+           <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> \
+           <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> \
+           <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> \
+           <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="unpack_windows_version"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.unpack_windows_version">[文档]</a><span class="k">def</span> <span class="nf">unpack_windows_version</span><span class="p">(</span><span class="n">version_message</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">version_message</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;version field must be 8 bytes long&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">str</span> <span class="o">==</span> <span class="nb">bytes</span><span class="p">:</span>  <span class="c1"># python 2</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">version_message</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">version_message</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">version_message</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="n">version_message</span><span class="p">[</span><span class="mi">7</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># python 3</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">version_message</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">version_message</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">version_message</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">version_message</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="NtlmClient"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient">[文档]</a><span class="k">class</span> <span class="nc">NtlmClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">user_name</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_config_flags</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exported_session_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiated_flags</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_name</span> <span class="o">=</span> <span class="n">user_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_domain</span> <span class="o">=</span> <span class="n">domain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_lm_response_ntlm_v1</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_blocked</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_block_exceptions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_require_128_bit_encryption</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_life_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_signing_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_sealing_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_sealing_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_signing_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">integrity</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replay_detect</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_detect</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confidentiality</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datagram</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identity</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_supplied_target_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_channel_binding_unhashed</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unverified_target_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_target_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_target_info</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_version</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_netbios_computer_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_netbios_domain_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_dns_computer_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_dns_domain_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_dns_forest_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_target_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flags</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_timestamp</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_single_host_data</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_channel_bindings</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flag_constrained</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flag_integrity</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flag_target_spn_untrusted</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_encoding</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_challenge</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_target_info_raw</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="NtlmClient.get_client_flag"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.get_client_flag">[文档]</a>    <span class="k">def</span> <span class="nf">get_client_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config_flags</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">FLAG_TYPES</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config_flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">flag</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid flag&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NtlmClient.get_negotiated_flag"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.get_negotiated_flag">[文档]</a>    <span class="k">def</span> <span class="nf">get_negotiated_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiated_flags</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">flag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">FLAG_TYPES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid flag&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiated_flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">flag</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span></div>
+
+<div class="viewcode-block" id="NtlmClient.get_server_av_flag"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.get_server_av_flag">[文档]</a>    <span class="k">def</span> <span class="nf">get_server_av_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flags</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">flag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">AV_FLAG_TYPES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid AV flag&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">flag</span><span class="p">)</span> <span class="k">else</span> <span class="bp">False</span></div>
+
+<div class="viewcode-block" id="NtlmClient.set_client_flag"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.set_client_flag">[文档]</a>    <span class="k">def</span> <span class="nf">set_client_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">flags</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">flags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">FLAG_TYPES</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client_config_flags</span> <span class="o">|=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">flag</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid flag&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NtlmClient.reset_client_flags"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.reset_client_flags">[文档]</a>    <span class="k">def</span> <span class="nf">reset_client_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_config_flags</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="NtlmClient.unset_client_flag"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.unset_client_flag">[文档]</a>    <span class="k">def</span> <span class="nf">unset_client_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">=</span> <span class="p">[</span><span class="n">flags</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">flags</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">FLAG_TYPES</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client_config_flags</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">flag</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid flag&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NtlmClient.create_negotiate_message"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.create_negotiate_message">[文档]</a>    <span class="k">def</span> <span class="nf">create_negotiate_message</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Microsoft MS-NLMP 2.2.1.1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_client_flags</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_client_flag</span><span class="p">([</span><span class="n">FLAG_REQUEST_TARGET</span><span class="p">,</span>
+                              <span class="n">FLAG_NEGOTIATE_56</span><span class="p">,</span>
+                              <span class="n">FLAG_NEGOTIATE_128</span><span class="p">,</span>
+                              <span class="n">FLAG_NEGOTIATE_NTLM</span><span class="p">,</span>
+                              <span class="n">FLAG_NEGOTIATE_ALWAYS_SIGN</span><span class="p">,</span>
+                              <span class="n">FLAG_NEGOTIATE_OEM</span><span class="p">,</span>
+                              <span class="n">FLAG_NEGOTIATE_UNICODE</span><span class="p">,</span>
+                              <span class="n">FLAG_NEGOTIATE_EXTENDED_SESSIONSECURITY</span><span class="p">])</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="n">NTLM_SIGNATURE</span>  <span class="c1"># 8 bytes</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="n">NTLM_MESSAGE_TYPE_NTLM_NEGOTIATE</span><span class="p">)</span>  <span class="c1"># 4 bytes</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config_flags</span><span class="p">)</span>  <span class="c1"># 4 bytes</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack_field</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>  <span class="c1"># domain name field  # 8 bytes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_client_flag</span><span class="p">(</span><span class="n">FLAG_NEGOTIATE_VERSION</span><span class="p">):</span>  <span class="c1"># version 8 bytes - used for debug in ntlm</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="n">pack_windows_version</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="n">pack_windows_version</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">message</span></div>
+
+<div class="viewcode-block" id="NtlmClient.parse_challenge_message"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.parse_challenge_message">[文档]</a>    <span class="k">def</span> <span class="nf">parse_challenge_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Microsoft MS-NLMP 2.2.1.2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">56</span><span class="p">:</span>  <span class="c1"># minimum size of challenge message</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">!=</span> <span class="n">NTLM_SIGNATURE</span><span class="p">:</span>  <span class="c1"># NTLM signature - 8 bytes</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">])[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="n">NTLM_MESSAGE_TYPE_NTLM_CHALLENGE</span><span class="p">:</span>  <span class="c1"># type of message - 4 bytes</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">target_name_len</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">target_name_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack_field</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">20</span><span class="p">])</span>  <span class="c1"># targetNameFields - 8 bytes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">negotiated_flags</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">24</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># negotiated flags - 4 bytes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-16-le&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_negotiated_flag</span><span class="p">(</span>
+            <span class="n">FLAG_NEGOTIATE_UNICODE</span><span class="p">)</span> <span class="k">else</span> <span class="n">oem_encoding</span>  <span class="c1"># set encoding</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">32</span><span class="p">]</span>  <span class="c1"># server challenge - 8 bytes</span>
+        <span class="n">target_info_len</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">target_info_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack_field</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">48</span><span class="p">])</span>  <span class="c1"># targetInfoFields - 8 bytes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_version</span> <span class="o">=</span> <span class="n">unpack_windows_version</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="mi">48</span><span class="p">:</span><span class="mi">56</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_negotiated_flag</span><span class="p">(</span><span class="n">FLAG_REQUEST_TARGET</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target_name_len</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_target_name</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="n">target_name_offset</span><span class="p">:</span> <span class="n">target_name_offset</span> <span class="o">+</span> <span class="n">target_name_len</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_encoding</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_negotiated_flag</span><span class="p">(</span><span class="n">FLAG_NEGOTIATE_TARGET_INFO</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target_info_len</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_target_info_raw</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="n">target_info_offset</span><span class="p">:</span> <span class="n">target_info_offset</span> <span class="o">+</span> <span class="n">target_info_len</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_target_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack_av_info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_target_info_raw</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_target_info</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_NETBIOS_COMPUTER_NAME</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_netbios_computer_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-16-le&#39;</span><span class="p">)</span>  <span class="c1"># always unicode</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_NETBIOS_DOMAIN_NAME</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_netbios_domain_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-16-le&#39;</span><span class="p">)</span>  <span class="c1"># always unicode</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_DNS_COMPUTER_NAME</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_dns_computer_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-16-le&#39;</span><span class="p">)</span>  <span class="c1"># always unicode</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_DNS_DOMAIN_NAME</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_dns_domain_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-16-le&#39;</span><span class="p">)</span>  <span class="c1"># always unicode</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_DNS_TREE_NAME</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_dns_forest_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-16-le&#39;</span><span class="p">)</span>  <span class="c1"># always unicode</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_FLAGS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_server_av_flag</span><span class="p">(</span><span class="n">AV_FLAG_CONSTRAINED</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flag_constrained</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_server_av_flag</span><span class="p">(</span><span class="n">AV_FLAG_INTEGRITY</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flag_integrity</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_server_av_flag</span><span class="p">(</span><span class="n">AV_FLAG_TARGET_SPN_UNTRUSTED</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flag_target_spn_untrusted</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_TIMESTAMP</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_timestamp</span> <span class="o">=</span> <span class="n">format_ad_timestamp</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;Q&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_SINGLE_HOST_DATA</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_single_host_data</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_TARGET_NAME</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_target_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-16-le&#39;</span><span class="p">)</span>  <span class="c1"># always unicode</span>
+                <span class="k">elif</span> <span class="n">attribute</span> <span class="o">==</span> <span class="n">AV_CHANNEL_BINDINGS</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">server_av_channel_bindings</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown AV type&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NtlmClient.create_authenticate_message"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.create_authenticate_message">[文档]</a>    <span class="k">def</span> <span class="nf">create_authenticate_message</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Microsoft MS-NLMP 2.2.1.3</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 3.1.5.2</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_config_flags</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiated_flags</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c1"># 3.1.5.2</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_client_flag</span><span class="p">(</span><span class="n">FLAG_NEGOTIATE_128</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_negotiated_flag</span><span class="p">(</span><span class="n">FLAG_NEGOTIATE_128</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c1"># 3.1.5.2</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_av_netbios_computer_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_av_netbios_domain_name</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_av_flag_integrity</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="n">NTLM_SIGNATURE</span>  <span class="c1"># 8 bytes</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="n">NTLM_MESSAGE_TYPE_NTLM_AUTHENTICATE</span><span class="p">)</span>  <span class="c1"># 4 bytes</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="mi">88</span>  <span class="c1"># payload starts at 88</span>
+        <span class="c1"># 3.1.5.2</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_target_info</span><span class="p">:</span>
+            <span class="n">lm_challenge_response</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># computed LmChallengeResponse - todo</span>
+            <span class="n">lm_challenge_response</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+
+        <span class="n">message</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack_field</span><span class="p">(</span><span class="n">lm_challenge_response</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>  <span class="c1"># LmChallengeResponseField field  # 8 bytes</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lm_challenge_response</span><span class="p">)</span>
+        <span class="n">nt_challenge_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_nt_response</span><span class="p">()</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack_field</span><span class="p">(</span><span class="n">nt_challenge_response</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>  <span class="c1"># NtChallengeResponseField field  # 8 bytes</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nt_challenge_response</span><span class="p">)</span>
+        <span class="n">domain_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_domain</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_encoding</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack_field</span><span class="p">(</span><span class="n">domain_name</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>  <span class="c1"># DomainNameField field  # 8 bytes</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">domain_name</span><span class="p">)</span>
+        <span class="n">user_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_name</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_encoding</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack_field</span><span class="p">(</span><span class="n">user_name</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>  <span class="c1"># UserNameField field  # 8 bytes</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_negotiated_flag</span><span class="p">(</span><span class="n">FLAG_NEGOTIATE_OEM_WORKSTATION_SUPPLIED</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_negotiated_flag</span><span class="p">(</span>
+                <span class="n">FLAG_NEGOTIATE_VERSION</span><span class="p">):</span>
+            <span class="n">workstation</span> <span class="o">=</span> <span class="n">gethostname</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_encoding</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">workstation</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack_field</span><span class="p">(</span><span class="n">workstation</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>  <span class="c1"># empty WorkstationField field  # 8 bytes</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">workstation</span><span class="p">)</span>
+        <span class="n">encrypted_random_session_key</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack_field</span><span class="p">(</span><span class="n">encrypted_random_session_key</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>  <span class="c1"># EncryptedRandomSessionKeyField field  # 8 bytes</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encrypted_random_session_key</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">negotiated_flags</span><span class="p">)</span>  <span class="c1"># negotiated flags - 4 bytes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_negotiated_flag</span><span class="p">(</span><span class="n">FLAG_NEGOTIATE_VERSION</span><span class="p">):</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="n">pack_windows_version</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>  <span class="c1"># windows version - 8 bytes</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="n">pack_windows_version</span><span class="p">()</span>  <span class="c1"># empty windows version - 8 bytes</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;Q&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># mic</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;Q&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># mic - total of 16 bytes</span>
+        <span class="c1"># payload starts at 88</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">lm_challenge_response</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">nt_challenge_response</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">domain_name</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">user_name</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">workstation</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">encrypted_random_session_key</span>
+
+        <span class="k">return</span> <span class="n">message</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="NtlmClient.pack_field"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.pack_field">[文档]</a>    <span class="k">def</span> <span class="nf">pack_field</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">offset</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;HHI&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">offset</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="NtlmClient.unpack_field"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.unpack_field">[文档]</a>    <span class="k">def</span> <span class="nf">unpack_field</span><span class="p">(</span><span class="n">field_message</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_message</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;ntlm field must be 8 bytes long&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">field_message</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span> \
+               <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">field_message</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span> \
+               <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="n">field_message</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="NtlmClient.unpack_av_info"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.unpack_av_info">[文档]</a>    <span class="k">def</span> <span class="nf">unpack_av_info</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">info</span><span class="p">:</span>
+            <span class="n">avs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+                <span class="n">av_type</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="n">pos</span><span class="p">:</span> <span class="n">pos</span> <span class="o">+</span> <span class="mi">2</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">av_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">AV_TYPES</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown AV type&#39;</span><span class="p">)</span>
+                <span class="n">av_len</span> <span class="o">=</span> <span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span> <span class="n">pos</span> <span class="o">+</span> <span class="mi">4</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">av_value</span> <span class="o">=</span> <span class="n">info</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">4</span><span class="p">:</span> <span class="n">pos</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">av_len</span><span class="p">]</span>
+                <span class="n">pos</span> <span class="o">+=</span> <span class="n">av_len</span> <span class="o">+</span> <span class="mi">4</span>
+                <span class="k">if</span> <span class="n">av_type</span> <span class="o">==</span> <span class="n">AV_END_OF_LIST</span><span class="p">:</span>
+                    <span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">avs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">av_type</span><span class="p">,</span> <span class="n">av_value</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">avs</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="NtlmClient.pack_av_info"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.pack_av_info">[文档]</a>    <span class="k">def</span> <span class="nf">pack_av_info</span><span class="p">(</span><span class="n">avs</span><span class="p">):</span>
+        <span class="c1"># avs is a list of tuples, each tuple is made of av_type and av_value</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">av_type</span><span class="p">,</span> <span class="n">av_value</span> <span class="ow">in</span> <span class="n">avs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">av_type</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">AV_END_OF_LIST</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">info</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">av_type</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">av_value</span><span class="p">))</span>
+            <span class="n">info</span> <span class="o">+=</span> <span class="n">av_value</span>
+
+        <span class="c1"># add AV_END_OF_LIST</span>
+        <span class="n">info</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="n">AV_END_OF_LIST</span><span class="p">)</span>
+        <span class="n">info</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">info</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="NtlmClient.pack_windows_timestamp"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.pack_windows_timestamp">[文档]</a>    <span class="k">def</span> <span class="nf">pack_windows_timestamp</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;Q&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">+</span> <span class="mi">11644473600</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10000000</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="NtlmClient.compute_nt_response"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.compute_nt_response">[文档]</a>    <span class="k">def</span> <span class="nf">compute_nt_response</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_password</span><span class="p">:</span>  <span class="c1"># anonymous authentication</span>
+            <span class="k">return</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_challenge</span> <span class="o">=</span> <span class="n">urandom</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># ResponseVersion - 1 byte</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;B&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># HiResponseVersion - 1 byte</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;H&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># Z(2)</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># Z(4) - total Z(6)</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pack_windows_timestamp</span><span class="p">()</span>  <span class="c1"># time - 8 bytes</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_challenge</span>  <span class="c1"># random client challenge - 8 bytes</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># Z(4)</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_target_info_raw</span>
+        <span class="n">temp</span> <span class="o">+=</span> <span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;I&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># Z(4)</span>
+        <span class="n">response_key_nt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ntowf_v2</span><span class="p">()</span>
+        <span class="n">nt_proof_str</span> <span class="o">=</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">response_key_nt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_challenge</span> <span class="o">+</span> <span class="n">temp</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+        <span class="n">nt_challenge_response</span> <span class="o">=</span> <span class="n">nt_proof_str</span> <span class="o">+</span> <span class="n">temp</span>
+        <span class="k">return</span> <span class="n">nt_challenge_response</span></div>
+
+<div class="viewcode-block" id="NtlmClient.ntowf_v2"><a class="viewcode-back" href="../../../ldap3.utils.ntlm.html#ldap3.utils.ntlm.NtlmClient.ntowf_v2">[文档]</a>    <span class="k">def</span> <span class="nf">ntowf_v2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">password_digest</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;MD4&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-16-le&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">password_digest</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">user_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_domain</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-16-le&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

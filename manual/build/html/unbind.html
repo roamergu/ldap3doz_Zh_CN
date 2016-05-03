@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The UNBIND operation &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="LDAP Operations" href="operations.html" />
+    <link rel="next" title="The ADD operation" href="add.html" />
+    <link rel="prev" title="The BIND operation" href="bind.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-unbind-operation">
+<h1>The UNBIND operation<a class="headerlink" href="#the-unbind-operation" title="永久链接至标题">¶</a></h1>
+<p>As specified in RFC4511 the <strong>Unbind</strong> operation must be tought as the &#8220;disconnect&#8221; operation. It&#8217;s name (and that of its
+Bind counterpart) is for historical reason.</p>
+<p>Bind and Unbind are not symmetrical operations. In fact when you open a connection to an LDAP server you&#8217;re already bounded
+in an <strong>anonymous</strong> connection state. What this exactly means is defined by the server implementation, not by the protocol.
+When you perform an Unbind operation you&#8217;re actually requesting the server to end the user&#8217;s sessione and close the
+communication socket. The Bind operation instead has nothing to do with the socket, but performs the user&#8217;s authentication.</p>
+<p>So it&#8217;s perfectly legal to open a connession to the ldap server, perform some operation in the anonymous state and then Unbind
+to close the session.</p>
+<p>In the ldap3 library the signature for the Delete operation is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">unbind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+           <span class="n">controls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>controls: additional controls to send in the request</li>
+</ul>
+<p>The unbind method always returns True.</p>
+<p>You perform an Unbind operation as in the following example (using the default synchronous strategy):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># import class and constants</span>
+<span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">ALL</span>
+
+<span class="c1"># define the server</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;servername&#39;</span><span class="p">,</span> <span class="n">get_info</span><span class="o">=</span><span class="n">ALL</span><span class="p">)</span>  <span class="c1"># define an unsecure LDAP server, requesting info on DSE and schema</span>
+
+<span class="c1"># define the connection</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;user_dn&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;user_password&#39;</span><span class="p">)</span>
+
+<span class="c1"># perform some LDAP operation</span>
+<span class="o">...</span>
+
+<span class="c1"># perform the Unbind operation</span>
+<span class="n">c</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The Unbind request is quite peculiar in the LDAPv3 protocol. There is no acknowledgement from thet server, that doesn&#8217;t respond at all.
+It just ends the user&#8217;s session and close the socket. The ldap3 library checks the success of this operation shutting down the socket
+on both communication directions and then closes the socket.</p>
+<p>You can check if the socket has been closed querying the <em>closed</em> attribute of the connection object.</p>
+<div class="section" id="notice-of-disconnection">
+<h2>Notice of Disconnection<a class="headerlink" href="#notice-of-disconnection" title="永久链接至标题">¶</a></h2>
+<p>Usually all communications between the client and the server are started by the client. There is only one case where the
+LDAP server send an unsolicited message: the Notice of Disconnection. This message is issued by the server as an alert
+when the server is about to stop. Once the message is sent, the server doesn&#8217;t wait for any response, closes the socket
+and quits. Note that this notification is not used as a response to an Unbind requested by the client.</p>
+<p>When the ldap3 library receive a Notice of Disconnection it tries to gracefully close the socket and then raise the
+LDAPSessionTerminatedByServer Exception. With asynchronous strategies the Exception is raised immediately, while with
+synchronous strategies the Exception is raised as you try to send data over the socket.</p>
+</div>
+<div class="section" id="extended-logging">
+<h2>Extended logging<a class="headerlink" href="#extended-logging" title="永久链接至标题">¶</a></h2>
+<p>To get an idea of what&#8217;s happening when you perform an Unbind operation this is the extended log from an unbounded
+session to an OpenLdap server from a Windows client:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Initialization:</span>
+<span class="n">INFO</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">ldap3</span> <span class="n">library</span> <span class="n">initialized</span> <span class="o">-</span> <span class="n">logging</span> <span class="n">emitted</span> <span class="k">with</span> <span class="n">loglevel</span> <span class="nb">set</span> <span class="n">to</span> <span class="n">DEBUG</span> <span class="o">-</span> <span class="n">available</span> <span class="n">detail</span> <span class="n">levels</span> <span class="n">are</span><span class="p">:</span> <span class="n">OFF</span><span class="p">,</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">BASIC</span><span class="p">,</span> <span class="n">PROTOCOL</span><span class="p">,</span> <span class="n">NETWORK</span><span class="p">,</span> <span class="n">EXTENDED</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">ERROR</span><span class="p">:</span><span class="n">detail</span> <span class="n">level</span> <span class="nb">set</span> <span class="n">to</span> <span class="n">EXTENDED</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">instantiated</span> <span class="n">Server</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Server</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;openldap&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">389</span><span class="p">,</span> <span class="n">use_ssl</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_info</span><span class="o">=</span><span class="s1">&#39;NO_INFO&#39;</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">instantiated</span> <span class="n">Usage</span> <span class="nb">object</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">instantiated</span> <span class="o">&lt;</span><span class="n">SyncStrategy</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="n">closed</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">no</span> <span class="n">socket</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="ow">not</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">No</span> <span class="n">strategy</span> <span class="o">-</span> <span class="k">async</span> <span class="o">-</span> <span class="n">real</span> <span class="n">DSA</span> <span class="o">-</span> <span class="ow">not</span> <span class="n">pooled</span> <span class="o">-</span> <span class="n">cannot</span> <span class="n">stream</span> <span class="n">output</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">instantiated</span> <span class="n">Connection</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="n">Server</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;openldap&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">389</span><span class="p">,</span> <span class="n">use_ssl</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">get_info</span><span class="o">=</span><span class="s1">&#39;NO_INFO&#39;</span><span class="p">),</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;cn=admin,o=test&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="n">auto_bind</span><span class="o">=</span><span class="s1">&#39;NONE&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">authentication</span><span class="o">=</span><span class="s1">&#39;SIMPLE&#39;</span><span class="p">,</span> <span class="n">client_strategy</span><span class="o">=</span><span class="s1">&#39;SYNC&#39;</span><span class="p">,</span> <span class="n">auto_referrals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">check_names</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">collect_usage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">raise_exceptions</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">NETWORK</span><span class="p">:</span><span class="n">opening</span> <span class="n">connection</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="n">closed</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">no</span> <span class="n">socket</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="ow">not</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">reset</span> <span class="n">usage</span> <span class="n">metrics</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">start</span> <span class="n">collecting</span> <span class="n">usage</span> <span class="n">metrics</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">address</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span><span class="o">&gt;</span> <span class="n">resolved</span> <span class="k">as</span> <span class="o">&lt;</span><span class="p">[</span><span class="o">&lt;</span><span class="n">AddressFamily</span><span class="o">.</span><span class="n">AF_INET6</span><span class="p">:</span> <span class="mi">23</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">SocketKind</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">:</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;fe80::215:5dff:fe8f:2f0d%20&#39;</span><span class="p">,</span> <span class="mi">389</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)]</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">address</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span><span class="o">&gt;</span> <span class="n">resolved</span> <span class="k">as</span> <span class="o">&lt;</span><span class="p">[</span><span class="o">&lt;</span><span class="n">AddressFamily</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">:</span> <span class="mi">2</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">SocketKind</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">:</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;192.168.137.104&#39;</span><span class="p">,</span> <span class="mi">389</span><span class="p">)]</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">obtained</span> <span class="n">candidate</span> <span class="n">address</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;</span><span class="p">[</span><span class="o">&lt;</span><span class="n">AddressFamily</span><span class="o">.</span><span class="n">AF_INET6</span><span class="p">:</span> <span class="mi">23</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">SocketKind</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">:</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;fe80::215:5dff:fe8f:2f0d%20&#39;</span><span class="p">,</span> <span class="mi">389</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)]</span><span class="o">&gt;</span> <span class="k">with</span> <span class="n">mode</span> <span class="n">IP_V6_PREFERRED</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">obtained</span> <span class="n">candidate</span> <span class="n">address</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span><span class="o">&gt;</span><span class="p">:</span> <span class="o">&lt;</span><span class="p">[</span><span class="o">&lt;</span><span class="n">AddressFamily</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">:</span> <span class="mi">2</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">SocketKind</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">:</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;192.168.137.104&#39;</span><span class="p">,</span> <span class="mi">389</span><span class="p">)]</span><span class="o">&gt;</span> <span class="k">with</span> <span class="n">mode</span> <span class="n">IP_V6_PREFERRED</span>
+
+
+<span class="c1"># Opening the connection (trying IPv6 then IPv4):</span>
+
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="k">try</span> <span class="n">to</span> <span class="nb">open</span> <span class="n">candidate</span> <span class="n">address</span> <span class="p">[</span><span class="o">&lt;</span><span class="n">AddressFamily</span><span class="o">.</span><span class="n">AF_INET6</span><span class="p">:</span> <span class="mi">23</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">SocketKind</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">:</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;fe80::215:5dff:fe8f:2f0d%20&#39;</span><span class="p">,</span> <span class="mi">389</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)]</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">ERROR</span><span class="p">:</span><span class="o">&lt;</span><span class="n">socket</span> <span class="n">connection</span> <span class="n">error</span><span class="p">:</span> <span class="p">[</span><span class="n">WinError</span> <span class="mi">10061</span><span class="p">]</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">could</span> <span class="n">be</span> <span class="n">made</span> <span class="n">because</span> <span class="n">the</span> <span class="n">target</span> <span class="n">machine</span> <span class="n">actively</span> <span class="n">refused</span> <span class="n">it</span><span class="o">.&gt;</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="n">closed</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="p">[::]:</span><span class="mi">49610</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">]:</span><span class="kc">None</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="ow">not</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="k">try</span> <span class="n">to</span> <span class="nb">open</span> <span class="n">candidate</span> <span class="n">address</span> <span class="p">[</span><span class="o">&lt;</span><span class="n">AddressFamily</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">:</span> <span class="mi">2</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">SocketKind</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">:</span> <span class="mi">1</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;192.168.137.104&#39;</span><span class="p">,</span> <span class="mi">389</span><span class="p">)]</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">NETWORK</span><span class="p">:</span><span class="n">connection</span> <span class="nb">open</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="nb">open</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.1</span><span class="p">:</span><span class="mi">49291</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.104</span><span class="p">:</span><span class="mi">389</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">refreshing</span> <span class="n">server</span> <span class="n">info</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="nb">open</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.1</span><span class="p">:</span><span class="mi">49291</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.104</span><span class="p">:</span><span class="mi">389</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+
+
+<span class="c1"># Performing the Unbind operation:</span>
+
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">start</span> <span class="n">UNBIND</span> <span class="n">operation</span> <span class="n">via</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="nb">open</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.1</span><span class="p">:</span><span class="mi">49291</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.104</span><span class="p">:</span><span class="mi">389</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">PROTOCOL</span><span class="p">:</span><span class="n">UNBIND</span> <span class="n">request</span> <span class="n">sent</span> <span class="n">via</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="nb">open</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.1</span><span class="p">:</span><span class="mi">49291</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.104</span><span class="p">:</span><span class="mi">389</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">PROTOCOL</span><span class="p">:</span><span class="n">new</span> <span class="n">message</span> <span class="nb">id</span> <span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span> <span class="n">generated</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">NETWORK</span><span class="p">:</span><span class="n">sending</span> <span class="mi">1</span> <span class="n">ldap</span> <span class="n">message</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="nb">open</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.1</span><span class="p">:</span><span class="mi">49291</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.104</span><span class="p">:</span><span class="mi">389</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">EXTENDED</span><span class="p">:</span><span class="n">ldap</span> <span class="n">message</span> <span class="n">sent</span> <span class="n">via</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="nb">open</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.1</span><span class="p">:</span><span class="mi">49291</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.104</span><span class="p">:</span><span class="mi">389</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span><span class="p">:</span>
+<span class="o">&gt;&gt;</span><span class="n">LDAPMessage</span><span class="p">:</span>
+<span class="o">&gt;&gt;</span> <span class="n">messageID</span><span class="o">=</span><span class="mi">1</span>
+<span class="o">&gt;&gt;</span> <span class="n">protocolOp</span><span class="o">=</span><span class="n">ProtocolOp</span><span class="p">:</span>
+<span class="o">&gt;&gt;</span>  <span class="n">unbindRequest</span><span class="o">=</span><span class="n">b</span><span class="s1">&#39;&#39;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">NETWORK</span><span class="p">:</span><span class="n">sent</span> <span class="mi">7</span> <span class="nb">bytes</span> <span class="n">via</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="nb">open</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.1</span><span class="p">:</span><span class="mi">49291</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.104</span><span class="p">:</span><span class="mi">389</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">NETWORK</span><span class="p">:</span><span class="n">closing</span> <span class="n">connection</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="nb">open</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">local</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.1</span><span class="p">:</span><span class="mi">49291</span> <span class="o">-</span> <span class="n">remote</span><span class="p">:</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">137.104</span><span class="p">:</span><span class="mi">389</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">NETWORK</span><span class="p">:</span><span class="n">connection</span> <span class="n">closed</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">openldap</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span> <span class="n">cleartext</span> <span class="o">-</span> <span class="n">user</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">admin</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span> <span class="o">-</span> <span class="n">unbound</span> <span class="o">-</span> <span class="n">closed</span> <span class="o">-</span> <span class="o">&lt;</span><span class="n">no</span> <span class="n">socket</span><span class="o">&gt;</span> <span class="o">-</span> <span class="n">tls</span> <span class="ow">not</span> <span class="n">started</span> <span class="o">-</span> <span class="ow">not</span> <span class="n">listening</span> <span class="o">-</span> <span class="n">SyncStrategy</span><span class="o">&gt;</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">stop</span> <span class="n">collecting</span> <span class="n">usage</span> <span class="n">metrics</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">ldap3</span><span class="p">:</span><span class="n">BASIC</span><span class="p">:</span><span class="n">done</span> <span class="n">UNBIND</span> <span class="n">operation</span><span class="p">,</span> <span class="n">result</span> <span class="o">&lt;</span><span class="kc">True</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>These are the usage metrics of this session:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Connection</span> <span class="n">Usage</span><span class="p">:</span>
+  <span class="n">Time</span><span class="p">:</span> <span class="p">[</span><span class="n">elapsed</span><span class="p">:</span>        <span class="mi">0</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">01.030738</span><span class="p">]</span>
+    <span class="n">Initial</span> <span class="n">start</span> <span class="n">time</span><span class="p">:</span>  <span class="mi">2015</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">04</span><span class="n">T17</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mf">43.431465</span>
+    <span class="n">Open</span> <span class="n">socket</span> <span class="n">time</span><span class="p">:</span>    <span class="mi">2015</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">04</span><span class="n">T17</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mf">43.431465</span>
+    <span class="n">Close</span> <span class="n">socket</span> <span class="n">time</span><span class="p">:</span>   <span class="mi">2015</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">04</span><span class="n">T17</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mf">44.462203</span>
+  <span class="n">Server</span><span class="p">:</span>
+    <span class="n">Servers</span> <span class="kn">from</span> <span class="nn">pool</span><span class="p">:</span>   <span class="mi">0</span>
+    <span class="n">Sockets</span> <span class="nb">open</span><span class="p">:</span>        <span class="mi">1</span>
+    <span class="n">Sockets</span> <span class="n">closed</span><span class="p">:</span>      <span class="mi">1</span>
+    <span class="n">Sockets</span> <span class="n">wrapped</span><span class="p">:</span>     <span class="mi">0</span>
+  <span class="n">Bytes</span><span class="p">:</span>                 <span class="mi">7</span>
+    <span class="n">Transmitted</span><span class="p">:</span>         <span class="mi">7</span>
+    <span class="n">Received</span><span class="p">:</span>            <span class="mi">0</span>
+  <span class="n">Messages</span><span class="p">:</span>              <span class="mi">1</span>
+    <span class="n">Transmitted</span><span class="p">:</span>         <span class="mi">1</span>
+    <span class="n">Received</span><span class="p">:</span>            <span class="mi">0</span>
+  <span class="n">Operations</span><span class="p">:</span>            <span class="mi">1</span>
+    <span class="n">Abandon</span><span class="p">:</span>             <span class="mi">0</span>
+    <span class="n">Bind</span><span class="p">:</span>                <span class="mi">0</span>
+    <span class="n">Add</span><span class="p">:</span>                 <span class="mi">0</span>
+    <span class="n">Compare</span><span class="p">:</span>             <span class="mi">0</span>
+    <span class="n">Delete</span><span class="p">:</span>              <span class="mi">0</span>
+    <span class="n">Extended</span><span class="p">:</span>            <span class="mi">0</span>
+    <span class="n">Modify</span><span class="p">:</span>              <span class="mi">0</span>
+    <span class="n">ModifyDn</span><span class="p">:</span>            <span class="mi">0</span>
+    <span class="n">Search</span><span class="p">:</span>              <span class="mi">0</span>
+    <span class="n">Unbind</span><span class="p">:</span>              <span class="mi">1</span>
+  <span class="n">Referrals</span><span class="p">:</span>
+    <span class="n">Received</span><span class="p">:</span>            <span class="mi">0</span>
+    <span class="n">Followed</span><span class="p">:</span>            <span class="mi">0</span>
+  <span class="n">Restartable</span> <span class="n">tries</span><span class="p">:</span>     <span class="mi">0</span>
+    <span class="n">Failed</span> <span class="n">restarts</span><span class="p">:</span>     <span class="mi">0</span>
+    <span class="n">Successful</span> <span class="n">restarts</span><span class="p">:</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>As you can see there is been one operation only, the Unbind operation. 1 socket
+has been open and then has been closed. All the communication stream took 7 bytes in 1 LDAP messages and the server never
+sent anything back.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The UNBIND operation</a><ul>
+<li><a class="reference internal" href="#notice-of-disconnection">Notice of Disconnection</a></li>
+<li><a class="reference internal" href="#extended-logging">Extended logging</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="operations.html">LDAP Operations</a><ul>
+      <li>Previous: <a href="bind.html" title="上一章">The BIND operation</a></li>
+      <li>Next: <a href="add.html" title="下一章">The ADD operation</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/unbind.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/unbind.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

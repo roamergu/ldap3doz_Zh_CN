@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.core.usage module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.core package" href="ldap3.core.html" />
+    <link rel="next" title="ldap3.extend package" href="ldap3.extend.html" />
+    <link rel="prev" title="ldap3.core.tls module" href="ldap3.core.tls.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.core.usage">
+<span id="ldap3-core-usage-module"></span><h1>ldap3.core.usage module<a class="headerlink" href="#module-ldap3.core.usage" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.core.usage.ConnectionUsage">
+<em class="property">class </em><code class="descclassname">ldap3.core.usage.</code><code class="descname">ConnectionUsage</code><a class="reference internal" href="_modules/ldap3/core/usage.html#ConnectionUsage"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.usage.ConnectionUsage" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Collect statistics on connection usage</p>
+<dl class="attribute">
+<dt id="ldap3.core.usage.ConnectionUsage.elapsed_time">
+<code class="descname">elapsed_time</code><a class="headerlink" href="#ldap3.core.usage.ConnectionUsage.elapsed_time" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.usage.ConnectionUsage.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/usage.html#ConnectionUsage.reset"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.usage.ConnectionUsage.reset" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.usage.ConnectionUsage.start">
+<code class="descname">start</code><span class="sig-paren">(</span><em>reset=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/usage.html#ConnectionUsage.start"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.usage.ConnectionUsage.start" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.usage.ConnectionUsage.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/usage.html#ConnectionUsage.stop"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.usage.ConnectionUsage.stop" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.usage.ConnectionUsage.update_received_message">
+<code class="descname">update_received_message</code><span class="sig-paren">(</span><em>length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/usage.html#ConnectionUsage.update_received_message"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.usage.ConnectionUsage.update_received_message" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.usage.ConnectionUsage.update_transmitted_message">
+<code class="descname">update_transmitted_message</code><span class="sig-paren">(</span><em>message</em>, <em>length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/usage.html#ConnectionUsage.update_transmitted_message"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.usage.ConnectionUsage.update_transmitted_message" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.core.html">ldap3.core package</a><ul>
+      <li>Previous: <a href="ldap3.core.tls.html" title="上一章">ldap3.core.tls module</a></li>
+      <li>Next: <a href="ldap3.extend.html" title="下一章">ldap3.extend package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.core.usage.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.core.usage.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

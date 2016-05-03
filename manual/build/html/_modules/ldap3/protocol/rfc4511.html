@@ -1,0 +1,1088 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.rfc4511 &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.protocol.rfc4511 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2013.05.15</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c1">#######################</span>
+<span class="c1"># ldap ASN.1 Definition</span>
+<span class="c1"># from RFC4511 - Appendix B</span>
+<span class="c1"># extended with result codes from IANA ldap-parameters as of 2013.08.21</span>
+<span class="c1"># extended with modify_increment from RFC4525</span>
+
+<span class="c1">#########################################################</span>
+<span class="c1"># Lightweight-Directory-Access-Protocol-V3 {1 3 6 1 1 18}</span>
+<span class="c1"># -- Copyright (C) The Internet Society (2006).  This version of</span>
+<span class="c1"># -- this ASN.1 module is part of RFC 4511; see the RFC itself</span>
+<span class="c1"># -- for full legal notices.</span>
+<span class="c1"># DEFINITIONS</span>
+<span class="c1"># IMPLICIT TAGS</span>
+<span class="c1"># EXTENSIBILITY IMPLIED</span>
+
+<span class="kn">from</span> <span class="nn">pyasn1.type.univ</span> <span class="kn">import</span> <span class="n">OctetString</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Choice</span><span class="p">,</span> <span class="n">SequenceOf</span><span class="p">,</span> <span class="n">Boolean</span><span class="p">,</span> <span class="n">Null</span><span class="p">,</span> <span class="n">Enumerated</span><span class="p">,</span> <span class="n">SetOf</span>
+<span class="kn">from</span> <span class="nn">pyasn1.type.namedtype</span> <span class="kn">import</span> <span class="n">NamedTypes</span><span class="p">,</span> <span class="n">NamedType</span><span class="p">,</span> <span class="n">OptionalNamedType</span><span class="p">,</span> <span class="n">DefaultedNamedType</span>
+<span class="kn">from</span> <span class="nn">pyasn1.type.constraint</span> <span class="kn">import</span> <span class="n">ValueRangeConstraint</span><span class="p">,</span> <span class="n">SingleValueConstraint</span><span class="p">,</span> <span class="n">ValueSizeConstraint</span>
+<span class="kn">from</span> <span class="nn">pyasn1.type.namedval</span> <span class="kn">import</span> <span class="n">NamedValues</span>
+<span class="kn">from</span> <span class="nn">pyasn1.type.tag</span> <span class="kn">import</span> <span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="n">Tag</span><span class="p">,</span> <span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">LDAP_MAX_INT</span>
+
+
+<span class="c1"># constants</span>
+<span class="c1"># maxInt INTEGER ::= 2147483647 -- (2^^31 - 1) --</span>
+
+<span class="n">MAXINT</span> <span class="o">=</span> <span class="n">Integer</span><span class="p">(</span><span class="n">LDAP_MAX_INT</span><span class="p">)</span>
+
+<span class="c1"># constraints</span>
+<span class="n">rangeInt0ToMaxConstraint</span> <span class="o">=</span> <span class="n">ValueRangeConstraint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">MAXINT</span><span class="p">)</span>
+<span class="n">rangeInt1To127Constraint</span> <span class="o">=</span> <span class="n">ValueRangeConstraint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">127</span><span class="p">)</span>
+<span class="n">size1ToMaxConstraint</span> <span class="o">=</span> <span class="n">ValueSizeConstraint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">MAXINT</span><span class="p">)</span>
+<span class="n">responseValueConstraint</span> <span class="o">=</span> <span class="n">SingleValueConstraint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">51</span><span class="p">,</span> <span class="mi">52</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">68</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mi">71</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">115</span><span class="p">,</span> <span class="mi">116</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">118</span><span class="p">,</span> <span class="mi">119</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">122</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span>
+                                                <span class="mi">4096</span><span class="p">)</span>
+
+<span class="c1"># custom constraints</span>
+<span class="n">numericOIDConstraint</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># TODO</span>
+<span class="n">distinguishedNameConstraint</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># TODO</span>
+<span class="n">nameComponentConstraint</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># TODO</span>
+<span class="n">attributeDescriptionConstraint</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># TODO</span>
+<span class="n">uriConstraint</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># TODO</span>
+<span class="n">attributeSelectorConstraint</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># TODO</span>
+
+
+<div class="viewcode-block" id="Integer0ToMax"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Integer0ToMax">[文档]</a><span class="k">class</span> <span class="nc">Integer0ToMax</span><span class="p">(</span><span class="n">Integer</span><span class="p">):</span>
+    <span class="n">subtypeSpec</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="n">subtypeSpec</span> <span class="o">+</span> <span class="n">rangeInt0ToMaxConstraint</span></div>
+
+
+<div class="viewcode-block" id="LDAPString"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.LDAPString">[文档]</a><span class="k">class</span> <span class="nc">LDAPString</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># LDAPString ::= OCTET STRING -- UTF-8 encoded, -- [ISO10646] characters</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="MessageID"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.MessageID">[文档]</a><span class="k">class</span> <span class="nc">MessageID</span><span class="p">(</span><span class="n">Integer0ToMax</span><span class="p">):</span>
+    <span class="c1"># MessageID ::= INTEGER (0 ..  maxInt)</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPOID"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.LDAPOID">[文档]</a><span class="k">class</span> <span class="nc">LDAPOID</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># LDAPOID ::= OCTET STRING -- Constrained to &lt;numericoid&gt;</span>
+    <span class="c1">#                             -- [RFC4512]</span>
+
+    <span class="c1"># subtypeSpec = numericOIDConstraint</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPDN"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.LDAPDN">[文档]</a><span class="k">class</span> <span class="nc">LDAPDN</span><span class="p">(</span><span class="n">LDAPString</span><span class="p">):</span>
+    <span class="c1"># LDAPDN ::= LDAPString -- Constrained to &lt;distinguishedName&gt;</span>
+    <span class="c1">#                         -- [RFC4514]</span>
+
+    <span class="c1"># subtypeSpec = distinguishedName</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="RelativeLDAPDN"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.RelativeLDAPDN">[文档]</a><span class="k">class</span> <span class="nc">RelativeLDAPDN</span><span class="p">(</span><span class="n">LDAPString</span><span class="p">):</span>
+    <span class="c1"># RelativeLDAPDN ::= LDAPString -- Constrained to &lt;name-component&gt;</span>
+    <span class="c1">#                         -- [RFC4514]</span>
+
+    <span class="c1"># subtypeSpec = LDAPString.subtypeSpec + nameComponentConstraint</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AttributeDescription"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AttributeDescription">[文档]</a><span class="k">class</span> <span class="nc">AttributeDescription</span><span class="p">(</span><span class="n">LDAPString</span><span class="p">):</span>
+    <span class="c1"># AttributeDescription ::= LDAPString -- Constrained to &lt;attributedescription&gt;</span>
+    <span class="c1">#                         -- [RFC4512]</span>
+
+    <span class="c1"># subtypeSpec = LDAPString.subtypeSpec + attributeDescriptionConstraint</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AttributeValue"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AttributeValue">[文档]</a><span class="k">class</span> <span class="nc">AttributeValue</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># AttributeValue ::= OCTET STRING</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="AssertionValue"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AssertionValue">[文档]</a><span class="k">class</span> <span class="nc">AssertionValue</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># AssertionValue ::= OCTET STRING</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="AttributeValueAssertion"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AttributeValueAssertion">[文档]</a><span class="k">class</span> <span class="nc">AttributeValueAssertion</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># AttributeValueAssertion ::= SEQUENCE {</span>
+    <span class="c1">#     attributeDesc   AttributeDescription,</span>
+    <span class="c1">#     assertionValue  AssertionValue }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;attributeDesc&#39;</span><span class="p">,</span> <span class="n">AttributeDescription</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;assertionValue&#39;</span><span class="p">,</span> <span class="n">AssertionValue</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="MatchingRuleId"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.MatchingRuleId">[文档]</a><span class="k">class</span> <span class="nc">MatchingRuleId</span><span class="p">(</span><span class="n">LDAPString</span><span class="p">):</span>
+    <span class="c1"># MatchingRuleId ::= LDAPString</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Vals"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Vals">[文档]</a><span class="k">class</span> <span class="nc">Vals</span><span class="p">(</span><span class="n">SetOf</span><span class="p">):</span>
+    <span class="c1"># vals       SET OF value AttributeValue }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">AttributeValue</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ValsAtLeast1"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ValsAtLeast1">[文档]</a><span class="k">class</span> <span class="nc">ValsAtLeast1</span><span class="p">(</span><span class="n">SetOf</span><span class="p">):</span>
+    <span class="c1"># vals       SET OF value AttributeValue }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">AttributeValue</span><span class="p">()</span>
+    <span class="n">subtypeSpec</span> <span class="o">=</span> <span class="n">SetOf</span><span class="o">.</span><span class="n">subtypeSpec</span> <span class="o">+</span> <span class="n">size1ToMaxConstraint</span></div>
+
+
+<div class="viewcode-block" id="PartialAttribute"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.PartialAttribute">[文档]</a><span class="k">class</span> <span class="nc">PartialAttribute</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># PartialAttribute ::= SEQUENCE {</span>
+    <span class="c1">#     type       AttributeDescription,</span>
+    <span class="c1">#     vals       SET OF value AttributeValue }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">AttributeDescription</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;vals&#39;</span><span class="p">,</span> <span class="n">Vals</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="Attribute"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Attribute">[文档]</a><span class="k">class</span> <span class="nc">Attribute</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># Attribute ::= PartialAttribute(WITH COMPONENTS {</span>
+    <span class="c1">#     ...,</span>
+    <span class="c1">#     vals (SIZE(1..MAX))})</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">AttributeDescription</span><span class="p">()),</span>
+                               <span class="c1"># NamedType(&#39;vals&#39;, ValsAtLeast1()))</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;vals&#39;</span><span class="p">,</span> <span class="n">Vals</span><span class="p">()))</span>  <span class="c1"># changed from ValsAtLeast1() to allow empty member values in groups - this should not be as per rfc4511 4.1.7, but openldap accept it</span></div>
+
+
+<div class="viewcode-block" id="AttributeList"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AttributeList">[文档]</a><span class="k">class</span> <span class="nc">AttributeList</span><span class="p">(</span><span class="n">SequenceOf</span><span class="p">):</span>
+    <span class="c1"># AttributeList ::= SEQUENCE OF attribute Attribute</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">Attribute</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Simple"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Simple">[文档]</a><span class="k">class</span> <span class="nc">Simple</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># simple                  [0] OCTET STRING,</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">OctetString</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="Credentials"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Credentials">[文档]</a><span class="k">class</span> <span class="nc">Credentials</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># credentials             OCTET STRING</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="SaslCredentials"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SaslCredentials">[文档]</a><span class="k">class</span> <span class="nc">SaslCredentials</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># SaslCredentials ::= SEQUENCE {</span>
+    <span class="c1">#     mechanism               LDAPString,</span>
+    <span class="c1">#     credentials             OCTET STRING OPTIONAL }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;mechanism&#39;</span><span class="p">,</span> <span class="n">LDAPString</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;credentials&#39;</span><span class="p">,</span> <span class="n">Credentials</span><span class="p">()))</span></div>
+
+
+<span class="c1"># not in RFC4511 but used by Microsoft to embed the NTLM protocol in the BindRequest (Sicily Protocol)</span>
+<div class="viewcode-block" id="SicilyPackageDiscovery"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SicilyPackageDiscovery">[文档]</a><span class="k">class</span> <span class="nc">SicilyPackageDiscovery</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># sicilyPackageDiscovery  [9] OCTET STRING,</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">OctetString</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<span class="c1"># not in RFC4511 but used by Microsoft to embed the NTLM protocol in the BindRequest (Sicily Protocol)</span>
+<div class="viewcode-block" id="SicilyNegotiate"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SicilyNegotiate">[文档]</a><span class="k">class</span> <span class="nc">SicilyNegotiate</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># sicilyNegotiate  [10] OCTET STRING,</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">OctetString</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<span class="c1"># not in RFC4511 but used by Microsoft to embed the NTLM protocol in the BindRequest (Sicily Protocol)</span>
+<div class="viewcode-block" id="SicilyResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SicilyResponse">[文档]</a><span class="k">class</span> <span class="nc">SicilyResponse</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># sicilyResponse  [11] OCTET STRING,</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">OctetString</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">11</span><span class="p">))</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="AuthenticationChoice"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AuthenticationChoice">[文档]</a><span class="k">class</span> <span class="nc">AuthenticationChoice</span><span class="p">(</span><span class="n">Choice</span><span class="p">):</span>
+    <span class="c1"># AuthenticationChoice ::= CHOICE {</span>
+    <span class="c1">#     simple                  [0] OCTET STRING,</span>
+    <span class="c1">#                             -- 1 and 2 reserved</span>
+    <span class="c1">#     sasl                    [3] SaslCredentials,</span>
+    <span class="c1"># ... }</span>
+
+    <span class="c1"># from https://msdn.microsoft.com/en-us/library/cc223498.aspx  # legacy NTLM authentication for Windows Active Directory</span>
+    <span class="c1"># sicilyPackageDiscovery [9]    OCTET STRING</span>
+    <span class="c1"># sicilyNegotiate        [10]   OCTET STRING</span>
+    <span class="c1"># sicilyResponse         [11]   OCTET STRING  }</span>
+
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;simple&#39;</span><span class="p">,</span> <span class="n">Simple</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;sasl&#39;</span><span class="p">,</span> <span class="n">SaslCredentials</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;sicilyPackageDiscovery&#39;</span><span class="p">,</span> <span class="n">SicilyPackageDiscovery</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;sicilyNegotiate&#39;</span><span class="p">,</span> <span class="n">SicilyNegotiate</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;sicilyResponse&#39;</span><span class="p">,</span> <span class="n">SicilyResponse</span><span class="p">()),</span>
+                               <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Version"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Version">[文档]</a><span class="k">class</span> <span class="nc">Version</span><span class="p">(</span><span class="n">Integer</span><span class="p">):</span>
+    <span class="c1"># version                 INTEGER (1 ..  127),</span>
+    <span class="n">subtypeSpec</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="n">subtypeSpec</span> <span class="o">+</span> <span class="n">rangeInt1To127Constraint</span></div>
+
+
+<div class="viewcode-block" id="ResultCode"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ResultCode">[文档]</a><span class="k">class</span> <span class="nc">ResultCode</span><span class="p">(</span><span class="n">Enumerated</span><span class="p">):</span>
+    <span class="c1"># resultCode         ENUMERATED {</span>
+    <span class="c1">#     success                      (0),</span>
+    <span class="c1">#     operationsError              (1),</span>
+    <span class="c1">#     protocolError                (2),</span>
+    <span class="c1">#     timeLimitExceeded            (3),</span>
+    <span class="c1">#     sizeLimitExceeded            (4),</span>
+    <span class="c1">#     compareFalse                 (5),</span>
+    <span class="c1">#     compareTrue                  (6),</span>
+    <span class="c1">#     authMethodNotSupported       (7),</span>
+    <span class="c1">#     strongerAuthRequired         (8),</span>
+    <span class="c1">#          -- 9 reserved --</span>
+    <span class="c1">#     referral                     (10),</span>
+    <span class="c1">#     adminLimitExceeded           (11),</span>
+    <span class="c1">#     unavailableCriticalExtension (12),</span>
+    <span class="c1">#     confidentialityRequired      (13),</span>
+    <span class="c1">#     saslBindInProgress           (14),</span>
+    <span class="c1">#     noSuchAttribute              (16),</span>
+    <span class="c1">#     undefinedAttributeType       (17),</span>
+    <span class="c1">#     inappropriateMatching        (18),</span>
+    <span class="c1">#     constraintViolation          (19),</span>
+    <span class="c1">#     attributeOrValueExists       (20),</span>
+    <span class="c1">#     invalidAttributeSyntax       (21),</span>
+    <span class="c1">#          -- 22-31 unused --</span>
+    <span class="c1">#     noSuchObject                 (32),</span>
+    <span class="c1">#     aliasProblem                 (33),</span>
+    <span class="c1">#     invalidDNSyntax              (34),</span>
+    <span class="c1">#          -- 35 reserved for undefined isLeaf --</span>
+    <span class="c1">#     aliasDereferencingProblem    (36),</span>
+    <span class="c1">#          -- 37-47 unused --</span>
+    <span class="c1">#     inappropriateAuthentication  (48),</span>
+    <span class="c1">#     invalidCredentials           (49),</span>
+    <span class="c1">#     insufficientAccessRights     (50),</span>
+    <span class="c1">#     busy                         (51),</span>
+    <span class="c1">#     unavailable                  (52),</span>
+    <span class="c1">#     unwillingToPerform           (53),</span>
+    <span class="c1">#     loopDetect                   (54),</span>
+    <span class="c1">#          -- 55-63 unused --</span>
+    <span class="c1">#     namingViolation              (64),</span>
+    <span class="c1">#     objectClassViolation         (65),</span>
+    <span class="c1">#     notAllowedOnNonLeaf          (66),</span>
+    <span class="c1">#     notAllowedOnRDN              (67),</span>
+    <span class="c1">#     entryAlreadyExists           (68),</span>
+    <span class="c1">#     objectClassModsProhibited    (69),</span>
+    <span class="c1">#          -- 70 reserved for CLDAP --</span>
+    <span class="c1">#     affectsMultipleDSAs          (71),</span>
+    <span class="c1">#          -- 72-79 unused --</span>
+    <span class="c1">#     other                        (80),</span>
+    <span class="c1">#     ...  }</span>
+    <span class="c1">#</span>
+    <span class="c1">#     from IANA ldap-parameters:</span>
+    <span class="c1">#     lcupResourcesExhausted        113        IESG                             [RFC3928]</span>
+    <span class="c1">#     lcupSecurityViolation         114        IESG                             [RFC3928]</span>
+    <span class="c1">#     lcupInvalidData               115        IESG                             [RFC3928]</span>
+    <span class="c1">#     lcupUnsupportedScheme         116        IESG                             [RFC3928]</span>
+    <span class="c1">#     lcupReloadRequired            117        IESG                             [RFC3928]</span>
+    <span class="c1">#     canceled                      118        IESG                             [RFC3909]</span>
+    <span class="c1">#     noSuchOperation               119        IESG                             [RFC3909]</span>
+    <span class="c1">#     tooLate                       120        IESG                             [RFC3909]</span>
+    <span class="c1">#     cannotCancel                  121        IESG                             [RFC3909]</span>
+    <span class="c1">#     assertionFailed               122        IESG                             [RFC4528]</span>
+    <span class="c1">#     authorizationDenied           123        WELTMAN                          [RFC4370]</span>
+    <span class="c1">#     e-syncRefreshRequired         4096       [Kurt_Zeilenga] [Jong_Hyuk_Choi] [RFC4533]</span>
+    <span class="n">namedValues</span> <span class="o">=</span> <span class="n">NamedValues</span><span class="p">((</span><span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;operationsError&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;protocolError&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;timeLimitExceeded&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;sizeLimitExceeded&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;compareFalse&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;compareTrue&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;authMethodNotSupported&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;strongerAuthRequired&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;referral&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;adminLimitExceeded&#39;</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;unavailableCriticalExtension&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;confidentialityRequired&#39;</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;saslBindInProgress&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;noSuchAttribute&#39;</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;undefinedAttributeType&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;inappropriateMatching&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;constraintViolation&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;attributeOrValueExists&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;invalidAttributeSyntax&#39;</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;noSuchObject&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;aliasProblem&#39;</span><span class="p">,</span> <span class="mi">33</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;invalidDNSyntax&#39;</span><span class="p">,</span> <span class="mi">34</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;aliasDereferencingProblem&#39;</span><span class="p">,</span> <span class="mi">36</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;inappropriateAuthentication&#39;</span><span class="p">,</span> <span class="mi">48</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;invalidCredentials&#39;</span><span class="p">,</span> <span class="mi">49</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;insufficientAccessRights&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;busy&#39;</span><span class="p">,</span> <span class="mi">51</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;unavailable&#39;</span><span class="p">,</span> <span class="mi">52</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;unwillingToPerform&#39;</span><span class="p">,</span> <span class="mi">53</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;loopDetected&#39;</span><span class="p">,</span> <span class="mi">54</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;namingViolation&#39;</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;objectClassViolation&#39;</span><span class="p">,</span> <span class="mi">65</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;notAllowedOnNonLeaf&#39;</span><span class="p">,</span> <span class="mi">66</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;notAllowedOnRDN&#39;</span><span class="p">,</span> <span class="mi">67</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;entryAlreadyExists&#39;</span><span class="p">,</span> <span class="mi">68</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;objectClassModsProhibited&#39;</span><span class="p">,</span> <span class="mi">69</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;affectMultipleDSAs&#39;</span><span class="p">,</span> <span class="mi">71</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;other&#39;</span><span class="p">,</span> <span class="mi">80</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;lcupResourcesExhausted&#39;</span><span class="p">,</span> <span class="mi">113</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;lcupSecurityViolation&#39;</span><span class="p">,</span> <span class="mi">114</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;lcupInvalidData&#39;</span><span class="p">,</span> <span class="mi">115</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;lcupUnsupportedScheme&#39;</span><span class="p">,</span> <span class="mi">116</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;lcupReloadRequired&#39;</span><span class="p">,</span> <span class="mi">117</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;canceled&#39;</span><span class="p">,</span> <span class="mi">118</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;noSuchOperation&#39;</span><span class="p">,</span> <span class="mi">119</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;tooLate&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;cannotCancel&#39;</span><span class="p">,</span> <span class="mi">121</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;assertionFailed&#39;</span><span class="p">,</span> <span class="mi">122</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;authorizationDenied&#39;</span><span class="p">,</span> <span class="mi">123</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s1">&#39;e-syncRefreshRequired&#39;</span><span class="p">,</span> <span class="mi">4096</span><span class="p">))</span>
+
+    <span class="n">subTypeSpec</span> <span class="o">=</span> <span class="n">Enumerated</span><span class="o">.</span><span class="n">subtypeSpec</span> <span class="o">+</span> <span class="n">responseValueConstraint</span></div>
+
+
+<div class="viewcode-block" id="URI"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.URI">[文档]</a><span class="k">class</span> <span class="nc">URI</span><span class="p">(</span><span class="n">LDAPString</span><span class="p">):</span>
+    <span class="c1"># URI ::= LDAPString     -- limited to characters permitted in</span>
+    <span class="c1">#                      -- URIs</span>
+
+    <span class="c1"># subtypeSpec = LDAPString.subTypeSpec + uriConstrain</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Referral"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Referral">[文档]</a><span class="k">class</span> <span class="nc">Referral</span><span class="p">(</span><span class="n">SequenceOf</span><span class="p">):</span>
+    <span class="c1"># Referral ::= SEQUENCE SIZE (1..MAX) OF uri URI</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">SequenceOf</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">URI</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ServerSaslCreds"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ServerSaslCreds">[文档]</a><span class="k">class</span> <span class="nc">ServerSaslCreds</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># serverSaslCreds    [7] OCTET STRING OPTIONAL</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">OctetString</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span></div>
+    <span class="c1"># encoding = &#39;utf-8&#39;</span>
+
+
+<div class="viewcode-block" id="LDAPResult"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.LDAPResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPResult</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># LDAPResult ::= SEQUENCE {</span>
+    <span class="c1">#     resultCode         ENUMERATED {</span>
+    <span class="c1">#         success                      (0),</span>
+    <span class="c1">#         operationsError              (1),</span>
+    <span class="c1">#         protocolError                (2),</span>
+    <span class="c1">#         timeLimitExceeded            (3),</span>
+    <span class="c1">#         sizeLimitExceeded            (4),</span>
+    <span class="c1">#         compareFalse                 (5),</span>
+    <span class="c1">#         compareTrue                  (6),</span>
+    <span class="c1">#         authMethodNotSupported       (7),</span>
+    <span class="c1">#         strongerAuthRequired         (8),</span>
+    <span class="c1">#              -- 9 reserved --</span>
+    <span class="c1">#         referral                     (10),</span>
+    <span class="c1">#         adminLimitExceeded           (11),</span>
+    <span class="c1">#         unavailableCriticalExtension (12),</span>
+    <span class="c1">#         confidentialityRequired      (13),</span>
+    <span class="c1">#         saslBindInProgress           (14),</span>
+    <span class="c1">#         noSuchAttribute              (16),</span>
+    <span class="c1">#         undefinedAttributeType       (17),</span>
+    <span class="c1">#         inappropriateMatching        (18),</span>
+    <span class="c1">#         constraintViolation          (19),</span>
+    <span class="c1">#         attributeOrValueExists       (20),</span>
+    <span class="c1">#         invalidAttributeSyntax       (21),</span>
+    <span class="c1">#              -- 22-31 unused --</span>
+    <span class="c1">#         noSuchObject                 (32),</span>
+    <span class="c1">#         aliasProblem                 (33),</span>
+    <span class="c1">#         invalidDNSyntax              (34),</span>
+    <span class="c1">#              -- 35 reserved for undefined isLeaf --</span>
+    <span class="c1">#         aliasDereferencingProblem    (36),</span>
+    <span class="c1">#              -- 37-47 unused --</span>
+    <span class="c1">#         inappropriateAuthentication  (48),</span>
+    <span class="c1">#         invalidCredentials           (49),</span>
+    <span class="c1">#         insufficientAccessRights     (50),</span>
+    <span class="c1">#         busy                         (51),</span>
+    <span class="c1">#         unavailable                  (52),</span>
+    <span class="c1">#         unwillingToPerform           (53),</span>
+    <span class="c1">#         loopDetect                   (54),</span>
+    <span class="c1">#              -- 55-63 unused --</span>
+    <span class="c1">#         namingViolation              (64),</span>
+    <span class="c1">#         objectClassViolation         (65),</span>
+    <span class="c1">#         notAllowedOnNonLeaf          (66),</span>
+    <span class="c1">#         notAllowedOnRDN              (67),</span>
+    <span class="c1">#         entryAlreadyExists           (68),</span>
+    <span class="c1">#         objectClassModsProhibited    (69),</span>
+    <span class="c1">#              -- 70 reserved for CLDAP --</span>
+    <span class="c1">#         affectsMultipleDSAs          (71),</span>
+    <span class="c1">#              -- 72-79 unused --</span>
+    <span class="c1">#         other                        (80),</span>
+    <span class="c1">#         ...  },</span>
+    <span class="c1">#     matchedDN          LDAPDN,</span>
+    <span class="c1">#     diagnosticMessage  LDAPString,</span>
+    <span class="c1">#     referral           [3] Referral OPTIONAL }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;resultCode&#39;</span><span class="p">,</span> <span class="n">ResultCode</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;matchedDN&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;diagnosticMessage&#39;</span><span class="p">,</span> <span class="n">LDAPString</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;referral&#39;</span><span class="p">,</span> <span class="n">Referral</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="Criticality"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Criticality">[文档]</a><span class="k">class</span> <span class="nc">Criticality</span><span class="p">(</span><span class="n">Boolean</span><span class="p">):</span>
+    <span class="c1"># criticality             BOOLEAN DEFAULT FALSE</span>
+    <span class="n">defaultValue</span> <span class="o">=</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="ControlValue"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ControlValue">[文档]</a><span class="k">class</span> <span class="nc">ControlValue</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># controlValue            OCTET STRING</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="Control"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Control">[文档]</a><span class="k">class</span> <span class="nc">Control</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># Control ::= SEQUENCE {</span>
+    <span class="c1">#     controlType             LDAPOID,</span>
+    <span class="c1">#     criticality             BOOLEAN DEFAULT FALSE,</span>
+    <span class="c1">#     controlValue            OCTET STRING OPTIONAL }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;controlType&#39;</span><span class="p">,</span> <span class="n">LDAPOID</span><span class="p">()),</span>
+                               <span class="n">DefaultedNamedType</span><span class="p">(</span><span class="s1">&#39;criticality&#39;</span><span class="p">,</span> <span class="n">Criticality</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;controlValue&#39;</span><span class="p">,</span> <span class="n">ControlValue</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="Controls"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Controls">[文档]</a><span class="k">class</span> <span class="nc">Controls</span><span class="p">(</span><span class="n">SequenceOf</span><span class="p">):</span>
+    <span class="c1"># Controls ::= SEQUENCE OF control Control</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">SequenceOf</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">Control</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Scope"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Scope">[文档]</a><span class="k">class</span> <span class="nc">Scope</span><span class="p">(</span><span class="n">Enumerated</span><span class="p">):</span>
+    <span class="c1"># scope           ENUMERATED {</span>
+    <span class="c1">#     baseObject              (0),</span>
+    <span class="c1">#     singleLevel             (1),</span>
+    <span class="c1">#     wholeSubtree            (2),</span>
+    <span class="n">namedValues</span> <span class="o">=</span> <span class="n">NamedValues</span><span class="p">((</span><span class="s1">&#39;baseObject&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;singleLevel&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;wholeSubtree&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DerefAliases"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.DerefAliases">[文档]</a><span class="k">class</span> <span class="nc">DerefAliases</span><span class="p">(</span><span class="n">Enumerated</span><span class="p">):</span>
+    <span class="c1"># derefAliases    ENUMERATED {</span>
+    <span class="c1">#     neverDerefAliases       (0),</span>
+    <span class="c1">#     derefInSearching        (1),</span>
+    <span class="c1">#     derefFindingBaseObj     (2),</span>
+    <span class="c1">#     derefAlways             (3) },</span>
+    <span class="n">namedValues</span> <span class="o">=</span> <span class="n">NamedValues</span><span class="p">((</span><span class="s1">&#39;neverDerefAliases&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;derefInSearching&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;derefFindingBaseObj&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;derefAlways&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="TypesOnly"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.TypesOnly">[文档]</a><span class="k">class</span> <span class="nc">TypesOnly</span><span class="p">(</span><span class="n">Boolean</span><span class="p">):</span>
+    <span class="c1"># typesOnly       BOOLEAN</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Selector"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Selector">[文档]</a><span class="k">class</span> <span class="nc">Selector</span><span class="p">(</span><span class="n">LDAPString</span><span class="p">):</span>
+    <span class="c1">#     -- The LDAPString is constrained to</span>
+    <span class="c1">#     -- &lt;attributeSelector&gt; in Section 4.5.1.8</span>
+
+    <span class="c1"># subtypeSpec = LDAPString.subtypeSpec + attributeSelectorConstraint</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AttributeSelection"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AttributeSelection">[文档]</a><span class="k">class</span> <span class="nc">AttributeSelection</span><span class="p">(</span><span class="n">SequenceOf</span><span class="p">):</span>
+    <span class="c1"># AttributeSelection ::= SEQUENCE OF selector LDAPString</span>
+    <span class="c1">#     -- The LDAPString is constrained to</span>
+    <span class="c1">#     -- &lt;attributeSelector&gt; in Section 4.5.1.8</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">Selector</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MatchingRule"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.MatchingRule">[文档]</a><span class="k">class</span> <span class="nc">MatchingRule</span><span class="p">(</span><span class="n">MatchingRuleId</span><span class="p">):</span>
+    <span class="c1"># matchingRule    [1] MatchingRuleId</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">MatchingRuleId</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Type">[文档]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">AttributeDescription</span><span class="p">):</span>
+    <span class="c1"># type            [2] AttributeDescription</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AttributeDescription</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="MatchValue"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.MatchValue">[文档]</a><span class="k">class</span> <span class="nc">MatchValue</span><span class="p">(</span><span class="n">AssertionValue</span><span class="p">):</span>
+    <span class="c1"># matchValue      [3] AssertionValue,</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AssertionValue</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DnAttributes"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.DnAttributes">[文档]</a><span class="k">class</span> <span class="nc">DnAttributes</span><span class="p">(</span><span class="n">Boolean</span><span class="p">):</span>
+    <span class="c1"># dnAttributes    [4] BOOLEAN DEFAULT FALSE }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Boolean</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">defaultValue</span> <span class="o">=</span> <span class="n">Boolean</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MatchingRuleAssertion"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.MatchingRuleAssertion">[文档]</a><span class="k">class</span> <span class="nc">MatchingRuleAssertion</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># MatchingRuleAssertion ::= SEQUENCE {</span>
+    <span class="c1">#     matchingRule    [1] MatchingRuleId OPTIONAL,</span>
+    <span class="c1">#     type            [2] AttributeDescription OPTIONAL,</span>
+    <span class="c1">#     matchValue      [3] AssertionValue,</span>
+    <span class="c1">#     dnAttributes    [4] BOOLEAN DEFAULT FALSE }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;matchingRule&#39;</span><span class="p">,</span> <span class="n">MatchingRule</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">Type</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;matchValue&#39;</span><span class="p">,</span> <span class="n">MatchValue</span><span class="p">()),</span>
+                               <span class="n">DefaultedNamedType</span><span class="p">(</span><span class="s1">&#39;dnAttributes&#39;</span><span class="p">,</span> <span class="n">DnAttributes</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="Initial"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Initial">[文档]</a><span class="k">class</span> <span class="nc">Initial</span><span class="p">(</span><span class="n">AssertionValue</span><span class="p">):</span>
+    <span class="c1"># initial [0] AssertionValue,  -- can occur at most once</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AssertionValue</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Any"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Any">[文档]</a><span class="k">class</span> <span class="nc">Any</span><span class="p">(</span><span class="n">AssertionValue</span><span class="p">):</span>
+    <span class="c1"># any [1] AssertionValue,</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AssertionValue</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Final"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Final">[文档]</a><span class="k">class</span> <span class="nc">Final</span><span class="p">(</span><span class="n">AssertionValue</span><span class="p">):</span>
+    <span class="c1"># final [1] AssertionValue,  -- can occur at most once</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AssertionValue</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Substring"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Substring">[文档]</a><span class="k">class</span> <span class="nc">Substring</span><span class="p">(</span><span class="n">Choice</span><span class="p">):</span>
+    <span class="c1"># substring CHOICE {</span>
+    <span class="c1">#     initial [0] AssertionValue,  -- can occur at most once</span>
+    <span class="c1">#     any     [1] AssertionValue,</span>
+    <span class="c1">#     final   [2] AssertionValue } -- can occur at most once</span>
+    <span class="c1">#     }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;initial&#39;</span><span class="p">,</span> <span class="n">Initial</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;any&#39;</span><span class="p">,</span> <span class="n">Any</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;final&#39;</span><span class="p">,</span> <span class="n">Final</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="Substrings"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Substrings">[文档]</a><span class="k">class</span> <span class="nc">Substrings</span><span class="p">(</span><span class="n">SequenceOf</span><span class="p">):</span>
+    <span class="c1"># substrings     SEQUENCE SIZE (1..MAX) OF substring CHOICE {</span>
+    <span class="c1"># ...</span>
+    <span class="c1"># }</span>
+    <span class="n">subtypeSpec</span> <span class="o">=</span> <span class="n">SequenceOf</span><span class="o">.</span><span class="n">subtypeSpec</span> <span class="o">+</span> <span class="n">size1ToMaxConstraint</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">Substring</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SubstringFilter"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SubstringFilter">[文档]</a><span class="k">class</span> <span class="nc">SubstringFilter</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1">#     SubstringFilter ::= SEQUENCE {</span>
+    <span class="c1">#         type           AttributeDescription,</span>
+    <span class="c1">#         substrings     SEQUENCE SIZE (1..MAX) OF substring CHOICE {</span>
+    <span class="c1">#             initial [0] AssertionValue,  -- can occur at most once</span>
+    <span class="c1">#             any     [1] AssertionValue,</span>
+    <span class="c1">#             final   [2] AssertionValue } -- can occur at most once</span>
+    <span class="c1">#             }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">AttributeDescription</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;substrings&#39;</span><span class="p">,</span> <span class="n">Substrings</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="And"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.And">[文档]</a><span class="k">class</span> <span class="nc">And</span><span class="p">(</span><span class="n">SetOf</span><span class="p">):</span>
+    <span class="c1"># and             [0] SET SIZE (1..MAX) OF filter Filter</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">SetOf</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">subtypeSpec</span> <span class="o">=</span> <span class="n">SetOf</span><span class="o">.</span><span class="n">subtypeSpec</span> <span class="o">+</span> <span class="n">size1ToMaxConstraint</span></div>
+
+
+<div class="viewcode-block" id="Or"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Or">[文档]</a><span class="k">class</span> <span class="nc">Or</span><span class="p">(</span><span class="n">SetOf</span><span class="p">):</span>
+    <span class="c1"># or              [1] SET SIZE (1..MAX) OF filter Filter</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">SetOf</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">subtypeSpec</span> <span class="o">=</span> <span class="n">SetOf</span><span class="o">.</span><span class="n">subtypeSpec</span> <span class="o">+</span> <span class="n">size1ToMaxConstraint</span></div>
+
+
+<div class="viewcode-block" id="Not"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Not">[文档]</a><span class="k">class</span> <span class="nc">Not</span><span class="p">(</span><span class="n">Choice</span><span class="p">):</span>
+    <span class="c1"># not             [2] Filter</span>
+    <span class="k">pass</span>  <span class="c1"># defined after Filter definition to allow recursion</span></div>
+
+
+<div class="viewcode-block" id="EqualityMatch"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.EqualityMatch">[文档]</a><span class="k">class</span> <span class="nc">EqualityMatch</span><span class="p">(</span><span class="n">AttributeValueAssertion</span><span class="p">):</span>
+    <span class="c1"># equalityMatch   [3] AttributeValueAssertion</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AttributeValueAssertion</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="GreaterOrEqual"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.GreaterOrEqual">[文档]</a><span class="k">class</span> <span class="nc">GreaterOrEqual</span><span class="p">(</span><span class="n">AttributeValueAssertion</span><span class="p">):</span>
+    <span class="c1"># greaterOrEqual  [5] AttributeValueAssertion</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AttributeValueAssertion</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="LessOrEqual"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.LessOrEqual">[文档]</a><span class="k">class</span> <span class="nc">LessOrEqual</span><span class="p">(</span><span class="n">AttributeValueAssertion</span><span class="p">):</span>
+    <span class="c1"># lessOrEqual     [6] AttributeValueAssertion</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AttributeValueAssertion</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Present"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Present">[文档]</a><span class="k">class</span> <span class="nc">Present</span><span class="p">(</span><span class="n">AttributeDescription</span><span class="p">):</span>
+    <span class="c1"># present         [7] AttributeDescription</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AttributeDescription</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ApproxMatch"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ApproxMatch">[文档]</a><span class="k">class</span> <span class="nc">ApproxMatch</span><span class="p">(</span><span class="n">AttributeValueAssertion</span><span class="p">):</span>
+    <span class="c1"># approxMatch     [8] AttributeValueAssertion</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">AttributeValueAssertion</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ExtensibleMatch"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ExtensibleMatch">[文档]</a><span class="k">class</span> <span class="nc">ExtensibleMatch</span><span class="p">(</span><span class="n">MatchingRuleAssertion</span><span class="p">):</span>
+    <span class="c1"># extensibleMatch [9] MatchingRuleAssertion</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">MatchingRuleAssertion</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Filter"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Filter">[文档]</a><span class="k">class</span> <span class="nc">Filter</span><span class="p">(</span><span class="n">Choice</span><span class="p">):</span>
+    <span class="c1"># Filter ::= CHOICE {</span>
+    <span class="c1">#     and             [0] SET SIZE (1..MAX) OF filter Filter,</span>
+    <span class="c1">#     or              [1] SET SIZE (1..MAX) OF filter Filter,</span>
+    <span class="c1">#     not             [2] Filter,</span>
+    <span class="c1">#     equalityMatch   [3] AttributeValueAssertion,</span>
+    <span class="c1">#     substrings      [4] SubstringFilter,</span>
+    <span class="c1">#     greaterOrEqual  [5] AttributeValueAssertion,</span>
+    <span class="c1">#     lessOrEqual     [6] AttributeValueAssertion,</span>
+    <span class="c1">#     present         [7] AttributeDescription,</span>
+    <span class="c1">#     approxMatch     [8] AttributeValueAssertion,</span>
+    <span class="c1">#     extensibleMatch [9] MatchingRuleAssertion,</span>
+    <span class="c1">#          ...  }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;and&#39;</span><span class="p">,</span> <span class="n">And</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;or&#39;</span><span class="p">,</span> <span class="n">Or</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;notFilter&#39;</span><span class="p">,</span> <span class="n">Not</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;equalityMatch&#39;</span><span class="p">,</span> <span class="n">EqualityMatch</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;substringFilter&#39;</span><span class="p">,</span> <span class="n">SubstringFilter</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;greaterOrEqual&#39;</span><span class="p">,</span> <span class="n">GreaterOrEqual</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;lessOrEqual&#39;</span><span class="p">,</span> <span class="n">LessOrEqual</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;present&#39;</span><span class="p">,</span> <span class="n">Present</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;approxMatch&#39;</span><span class="p">,</span> <span class="n">ApproxMatch</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;extensibleMatch&#39;</span><span class="p">,</span> <span class="n">ExtensibleMatch</span><span class="p">()))</span></div>
+
+
+<span class="n">And</span><span class="o">.</span><span class="n">componentType</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">()</span>
+<span class="n">Or</span><span class="o">.</span><span class="n">componentType</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">()</span>
+<span class="n">Not</span><span class="o">.</span><span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;innerNotFilter&#39;</span><span class="p">,</span> <span class="n">Filter</span><span class="p">()))</span>
+<span class="n">Not</span><span class="o">.</span><span class="n">tagSet</span> <span class="o">=</span> <span class="n">Filter</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagExplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># as per RFC4511 page 23</span>
+
+
+<div class="viewcode-block" id="PartialAttributeList"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.PartialAttributeList">[文档]</a><span class="k">class</span> <span class="nc">PartialAttributeList</span><span class="p">(</span><span class="n">SequenceOf</span><span class="p">):</span>
+    <span class="c1"># PartialAttributeList ::= SEQUENCE OF</span>
+    <span class="c1">#     partialAttribute PartialAttribute</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">PartialAttribute</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Operation"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Operation">[文档]</a><span class="k">class</span> <span class="nc">Operation</span><span class="p">(</span><span class="n">Enumerated</span><span class="p">):</span>
+    <span class="c1"># operation       ENUMERATED {</span>
+    <span class="c1">#     add     (0),</span>
+    <span class="c1">#     delete  (1),</span>
+    <span class="c1">#     replace (2),</span>
+    <span class="c1">#     ...  }</span>
+    <span class="n">namedValues</span> <span class="o">=</span> <span class="n">NamedValues</span><span class="p">((</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;replace&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;increment&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Change"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Change">[文档]</a><span class="k">class</span> <span class="nc">Change</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># change SEQUENCE {</span>
+    <span class="c1">#     operation       ENUMERATED {</span>
+    <span class="c1">#         add     (0),</span>
+    <span class="c1">#         delete  (1),</span>
+    <span class="c1">#         replace (2),</span>
+    <span class="c1">#         ...  },</span>
+    <span class="c1">#     modification    PartialAttribute } }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;operation&#39;</span><span class="p">,</span> <span class="n">Operation</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;modification&#39;</span><span class="p">,</span> <span class="n">PartialAttribute</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="Changes"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.Changes">[文档]</a><span class="k">class</span> <span class="nc">Changes</span><span class="p">(</span><span class="n">SequenceOf</span><span class="p">):</span>
+    <span class="c1"># changes         SEQUENCE OF change SEQUENCE</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">Change</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DeleteOldRDN"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.DeleteOldRDN">[文档]</a><span class="k">class</span> <span class="nc">DeleteOldRDN</span><span class="p">(</span><span class="n">Boolean</span><span class="p">):</span>
+    <span class="c1"># deleteoldrdn    BOOLEAN</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NewSuperior"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.NewSuperior">[文档]</a><span class="k">class</span> <span class="nc">NewSuperior</span><span class="p">(</span><span class="n">LDAPDN</span><span class="p">):</span>
+    <span class="c1"># newSuperior     [0] LDAPDN</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPDN</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="RequestName"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.RequestName">[文档]</a><span class="k">class</span> <span class="nc">RequestName</span><span class="p">(</span><span class="n">LDAPOID</span><span class="p">):</span>
+    <span class="c1"># requestName      [0] LDAPOID</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPOID</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="RequestValue"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.RequestValue">[文档]</a><span class="k">class</span> <span class="nc">RequestValue</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># requestValue     [1] OCTET STRING</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">OctetString</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="ResponseName"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ResponseName">[文档]</a><span class="k">class</span> <span class="nc">ResponseName</span><span class="p">(</span><span class="n">LDAPOID</span><span class="p">):</span>
+    <span class="c1"># responseName      [10] LDAPOID</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPOID</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ResponseValue"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ResponseValue">[文档]</a><span class="k">class</span> <span class="nc">ResponseValue</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># responseValue     [11] OCTET STRING</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">OctetString</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">11</span><span class="p">))</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<div class="viewcode-block" id="IntermediateResponseName"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.IntermediateResponseName">[文档]</a><span class="k">class</span> <span class="nc">IntermediateResponseName</span><span class="p">(</span><span class="n">LDAPOID</span><span class="p">):</span>
+    <span class="c1"># responseName      [0] LDAPOID</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPOID</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="IntermediateResponseValue"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.IntermediateResponseValue">[文档]</a><span class="k">class</span> <span class="nc">IntermediateResponseValue</span><span class="p">(</span><span class="n">OctetString</span><span class="p">):</span>
+    <span class="c1"># responseValue     [1] OCTET STRING</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">OctetString</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassContext</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="s1">&#39;utf-8&#39;</span></div>
+
+
+<span class="c1"># operations</span>
+<div class="viewcode-block" id="BindRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.BindRequest">[文档]</a><span class="k">class</span> <span class="nc">BindRequest</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># BindRequest ::= [APPLICATION 0] SEQUENCE {</span>
+    <span class="c1">#     version                 INTEGER (1 ..  127),</span>
+    <span class="c1">#     name                    LDAPDN,</span>
+    <span class="c1">#     authentication          AuthenticationChoice }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">Version</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="n">AuthenticationChoice</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="BindResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.BindResponse">[文档]</a><span class="k">class</span> <span class="nc">BindResponse</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># BindResponse ::= [APPLICATION 1] SEQUENCE {</span>
+    <span class="c1">#     COMPONENTS OF LDAPResult,</span>
+    <span class="c1">#     serverSaslCreds    [7] OCTET STRING OPTIONAL }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;resultCode&#39;</span><span class="p">,</span> <span class="n">ResultCode</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;matchedDN&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;diagnosticMessage&#39;</span><span class="p">,</span> <span class="n">LDAPString</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;referral&#39;</span><span class="p">,</span> <span class="n">Referral</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;serverSaslCreds&#39;</span><span class="p">,</span> <span class="n">ServerSaslCreds</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="UnbindRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.UnbindRequest">[文档]</a><span class="k">class</span> <span class="nc">UnbindRequest</span><span class="p">(</span><span class="n">Null</span><span class="p">):</span>
+    <span class="c1"># UnbindRequest ::= [APPLICATION 2] NULL</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Null</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="SearchRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SearchRequest">[文档]</a><span class="k">class</span> <span class="nc">SearchRequest</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># SearchRequest ::= [APPLICATION 3] SEQUENCE {</span>
+    <span class="c1">#     baseObject      LDAPDN,</span>
+    <span class="c1">#     scope           ENUMERATED {</span>
+    <span class="c1">#         baseObject              (0),</span>
+    <span class="c1">#         singleLevel             (1),</span>
+    <span class="c1">#         wholeSubtree            (2),</span>
+    <span class="c1">#     ...  },</span>
+    <span class="c1">#     derefAliases    ENUMERATED {</span>
+    <span class="c1">#         neverDerefAliases       (0),</span>
+    <span class="c1">#         derefInSearching        (1),</span>
+    <span class="c1">#         derefFindingBaseObj     (2),</span>
+    <span class="c1">#         derefAlways             (3) },</span>
+    <span class="c1">#     sizeLimit       INTEGER (0 ..  maxInt),</span>
+    <span class="c1">#     timeLimit       INTEGER (0 ..  maxInt),</span>
+    <span class="c1">#     typesOnly       BOOLEAN,</span>
+    <span class="c1">#     filter          Filter,</span>
+    <span class="c1">#     attributes      AttributeSelection }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;baseObject&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;scope&#39;</span><span class="p">,</span> <span class="n">Scope</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;derefAliases&#39;</span><span class="p">,</span> <span class="n">DerefAliases</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;sizeLimit&#39;</span><span class="p">,</span> <span class="n">Integer0ToMax</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;timeLimit&#39;</span><span class="p">,</span> <span class="n">Integer0ToMax</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;typesOnly&#39;</span><span class="p">,</span> <span class="n">TypesOnly</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;filter&#39;</span><span class="p">,</span> <span class="n">Filter</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;attributes&#39;</span><span class="p">,</span> <span class="n">AttributeSelection</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="SearchResultReference"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SearchResultReference">[文档]</a><span class="k">class</span> <span class="nc">SearchResultReference</span><span class="p">(</span><span class="n">SequenceOf</span><span class="p">):</span>
+    <span class="c1"># SearchResultReference ::= [APPLICATION 19] SEQUENCE</span>
+    <span class="c1">#     SIZE (1..MAX) OF uri URI</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">SequenceOf</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">19</span><span class="p">))</span>
+    <span class="n">subtypeSpec</span> <span class="o">=</span> <span class="n">SequenceOf</span><span class="o">.</span><span class="n">subtypeSpec</span> <span class="o">+</span> <span class="n">size1ToMaxConstraint</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">URI</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SearchResultEntry"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SearchResultEntry">[文档]</a><span class="k">class</span> <span class="nc">SearchResultEntry</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># SearchResultEntry ::= [APPLICATION 4] SEQUENCE {</span>
+    <span class="c1">#     objectName      LDAPDN,</span>
+    <span class="c1">#     attributes      PartialAttributeList }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;attributes&#39;</span><span class="p">,</span> <span class="n">PartialAttributeList</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="SearchResultDone"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.SearchResultDone">[文档]</a><span class="k">class</span> <span class="nc">SearchResultDone</span><span class="p">(</span><span class="n">LDAPResult</span><span class="p">):</span>
+    <span class="c1"># SearchResultDone ::= [APPLICATION 5] LDAPResult</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPResult</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ModifyRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ModifyRequest">[文档]</a><span class="k">class</span> <span class="nc">ModifyRequest</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># ModifyRequest ::= [APPLICATION 6] SEQUENCE {</span>
+    <span class="c1">#     object          LDAPDN,</span>
+    <span class="c1">#     changes         SEQUENCE OF change SEQUENCE {</span>
+    <span class="c1">#         operation       ENUMERATED {</span>
+    <span class="c1">#             add     (0),</span>
+    <span class="c1">#             delete  (1),</span>
+    <span class="c1">#             replace (2),</span>
+    <span class="c1">#             ...  },</span>
+    <span class="c1">#         modification    PartialAttribute } }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;changes&#39;</span><span class="p">,</span> <span class="n">Changes</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="ModifyResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ModifyResponse">[文档]</a><span class="k">class</span> <span class="nc">ModifyResponse</span><span class="p">(</span><span class="n">LDAPResult</span><span class="p">):</span>
+    <span class="c1"># ModifyResponse ::= [APPLICATION 7] LDAPResult</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPResult</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="AddRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AddRequest">[文档]</a><span class="k">class</span> <span class="nc">AddRequest</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># AddRequest ::= [APPLICATION 8] SEQUENCE {</span>
+    <span class="c1">#     entry           LDAPDN,</span>
+    <span class="c1">#     attributes      AttributeList }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;entry&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;attributes&#39;</span><span class="p">,</span> <span class="n">AttributeList</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="AddResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AddResponse">[文档]</a><span class="k">class</span> <span class="nc">AddResponse</span><span class="p">(</span><span class="n">LDAPResult</span><span class="p">):</span>
+    <span class="c1"># AddResponse ::= [APPLICATION 9] LDAPResult</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPResult</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DelRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.DelRequest">[文档]</a><span class="k">class</span> <span class="nc">DelRequest</span><span class="p">(</span><span class="n">LDAPDN</span><span class="p">):</span>
+    <span class="c1"># DelRequest ::= [APPLICATION 10] LDAPDN</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPDN</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DelResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.DelResponse">[文档]</a><span class="k">class</span> <span class="nc">DelResponse</span><span class="p">(</span><span class="n">LDAPResult</span><span class="p">):</span>
+    <span class="c1"># DelResponse ::= [APPLICATION 11] LDAPResult</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPResult</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">11</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ModifyDNRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ModifyDNRequest">[文档]</a><span class="k">class</span> <span class="nc">ModifyDNRequest</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># ModifyDNRequest ::= [APPLICATION 12] SEQUENCE {</span>
+    <span class="c1">#     entry           LDAPDN,</span>
+    <span class="c1">#     newrdn          RelativeLDAPDN,</span>
+    <span class="c1">#     deleteoldrdn    BOOLEAN,</span>
+    <span class="c1">#     newSuperior     [0] LDAPDN OPTIONAL }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;entry&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;newrdn&#39;</span><span class="p">,</span> <span class="n">RelativeLDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;deleteoldrdn&#39;</span><span class="p">,</span> <span class="n">DeleteOldRDN</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;newSuperior&#39;</span><span class="p">,</span> <span class="n">NewSuperior</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="ModifyDNResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ModifyDNResponse">[文档]</a><span class="k">class</span> <span class="nc">ModifyDNResponse</span><span class="p">(</span><span class="n">LDAPResult</span><span class="p">):</span>
+    <span class="c1"># ModifyDNResponse ::= [APPLICATION 13] LDAPResult</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPResult</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="CompareRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.CompareRequest">[文档]</a><span class="k">class</span> <span class="nc">CompareRequest</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># CompareRequest ::= [APPLICATION 14] SEQUENCE {</span>
+    <span class="c1">#     entry           LDAPDN,</span>
+    <span class="c1">#     ava             AttributeValueAssertion }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">14</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;entry&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;ava&#39;</span><span class="p">,</span> <span class="n">AttributeValueAssertion</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="CompareResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.CompareResponse">[文档]</a><span class="k">class</span> <span class="nc">CompareResponse</span><span class="p">(</span><span class="n">LDAPResult</span><span class="p">):</span>
+    <span class="c1"># CompareResponse ::= [APPLICATION 15] LDAPResult</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">LDAPResult</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="AbandonRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.AbandonRequest">[文档]</a><span class="k">class</span> <span class="nc">AbandonRequest</span><span class="p">(</span><span class="n">MessageID</span><span class="p">):</span>
+    <span class="c1"># AbandonRequest ::= [APPLICATION 16] MessageID</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">MessageID</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatSimple</span><span class="p">,</span> <span class="mi">16</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ExtendedRequest"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ExtendedRequest">[文档]</a><span class="k">class</span> <span class="nc">ExtendedRequest</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># ExtendedRequest ::= [APPLICATION 23] SEQUENCE {</span>
+    <span class="c1">#     requestName      [0] LDAPOID,</span>
+    <span class="c1">#     requestValue     [1] OCTET STRING OPTIONAL }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">23</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;requestName&#39;</span><span class="p">,</span> <span class="n">RequestName</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;requestValue&#39;</span><span class="p">,</span> <span class="n">RequestValue</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="ExtendedResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ExtendedResponse">[文档]</a><span class="k">class</span> <span class="nc">ExtendedResponse</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># ExtendedResponse ::= [APPLICATION 24] SEQUENCE {</span>
+    <span class="c1">#     COMPONENTS OF LDAPResult,</span>
+    <span class="c1">#     responseName     [10] LDAPOID OPTIONAL,</span>
+    <span class="c1">#     responseValue    [11] OCTET STRING OPTIONAL }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">24</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;resultCode&#39;</span><span class="p">,</span> <span class="n">ResultCode</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;matchedDN&#39;</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;diagnosticMessage&#39;</span><span class="p">,</span> <span class="n">LDAPString</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;referral&#39;</span><span class="p">,</span> <span class="n">Referral</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;responseName&#39;</span><span class="p">,</span> <span class="n">ResponseName</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;responseValue&#39;</span><span class="p">,</span> <span class="n">ResponseValue</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="IntermediateResponse"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.IntermediateResponse">[文档]</a><span class="k">class</span> <span class="nc">IntermediateResponse</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># IntermediateResponse ::= [APPLICATION 25] SEQUENCE {</span>
+    <span class="c1">#     responseName     [0] LDAPOID OPTIONAL,</span>
+    <span class="c1">#     responseValue    [1] OCTET STRING OPTIONAL }</span>
+    <span class="n">tagSet</span> <span class="o">=</span> <span class="n">Sequence</span><span class="o">.</span><span class="n">tagSet</span><span class="o">.</span><span class="n">tagImplicitly</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="n">tagClassApplication</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="mi">25</span><span class="p">))</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;responseName&#39;</span><span class="p">,</span> <span class="n">IntermediateResponseName</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;responseValue&#39;</span><span class="p">,</span> <span class="n">IntermediateResponseValue</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="ProtocolOp"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.ProtocolOp">[文档]</a><span class="k">class</span> <span class="nc">ProtocolOp</span><span class="p">(</span><span class="n">Choice</span><span class="p">):</span>
+    <span class="c1"># protocolOp      CHOICE {</span>
+    <span class="c1">#     bindRequest           BindRequest,</span>
+    <span class="c1">#     bindResponse          BindResponse,</span>
+    <span class="c1">#     unbindRequest         UnbindRequest,</span>
+    <span class="c1">#     searchRequest         SearchRequest,</span>
+    <span class="c1">#     searchResEntry        SearchResultEntry,</span>
+    <span class="c1">#     searchResDone         SearchResultDone,</span>
+    <span class="c1">#     searchResRef          SearchResultReference,</span>
+    <span class="c1">#     modifyRequest         ModifyRequest,</span>
+    <span class="c1">#     modifyResponse        ModifyResponse,</span>
+    <span class="c1">#     addRequest            AddRequest,</span>
+    <span class="c1">#     addResponse           AddResponse,</span>
+    <span class="c1">#     delRequest            DelRequest,</span>
+    <span class="c1">#     delResponse           DelResponse,</span>
+    <span class="c1">#     modDNRequest          ModifyDNRequest,</span>
+    <span class="c1">#     modDNResponse         ModifyDNResponse,</span>
+    <span class="c1">#     compareRequest        CompareRequest,</span>
+    <span class="c1">#     compareResponse       CompareResponse,</span>
+    <span class="c1">#     abandonRequest        AbandonRequest,</span>
+    <span class="c1">#     extendedReq           ExtendedRequest,</span>
+    <span class="c1">#     extendedResp          ExtendedResponse,</span>
+    <span class="c1">#     ...,</span>
+    <span class="c1">#     intermediateResponse  IntermediateResponse }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;bindRequest&#39;</span><span class="p">,</span> <span class="n">BindRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;bindResponse&#39;</span><span class="p">,</span> <span class="n">BindResponse</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;unbindRequest&#39;</span><span class="p">,</span> <span class="n">UnbindRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;searchRequest&#39;</span><span class="p">,</span> <span class="n">SearchRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;searchResEntry&#39;</span><span class="p">,</span> <span class="n">SearchResultEntry</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;searchResDone&#39;</span><span class="p">,</span> <span class="n">SearchResultDone</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;searchResRef&#39;</span><span class="p">,</span> <span class="n">SearchResultReference</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;modifyRequest&#39;</span><span class="p">,</span> <span class="n">ModifyRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;modifyResponse&#39;</span><span class="p">,</span> <span class="n">ModifyResponse</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;addRequest&#39;</span><span class="p">,</span> <span class="n">AddRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;addResponse&#39;</span><span class="p">,</span> <span class="n">AddResponse</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;delRequest&#39;</span><span class="p">,</span> <span class="n">DelRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;delResponse&#39;</span><span class="p">,</span> <span class="n">DelResponse</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;modDNRequest&#39;</span><span class="p">,</span> <span class="n">ModifyDNRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;modDNResponse&#39;</span><span class="p">,</span> <span class="n">ModifyDNResponse</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;compareRequest&#39;</span><span class="p">,</span> <span class="n">CompareRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;compareResponse&#39;</span><span class="p">,</span> <span class="n">CompareResponse</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;abandonRequest&#39;</span><span class="p">,</span> <span class="n">AbandonRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;extendedReq&#39;</span><span class="p">,</span> <span class="n">ExtendedRequest</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;extendedResp&#39;</span><span class="p">,</span> <span class="n">ExtendedResponse</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;intermediateResponse&#39;</span><span class="p">,</span> <span class="n">IntermediateResponse</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="LDAPMessage"><a class="viewcode-back" href="../../../ldap3.protocol.rfc4511.html#ldap3.protocol.rfc4511.LDAPMessage">[文档]</a><span class="k">class</span> <span class="nc">LDAPMessage</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="c1"># LDAPMessage ::= SEQUENCE {</span>
+    <span class="c1">#     messageID       MessageID,</span>
+    <span class="c1">#     protocolOp      CHOICE {</span>
+    <span class="c1">#         bindRequest           BindRequest,</span>
+    <span class="c1">#         bindResponse          BindResponse,</span>
+    <span class="c1">#         unbindRequest         UnbindRequest,</span>
+    <span class="c1">#         searchRequest         SearchRequest,</span>
+    <span class="c1">#         searchResEntry        SearchResultEntry,</span>
+    <span class="c1">#         searchResDone         SearchResultDone,</span>
+    <span class="c1">#         searchResRef          SearchResultReference,</span>
+    <span class="c1">#         modifyRequest         ModifyRequest,</span>
+    <span class="c1">#         modifyResponse        ModifyResponse,</span>
+    <span class="c1">#         addRequest            AddRequest,</span>
+    <span class="c1">#         addResponse           AddResponse,</span>
+    <span class="c1">#         delRequest            DelRequest,</span>
+    <span class="c1">#         delResponse           DelResponse,</span>
+    <span class="c1">#         modDNRequest          ModifyDNRequest,</span>
+    <span class="c1">#         modDNResponse         ModifyDNResponse,</span>
+    <span class="c1">#         compareRequest        CompareRequest,</span>
+    <span class="c1">#         compareResponse       CompareResponse,</span>
+    <span class="c1">#         abandonRequest        AbandonRequest,</span>
+    <span class="c1">#         extendedReq           ExtendedRequest,</span>
+    <span class="c1">#         extendedResp          ExtendedResponse,</span>
+    <span class="c1">#         ...,</span>
+    <span class="c1">#         intermediateResponse  IntermediateResponse },</span>
+    <span class="c1">#     controls       [0] Controls OPTIONAL }</span>
+    <span class="n">componentType</span> <span class="o">=</span> <span class="n">NamedTypes</span><span class="p">(</span><span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;messageID&#39;</span><span class="p">,</span> <span class="n">MessageID</span><span class="p">()),</span>
+                               <span class="n">NamedType</span><span class="p">(</span><span class="s1">&#39;protocolOp&#39;</span><span class="p">,</span> <span class="n">ProtocolOp</span><span class="p">()),</span>
+                               <span class="n">OptionalNamedType</span><span class="p">(</span><span class="s1">&#39;controls&#39;</span><span class="p">,</span> <span class="n">Controls</span><span class="p">()))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

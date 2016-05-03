@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Extended standard RFCs operations &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="Extend namespace" href="extend.html" />
+    <link rel="next" title="Extended Novell operations" href="novell.html" />
+    <link rel="prev" title="Extend namespace" href="extend.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="extended-standard-rfcs-operations">
+<h1>Extended standard RFCs operations<a class="headerlink" href="#extended-standard-rfcs-operations" title="永久链接至标题">¶</a></h1>
+<p>The extend.standard namespace contains extended operation defined in current RFCs:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span>
+    <span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
+    <span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">modify_password</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">old_password</span><span class="p">,</span> <span class="n">new_password</span><span class="p">,</span> <span class="n">hash_algorithm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">salt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">paged_search</span><span class="p">(</span><span class="n">search_base</span><span class="p">,</span> <span class="n">search_filter</span><span class="p">,</span> <span class="n">search_scope</span><span class="p">,</span> <span class="n">dereference_aliases</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">size_limit</span><span class="p">,</span> <span class="n">time_limit</span><span class="p">,</span> <span class="n">types_only</span><span class="p">,</span> <span class="n">get_operational_attributes</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">paged_size</span><span class="p">,</span> <span class="n">paged_criticality</span><span class="p">,</span> <span class="n">generator</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To get the identity of the bound user:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="o">....</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="n">i_am</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>if who_am_i() returns an empty string an anonymous connection is bound.</p>
+<p>To modify a user password:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">HASHED_SALTED_SHA256</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>  <span class="c1"># bind as someone that has permission to change user&#39;s password</span>
+<span class="n">new_password</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">modify_password</span><span class="p">(</span><span class="s1">&#39;cn=test1,o=test&#39;</span><span class="p">,</span> <span class="s1">&#39;old_password&#39;</span><span class="p">,</span> <span class="s1">&#39;new_password&#39;</span><span class="p">,</span> <span class="n">HASHED_SALTED_SHA256</span><span class="p">)</span>  <span class="c1"># a new password is set, hashed with sha256 and a random salt</span>
+</pre></div>
+</div>
+<p>A special case with modify_password is for LDAP servers that follow RFC3062. If you send the old password and do not specify
+a new password, the server should generate a new password compliant with the server password policy:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>  <span class="c1"># bind as someone that has permission to change user&#39;s password</span>
+<span class="n">new_password</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">modify_password</span><span class="p">(</span><span class="s1">&#39;cn=test1,o=test&#39;</span><span class="p">,</span> <span class="s1">&#39;old_password&#39;</span><span class="p">)</span>  <span class="c1"># a new password is generated by the server if compliant with RFC3062</span>
+</pre></div>
+</div>
+<p>The extend.standard.paged_search() operation is a convenient wrapper for the simple paged search as specified in the
+RFC2696. You can indicate how many entries will be read in the paged_size parameter (defaults to 100) and you get back
+a <em>generator</em> for the entries.
+If you set to False the generator parameter of the search will be fully executed before returning the results.
+If generator is set to True (the default) any subsequent search will be executed only when you read all the previous
+read entries, saving memory.</p>
+<p>In the modify_password() extended operation you can specify an hashing algorithm, if your LDAP server use hashed password but don&#8217;t compute the hash by itself. Otherwise you can send the password and the server will hash it.</p>
+<p>Algorithms names are defined in the ldap3 module. You can choose between:</p>
+<ul class="simple">
+<li>HASHED_NONE (no hashing is performed, password is sent in plain text)</li>
+<li>HASHED_MD5</li>
+<li>HASHED_SHA</li>
+<li>HASHED_SHA256</li>
+<li>HASHED_SHA384</li>
+<li>HASHED_SHA512</li>
+<li>HASHED_SALTED_MD5</li>
+<li>HASHED_SALTED_SHA</li>
+<li>HASHED_SALTED_SHA256</li>
+<li>HASHED_SALTED_SHA384</li>
+<li>HASHED_SALTED_SHA512</li>
+</ul>
+<p>If you don&#8217;t specify a <em>salt</em> parameter a random salt will be generated by the ldap3 library. Keep in mind that only
+salted password can provide a strong level of security against dictionary attacks.</p>
+<p>To directly modify the userPassword attribute via a modify operation you probably have to send the hashed password.
+In this case you can use the hashed() function in the ldap3.utils.hashed package:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">HASHED_SALTED_SHA</span>
+<span class="kn">from</span> <span class="nn">ldap3.utils.hashed</span> <span class="k">import</span> <span class="n">hashed</span>
+
+<span class="n">hashed_password</span> <span class="o">=</span> <span class="n">hashed</span><span class="p">(</span><span class="n">HASHED_SALTED_SHA</span><span class="p">,</span> <span class="s1">&#39;new_password&#39;</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="s1">&#39;cn=user1,o=test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;userPassword&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="n">MODIFY_REPLACE</span><span class="p">,[</span><span class="n">hashed_password</span><span class="p">])]})</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="extend.html">Extend namespace</a><ul>
+      <li>Previous: <a href="extend.html" title="上一章">Extend namespace</a></li>
+      <li>Next: <a href="novell.html" title="下一章">Extended Novell operations</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/standard.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/standard.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

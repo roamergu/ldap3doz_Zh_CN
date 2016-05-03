@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.operation.modifyDn &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.operation.modifyDn 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2013.05.31</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">..protocol.rfc4511</span> <span class="kn">import</span> <span class="n">ModifyDNRequest</span><span class="p">,</span> <span class="n">LDAPDN</span><span class="p">,</span> <span class="n">RelativeLDAPDN</span><span class="p">,</span> <span class="n">DeleteOldRDN</span><span class="p">,</span> <span class="n">NewSuperior</span><span class="p">,</span> <span class="n">ResultCode</span>
+<span class="kn">from</span> <span class="nn">..operation.bind</span> <span class="kn">import</span> <span class="n">referrals_to_list</span>
+
+<span class="c1"># ModifyDNRequest ::= [APPLICATION 12] SEQUENCE {</span>
+<span class="c1">#     entry           LDAPDN,</span>
+<span class="c1">#     newrdn          RelativeLDAPDN,</span>
+<span class="c1">#     deleteoldrdn    BOOLEAN,</span>
+<span class="c1">#     newSuperior     [0] LDAPDN OPTIONAL }</span>
+
+
+<div class="viewcode-block" id="modify_dn_operation"><a class="viewcode-back" href="../../../ldap3.operation.modifyDn.html#ldap3.operation.modifyDn.modify_dn_operation">[文档]</a><span class="k">def</span> <span class="nf">modify_dn_operation</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span>
+                        <span class="n">new_relative_dn</span><span class="p">,</span>
+                        <span class="n">delete_old_rdn</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                        <span class="n">new_superior</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">ModifyDNRequest</span><span class="p">()</span>
+    <span class="n">request</span><span class="p">[</span><span class="s1">&#39;entry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LDAPDN</span><span class="p">(</span><span class="n">dn</span><span class="p">)</span>
+    <span class="n">request</span><span class="p">[</span><span class="s1">&#39;newrdn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RelativeLDAPDN</span><span class="p">(</span><span class="n">new_relative_dn</span><span class="p">)</span>
+    <span class="n">request</span><span class="p">[</span><span class="s1">&#39;deleteoldrdn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DeleteOldRDN</span><span class="p">(</span><span class="n">delete_old_rdn</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">new_superior</span><span class="p">:</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;newSuperior&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NewSuperior</span><span class="p">(</span><span class="n">new_superior</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">request</span></div>
+
+
+<div class="viewcode-block" id="modify_dn_request_to_dict"><a class="viewcode-back" href="../../../ldap3.operation.modifyDn.html#ldap3.operation.modifyDn.modify_dn_request_to_dict">[文档]</a><span class="k">def</span> <span class="nf">modify_dn_request_to_dict</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;entry&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s1">&#39;entry&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;newRdn&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s1">&#39;newrdn&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;deleteOldRdn&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s1">&#39;deleteoldrdn&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;newSuperior&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s1">&#39;newSuperior&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">request</span><span class="p">[</span><span class="s1">&#39;newSuperior&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="bp">None</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="modify_dn_response_to_dict"><a class="viewcode-back" href="../../../ldap3.operation.modifyDn.html#ldap3.operation.modifyDn.modify_dn_response_to_dict">[文档]</a><span class="k">def</span> <span class="nf">modify_dn_response_to_dict</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">ResultCode</span><span class="p">()</span><span class="o">.</span><span class="n">getNamedValues</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="s1">&#39;dn&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;matchedDN&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;referrals&#39;</span><span class="p">:</span> <span class="n">referrals_to_list</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;referral&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;diagnosticMessage&#39;</span><span class="p">])}</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Exceptions &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="LDAP3 Utils" href="utils.html" />
+    <link rel="prev" title="LDIF (LDAP Data Interchange Format)" href="ldif.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="exceptions">
+<h1>Exceptions<a class="headerlink" href="#exceptions" title="永久链接至标题">¶</a></h1>
+<p>The ldap3 exceptions hierarchy includes a LDAPException root class with two main
+branches: LDAPExceptionError and LDAPExceptionResult. The
+LDAPExceptionError contains 42 different exceptions that should help
+understanding what&#8217;s going wrong when you have an error. A few of these
+(including all the LDAPCommunicationError exceptions) have multiple
+inheritance either from the LDAPExceptionError and from specific
+Python exceptions. This let you choose between catching standard Python
+errors or the more detailed ldap3 errors. The
+LDAPCommunicationError exceptions will be created at runtime and
+inherit the specific socket exception raised by the interpreter, so
+you can catch them with the specific socket.error or the more general
+LDAPCommunicationError.</p>
+<p>LDAPOperationResult (the other branch of LDAPException hierarchy)
+includes 48 exceptions, one for each possible error result (except
+RESULT_SUCCESS) specified in the LDAPv3 protocol. When you create a
+connection object with the &#8220;raise_exceptions&#8221; parameter set to True
+any unsuccesful LDAP operation will throw an exception of this class, subclassed
+to the specific LDAP result code exception. For example if you get an
+INVALID_DN_SYNTAX (result code 34) the connection will raise the
+LDAPInvalidDNSyntaxResult exception, with the following parameter:
+result, description, dn, message and the response_type.
+You can specify which result codes you don&#8217;t want to raise
+exceptions, the default is : RESULT_COMPARE_FALSE, RESULT_COMPARE_TRUE,
+RESULT_REFERRAL (and of course RESULT_SUCCESS). You can change this
+behaviour in the ldap3 __init__.py package or at runtime modifying the
+ldap3.DO_NOT_RAISE_EXCEPTIONS list.</p>
+<p>The &#8220;raise_exceptions&#8221; mode is helpful if you want exceptions to flow
+up in the code and manage them at a upper level than the single
+operation level. This mode works in every kind of strategy, even in
+the ReusableStrategy (for connection pooling) where exceptions are
+trapped in the &#8220;effective&#8221; connection thread and are sent back to the
+calling connection object in the main (or another) thread.</p>
+<p>LDAPException</p>
+<p>&#8211;LDAPExceptionError</p>
+<p>&#8212;-LDAPAttributeError (inherits also from AttributeError)</p>
+<p>&#8212;-LDAPBindError</p>
+<p>&#8212;-LDAPCertificateError</p>
+<p>&#8212;-LDAPChangesError (inherits also from ValueError)</p>
+<p>&#8212;-LDAPCommunicationError (all may inherit from socket.error)</p>
+<p>&#8212;&#8212;LDAPReferralError</p>
+<p>&#8212;&#8212;LDAPSessionTerminatedByServer</p>
+<p>&#8212;&#8212;LDAPSocketCloseError</p>
+<p>&#8212;&#8212;LDAPSocketOpenError</p>
+<p>&#8212;&#8212;LDAPSocketReceiveError</p>
+<p>&#8212;&#8212;LDAPSocketSendError</p>
+<p>&#8212;&#8212;LDAPUnknownRequestError</p>
+<p>&#8212;&#8212;LDAPUnknownResponseError</p>
+<p>&#8212;-LDAPConfigurationError</p>
+<p>&#8212;&#8212;LDAPUnknownStrategyError</p>
+<p>&#8212;&#8212;LDAPUnknownAuthenticationMethodError</p>
+<p>&#8212;&#8212;LDAPSSLConfigurationError</p>
+<p>&#8212;&#8212;LDAPDefinitionError</p>
+<p>&#8212;-LDAPConnectionIsReadOnlyError</p>
+<p>&#8212;-LDAPConnectionPoolNameIsMandatoryError</p>
+<p>&#8212;-LDAPConnectionPoolNotStartedError</p>
+<p>&#8212;-LDAPControlsError (inherits also from ValueError)</p>
+<p>&#8212;-LDAPEntryError</p>
+<p>&#8212;-LDAPExtensionError</p>
+<p>&#8212;-LDAPInvalidDereferenceAliasesError (inherits also from ValueError)</p>
+<p>&#8212;-LDAPInvalidFilterError</p>
+<p>&#8212;-LDAPInvalidPort</p>
+<p>&#8212;-LDAPInvalidScopeError (inherits also from ValueError)</p>
+<p>&#8212;-LDAPInvalidServerError</p>
+<p>&#8212;-LDAPKeyError (inherits also from KeyError)</p>
+<p>&#8212;-LDAPLDIFError</p>
+<p>&#8212;-LDAPMaximumRetriesError</p>
+<p>&#8212;-LDAPMetricsError</p>
+<p>&#8212;-LDAPObjectClassError (inherits also from ValueError)</p>
+<p>&#8212;-LDAPObjectError</p>
+<p>&#8212;-LDAPPasswordIsMandatoryError</p>
+<p>&#8212;-LDAPReaderError</p>
+<p>&#8212;-LDAPMaximumRetriesError</p>
+<p>&#8212;-LDAPSASLBindInProgressError</p>
+<p>&#8212;-LDAPSASLMechanismNotSupportedError</p>
+<p>&#8212;-LDAPSASLPrepError</p>
+<p>&#8212;-LDAPSchemaError</p>
+<p>&#8212;-LDAPServerPoolError</p>
+<p>&#8212;-LDAPServerPoolExhaustedError</p>
+<p>&#8212;-LDAPSSLNotSupportedError (inherits also from ImportError)</p>
+<p>&#8212;-LDAPStartTLSError</p>
+<p>&#8212;-LDAPTypeError</p>
+<p>&#8211;LDAPOperationResult</p>
+<p>&#8212;-LDAPAdminLimitExceededResult</p>
+<p>&#8212;-LDAPAffectMultipleDSASResult</p>
+<p>&#8212;-LDAPAliasDereferencingProblemResult</p>
+<p>&#8212;-LDAPAliasProblemResult</p>
+<p>&#8212;-LDAPAssertionFailedResult</p>
+<p>&#8212;-LDAPAttributeOrValueExistsResult</p>
+<p>&#8212;-LDAPAuthMethodNotSupportedResult</p>
+<p>&#8212;-LDAPAuthorizationDeniedResult</p>
+<p>&#8212;-LDAPBusyResult</p>
+<p>&#8212;-LDAPCanceledResult</p>
+<p>&#8212;-LDAPCannotCancelResult</p>
+<p>&#8212;-LDAPConfidentialityRequiredResult</p>
+<p>&#8212;-LDAPConstraintViolationResult</p>
+<p>&#8212;-LDAPEntryAlreadyExistsResult</p>
+<p>&#8212;-LDAPESyncRefreshRequiredResult</p>
+<p>&#8212;-LDAPInappropriateAuthenticationResult</p>
+<p>&#8212;-LDAPInappropriateMatchingResult</p>
+<p>&#8212;-LDAPInsufficientAccessRightsResult</p>
+<p>&#8212;-LDAPInvalidAttributeSyntaxResult</p>
+<p>&#8212;-LDAPInvalidCredentialsResult</p>
+<p>&#8212;-LDAPInvalidDNSyntaxResult</p>
+<p>&#8212;-LDAPLCUPInvalidDataResult</p>
+<p>&#8212;-LDAPLCUPReloadRequiredResult</p>
+<p>&#8212;-LDAPLCUPResourcesExhaustedResult</p>
+<p>&#8212;-LDAPLCUPSecurityViolationResult</p>
+<p>&#8212;-LDAPLCUPUnsupportedSchemeResult</p>
+<p>&#8212;-LDAPLoopDetectedResult</p>
+<p>&#8212;-LDAPNamingViolationResult</p>
+<p>&#8212;-LDAPNoSuchAttributeResult</p>
+<p>&#8212;-LDAPNoSuchObjectResult</p>
+<p>&#8212;-LDAPNoSuchOperationResult</p>
+<p>&#8212;-LDAPNotAllowedOnNotLeafResult</p>
+<p>&#8212;-LDAPNotAllowedOnRDNResult</p>
+<p>&#8212;-LDAPObjectClassModsProhibitedResult</p>
+<p>&#8212;-LDAPObjectClassViolationResult</p>
+<p>&#8212;-LDAPOperationsErrorResult</p>
+<p>&#8212;-LDAPOtherResult</p>
+<p>&#8212;-LDAPProtocolErrorResult</p>
+<p>&#8212;-LDAPReferralResult</p>
+<p>&#8212;-LDAPSASLBindInProgressResult</p>
+<p>&#8212;-LDAPSizeLimitExceededResult</p>
+<p>&#8212;-LDAPStrongerAuthRequiredResult</p>
+<p>&#8212;-LDAPTimeLimitExceededResult</p>
+<p>&#8212;-LDAPTooLateResult</p>
+<p>&#8212;-LDAPUnavailableCriticalExtensionResult</p>
+<p>&#8212;-LDAPUnavailableResult</p>
+<p>&#8212;-LDAPUndefinedAttributeTypeResult</p>
+<p>&#8212;-LDAPUnwillingToPerformResult</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ldif.html" title="上一章">LDIF (LDAP Data Interchange Format)</a></li>
+      <li>Next: <a href="utils.html" title="下一章">LDAP3 Utils</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/exceptions.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/exceptions.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.strategy.sync module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.strategy package" href="ldap3.strategy.html" />
+    <link rel="next" title="ldap3.utils package" href="ldap3.utils.html" />
+    <link rel="prev" title="ldap3.strategy.reusable module" href="ldap3.strategy.reusable.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.strategy.sync">
+<span id="ldap3-strategy-sync-module"></span><h1>ldap3.strategy.sync module<a class="headerlink" href="#module-ldap3.strategy.sync" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.strategy.sync.SyncStrategy">
+<em class="property">class </em><code class="descclassname">ldap3.strategy.sync.</code><code class="descname">SyncStrategy</code><span class="sig-paren">(</span><em>ldap_connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/sync.html#SyncStrategy"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.sync.SyncStrategy" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="ldap3.strategy.base.html#ldap3.strategy.base.BaseStrategy" title="ldap3.strategy.base.BaseStrategy"><code class="xref py py-class docutils literal"><span class="pre">ldap3.strategy.base.BaseStrategy</span></code></a></p>
+<p>This strategy is synchronous. You send the request and get the response
+Requests return a boolean value to indicate the result of the requested Operation
+Connection.response will contain the whole LDAP response for the messageId requested in a dict form
+Connection.request will contain the result LDAP message in a dict form</p>
+<dl class="method">
+<dt id="ldap3.strategy.sync.SyncStrategy.get_stream">
+<code class="descname">get_stream</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/sync.html#SyncStrategy.get_stream"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.sync.SyncStrategy.get_stream" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.sync.SyncStrategy.open">
+<code class="descname">open</code><span class="sig-paren">(</span><em>reset_usage=True</em>, <em>read_server_info=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/sync.html#SyncStrategy.open"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.sync.SyncStrategy.open" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.sync.SyncStrategy.post_send_search">
+<code class="descname">post_send_search</code><span class="sig-paren">(</span><em>message_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/sync.html#SyncStrategy.post_send_search"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.sync.SyncStrategy.post_send_search" title="永久链接至目标">¶</a></dt>
+<dd><p>Executed after a search request
+Returns the result message and store in connection.response the objects found</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.sync.SyncStrategy.post_send_single_response">
+<code class="descname">post_send_single_response</code><span class="sig-paren">(</span><em>message_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/sync.html#SyncStrategy.post_send_single_response"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.sync.SyncStrategy.post_send_single_response" title="永久链接至目标">¶</a></dt>
+<dd><p>Executed after an Operation Request (except Search)
+Returns the result message or None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.sync.SyncStrategy.receiving">
+<code class="descname">receiving</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/sync.html#SyncStrategy.receiving"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.sync.SyncStrategy.receiving" title="永久链接至目标">¶</a></dt>
+<dd><p>Receive data over the socket
+Checks if the socket is closed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.sync.SyncStrategy.set_stream">
+<code class="descname">set_stream</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/sync.html#SyncStrategy.set_stream"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.sync.SyncStrategy.set_stream" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.strategy.html">ldap3.strategy package</a><ul>
+      <li>Previous: <a href="ldap3.strategy.reusable.html" title="上一章">ldap3.strategy.reusable module</a></li>
+      <li>Next: <a href="ldap3.utils.html" title="下一章">ldap3.utils package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.strategy.sync.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.strategy.sync.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

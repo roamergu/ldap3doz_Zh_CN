@@ -1,0 +1,1254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.rfc4511 module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.protocol package" href="ldap3.protocol.html" />
+    <link rel="next" title="ldap3.protocol.rfc4512 module" href="ldap3.protocol.rfc4512.html" />
+    <link rel="prev" title="ldap3.protocol.rfc3062 module" href="ldap3.protocol.rfc3062.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.protocol.rfc4511">
+<span id="ldap3-protocol-rfc4511-module"></span><h1>ldap3.protocol.rfc4511 module<a class="headerlink" href="#module-ldap3.protocol.rfc4511" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AbandonRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AbandonRequest</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AbandonRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AbandonRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.MessageID" title="ldap3.protocol.rfc4511.MessageID"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.MessageID</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AbandonRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=0, tagId=16))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AbandonRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AddRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AddRequest</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AddRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AddRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AddRequest.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('entry', LDAPDN()), NamedType('attributes', AttributeList()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AddRequest.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AddRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=8))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AddRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AddResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AddResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AddResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AddResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPResult" title="ldap3.protocol.rfc4511.LDAPResult"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPResult</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AddResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=9))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AddResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.And">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">And</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#And"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.And" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SetOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.And.componentType">
+<code class="descname">componentType</code><em class="property"> = Filter(componentType=NamedTypes(NamedType('and', And(componentType=None)), NamedType('or', Or(componentType=None)), NamedType('notFilter', Not(componentType=NamedTypes(), tagSet=TagSet((), ))), NamedType('equalityMatch', EqualityMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('substringFilter', SubstringFilter(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('substrings', Substrings())))), NamedType('greaterOrEqual', GreaterOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('lessOrEqual', LessOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('present', Present()), NamedType('approxMatch', ApproxMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('extensibleMatch', ExtensibleMatch(componentType=NamedTypes(OptionalNamedType('matchingRule', MatchingRule()), OptionalNamedType('type', Type()), NamedType('matchValue', MatchValue()), DefaultedNamedType('dnAttributes', DnAttributes('False')))))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.And.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.And.subtypeSpec">
+<code class="descname">subtypeSpec</code><em class="property"> = ConstraintsIntersection(ConstraintsIntersection(), ValueSizeConstraint(1, Integer(2147483647)))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.And.subtypeSpec" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.And.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.And.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Any">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Any</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Any"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Any" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AssertionValue" title="ldap3.protocol.rfc4511.AssertionValue"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AssertionValue</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Any.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=1))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Any.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ApproxMatch">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ApproxMatch</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ApproxMatch"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ApproxMatch" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AttributeValueAssertion" title="ldap3.protocol.rfc4511.AttributeValueAssertion"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AttributeValueAssertion</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ApproxMatch.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=8))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ApproxMatch.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AssertionValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AssertionValue</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AssertionValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AssertionValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AssertionValue.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AssertionValue.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Attribute">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Attribute</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Attribute"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Attribute" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Attribute.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('type', AttributeDescription()), NamedType('vals', Vals()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Attribute.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AttributeDescription">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AttributeDescription</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AttributeDescription"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeDescription" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPString" title="ldap3.protocol.rfc4511.LDAPString"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPString</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AttributeList">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AttributeList</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AttributeList"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeList" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SequenceOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AttributeList.componentType">
+<code class="descname">componentType</code><em class="property"> = Attribute(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('vals', Vals())))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeList.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AttributeSelection">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AttributeSelection</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AttributeSelection"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeSelection" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SequenceOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AttributeSelection.componentType">
+<code class="descname">componentType</code><em class="property"> = Selector()</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeSelection.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AttributeValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AttributeValue</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AttributeValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AttributeValue.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeValue.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AttributeValueAssertion">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AttributeValueAssertion</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AttributeValueAssertion"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeValueAssertion" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AttributeValueAssertion.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AttributeValueAssertion.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.AuthenticationChoice">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">AuthenticationChoice</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#AuthenticationChoice"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.AuthenticationChoice" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Choice</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.AuthenticationChoice.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('simple', Simple()), NamedType('sasl', SaslCredentials(componentType=NamedTypes(NamedType('mechanism', LDAPString()), OptionalNamedType('credentials', Credentials())))), NamedType('sicilyPackageDiscovery', SicilyPackageDiscovery()), NamedType('sicilyNegotiate', SicilyNegotiate()), NamedType('sicilyResponse', SicilyResponse()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.AuthenticationChoice.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.BindRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">BindRequest</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#BindRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.BindRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.BindRequest.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('version', Version()), NamedType('name', LDAPDN()), NamedType('authentication', AuthenticationChoice(componentType=NamedTypes(NamedType('simple', Simple()), NamedType('sasl', SaslCredentials(componentType=NamedTypes(NamedType('mechanism', LDAPString()), OptionalNamedType('credentials', Credentials())))), NamedType('sicilyPackageDiscovery', SicilyPackageDiscovery()), NamedType('sicilyNegotiate', SicilyNegotiate()), NamedType('sicilyResponse', SicilyResponse())))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.BindRequest.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.BindRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.BindRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.BindResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">BindResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#BindResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.BindResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.BindResponse.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral()), OptionalNamedType('serverSaslCreds', ServerSaslCreds()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.BindResponse.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.BindResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=1))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.BindResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Change">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Change</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Change"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Change" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Change.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('operation', Operation()), NamedType('modification', PartialAttribute(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('vals', Vals())))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Change.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Changes">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Changes</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Changes"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Changes" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SequenceOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Changes.componentType">
+<code class="descname">componentType</code><em class="property"> = Change(componentType=NamedTypes(NamedType('operation', Operation()), NamedType('modification', PartialAttribute(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('vals', Vals()))))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Changes.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.CompareRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">CompareRequest</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#CompareRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.CompareRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.CompareRequest.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('entry', LDAPDN()), NamedType('ava', AttributeValueAssertion(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.CompareRequest.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.CompareRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=14))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.CompareRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.CompareResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">CompareResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#CompareResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.CompareResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPResult" title="ldap3.protocol.rfc4511.LDAPResult"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPResult</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.CompareResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=15))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.CompareResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Control">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Control</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Control"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Control" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Control.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('controlType', LDAPOID()), DefaultedNamedType('criticality', Criticality('False')), OptionalNamedType('controlValue', ControlValue()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Control.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ControlValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ControlValue</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ControlValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ControlValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ControlValue.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ControlValue.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Controls">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Controls</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Controls"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Controls" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SequenceOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Controls.componentType">
+<code class="descname">componentType</code><em class="property"> = Control(componentType=NamedTypes(NamedType('controlType', LDAPOID()), DefaultedNamedType('criticality', Criticality('False')), OptionalNamedType('controlValue', ControlValue())))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Controls.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Controls.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Controls.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Credentials">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Credentials</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Credentials"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Credentials" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Credentials.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Credentials.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Criticality">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Criticality</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Criticality"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Criticality" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Boolean</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Criticality.defaultValue">
+<code class="descname">defaultValue</code><em class="property"> = False</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Criticality.defaultValue" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.DelRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">DelRequest</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#DelRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.DelRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPDN" title="ldap3.protocol.rfc4511.LDAPDN"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPDN</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.DelRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=0, tagId=10))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.DelRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.DelResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">DelResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#DelResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.DelResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPResult" title="ldap3.protocol.rfc4511.LDAPResult"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPResult</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.DelResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=11))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.DelResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.DeleteOldRDN">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">DeleteOldRDN</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#DeleteOldRDN"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.DeleteOldRDN" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Boolean</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.DerefAliases">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">DerefAliases</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#DerefAliases"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.DerefAliases" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Enumerated</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.DerefAliases.namedValues">
+<code class="descname">namedValues</code><em class="property"> = NamedValues(('neverDerefAliases', 0), ('derefInSearching', 1), ('derefFindingBaseObj', 2), ('derefAlways', 3))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.DerefAliases.namedValues" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.DnAttributes">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">DnAttributes</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#DnAttributes"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.DnAttributes" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Boolean</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.DnAttributes.defaultValue">
+<code class="descname">defaultValue</code><em class="property"> = Boolean('False')</em><a class="headerlink" href="#ldap3.protocol.rfc4511.DnAttributes.defaultValue" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.DnAttributes.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=4))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.DnAttributes.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.EqualityMatch">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">EqualityMatch</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#EqualityMatch"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.EqualityMatch" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AttributeValueAssertion" title="ldap3.protocol.rfc4511.AttributeValueAssertion"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AttributeValueAssertion</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.EqualityMatch.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=3))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.EqualityMatch.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ExtendedRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ExtendedRequest</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ExtendedRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ExtendedRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ExtendedRequest.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('requestName', RequestName()), OptionalNamedType('requestValue', RequestValue()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ExtendedRequest.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ExtendedRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=23))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ExtendedRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ExtendedResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ExtendedResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ExtendedResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ExtendedResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ExtendedResponse.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral()), OptionalNamedType('responseName', ResponseName()), OptionalNamedType('responseValue', ResponseValue()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ExtendedResponse.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ExtendedResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=24))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ExtendedResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ExtensibleMatch">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ExtensibleMatch</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ExtensibleMatch"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ExtensibleMatch" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.MatchingRuleAssertion" title="ldap3.protocol.rfc4511.MatchingRuleAssertion"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.MatchingRuleAssertion</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ExtensibleMatch.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=9))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ExtensibleMatch.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Filter">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Filter</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Filter"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Filter" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Choice</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Filter.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('and', And(componentType=None)), NamedType('or', Or(componentType=None)), NamedType('notFilter', Not(componentType=NamedTypes(), tagSet=TagSet((), ))), NamedType('equalityMatch', EqualityMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('substringFilter', SubstringFilter(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('substrings', Substrings())))), NamedType('greaterOrEqual', GreaterOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('lessOrEqual', LessOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('present', Present()), NamedType('approxMatch', ApproxMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('extensibleMatch', ExtensibleMatch(componentType=NamedTypes(OptionalNamedType('matchingRule', MatchingRule()), OptionalNamedType('type', Type()), NamedType('matchValue', MatchValue()), DefaultedNamedType('dnAttributes', DnAttributes('False'))))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Filter.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Final">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Final</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Final"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Final" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AssertionValue" title="ldap3.protocol.rfc4511.AssertionValue"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AssertionValue</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Final.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=2))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Final.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.GreaterOrEqual">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">GreaterOrEqual</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#GreaterOrEqual"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.GreaterOrEqual" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AttributeValueAssertion" title="ldap3.protocol.rfc4511.AttributeValueAssertion"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AttributeValueAssertion</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.GreaterOrEqual.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=5))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.GreaterOrEqual.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Initial">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Initial</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Initial"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Initial" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AssertionValue" title="ldap3.protocol.rfc4511.AssertionValue"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AssertionValue</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Initial.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Initial.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Integer0ToMax">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Integer0ToMax</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Integer0ToMax"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Integer0ToMax" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Integer</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Integer0ToMax.subtypeSpec">
+<code class="descname">subtypeSpec</code><em class="property"> = ConstraintsIntersection(ConstraintsIntersection(), ValueRangeConstraint(0, Integer(2147483647)))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Integer0ToMax.subtypeSpec" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.IntermediateResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">IntermediateResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#IntermediateResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.IntermediateResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.IntermediateResponse.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(OptionalNamedType('responseName', IntermediateResponseName()), OptionalNamedType('responseValue', IntermediateResponseValue()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.IntermediateResponse.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.IntermediateResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=25))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.IntermediateResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.IntermediateResponseName">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">IntermediateResponseName</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#IntermediateResponseName"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.IntermediateResponseName" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPOID" title="ldap3.protocol.rfc4511.LDAPOID"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPOID</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.IntermediateResponseName.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.IntermediateResponseName.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.IntermediateResponseValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">IntermediateResponseValue</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#IntermediateResponseValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.IntermediateResponseValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.IntermediateResponseValue.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.IntermediateResponseValue.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.IntermediateResponseValue.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=1))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.IntermediateResponseValue.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.LDAPDN">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">LDAPDN</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#LDAPDN"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.LDAPDN" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPString" title="ldap3.protocol.rfc4511.LDAPString"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPString</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.LDAPMessage">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">LDAPMessage</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#LDAPMessage"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.LDAPMessage" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.LDAPMessage.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('messageID', MessageID()), NamedType('protocolOp', ProtocolOp(componentType=NamedTypes(NamedType('bindRequest', BindRequest(componentType=NamedTypes(NamedType('version', Version()), NamedType('name', LDAPDN()), NamedType('authentication', AuthenticationChoice(componentType=NamedTypes(NamedType('simple', Simple()), NamedType('sasl', SaslCredentials(componentType=NamedTypes(NamedType('mechanism', LDAPString()), OptionalNamedType('credentials', Credentials())))), NamedType('sicilyPackageDiscovery', SicilyPackageDiscovery()), NamedType('sicilyNegotiate', SicilyNegotiate()), NamedType('sicilyResponse', SicilyResponse()))))))), NamedType('bindResponse', BindResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral()), OptionalNamedType('serverSaslCreds', ServerSaslCreds())))), NamedType('unbindRequest', UnbindRequest()), NamedType('searchRequest', SearchRequest(componentType=NamedTypes(NamedType('baseObject', LDAPDN()), NamedType('scope', Scope()), NamedType('derefAliases', DerefAliases()), NamedType('sizeLimit', Integer0ToMax()), NamedType('timeLimit', Integer0ToMax()), NamedType('typesOnly', TypesOnly()), NamedType('filter', Filter(componentType=NamedTypes(NamedType('and', And(componentType=None)), NamedType('or', Or(componentType=None)), NamedType('notFilter', Not(componentType=NamedTypes(), tagSet=TagSet((), ))), NamedType('equalityMatch', EqualityMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('substringFilter', SubstringFilter(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('substrings', Substrings())))), NamedType('greaterOrEqual', GreaterOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('lessOrEqual', LessOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('present', Present()), NamedType('approxMatch', ApproxMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('extensibleMatch', ExtensibleMatch(componentType=NamedTypes(OptionalNamedType('matchingRule', MatchingRule()), OptionalNamedType('type', Type()), NamedType('matchValue', MatchValue()), DefaultedNamedType('dnAttributes', DnAttributes('False')))))))), NamedType('attributes', AttributeSelection())))), NamedType('searchResEntry', SearchResultEntry(componentType=NamedTypes(NamedType('object', LDAPDN()), NamedType('attributes', PartialAttributeList())))), NamedType('searchResDone', SearchResultDone(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('searchResRef', SearchResultReference()), NamedType('modifyRequest', ModifyRequest(componentType=NamedTypes(NamedType('object', LDAPDN()), NamedType('changes', Changes())))), NamedType('modifyResponse', ModifyResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('addRequest', AddRequest(componentType=NamedTypes(NamedType('entry', LDAPDN()), NamedType('attributes', AttributeList())))), NamedType('addResponse', AddResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('delRequest', DelRequest()), NamedType('delResponse', DelResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('modDNRequest', ModifyDNRequest(componentType=NamedTypes(NamedType('entry', LDAPDN()), NamedType('newrdn', RelativeLDAPDN()), NamedType('deleteoldrdn', DeleteOldRDN()), OptionalNamedType('newSuperior', NewSuperior())))), NamedType('modDNResponse', ModifyDNResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('compareRequest', CompareRequest(componentType=NamedTypes(NamedType('entry', LDAPDN()), NamedType('ava', AttributeValueAssertion(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue()))))))), NamedType('compareResponse', CompareResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('abandonRequest', AbandonRequest()), NamedType('extendedReq', ExtendedRequest(componentType=NamedTypes(NamedType('requestName', RequestName()), OptionalNamedType('requestValue', RequestValue())))), NamedType('extendedResp', ExtendedResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral()), OptionalNamedType('responseName', ResponseName()), OptionalNamedType('responseValue', ResponseValue())))), NamedType('intermediateResponse', IntermediateResponse(componentType=NamedTypes(OptionalNamedType('responseName', IntermediateResponseName()), OptionalNamedType('responseValue', IntermediateResponseValue()))))))), OptionalNamedType('controls', Controls()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.LDAPMessage.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.LDAPOID">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">LDAPOID</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#LDAPOID"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.LDAPOID" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.LDAPResult">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">LDAPResult</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#LDAPResult"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.LDAPResult" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.LDAPResult.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.LDAPResult.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.LDAPString">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">LDAPString</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#LDAPString"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.LDAPString" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.LDAPString.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.LDAPString.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.LessOrEqual">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">LessOrEqual</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#LessOrEqual"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.LessOrEqual" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AttributeValueAssertion" title="ldap3.protocol.rfc4511.AttributeValueAssertion"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AttributeValueAssertion</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.LessOrEqual.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=6))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.LessOrEqual.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.MatchValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">MatchValue</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#MatchValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.MatchValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AssertionValue" title="ldap3.protocol.rfc4511.AssertionValue"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AssertionValue</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.MatchValue.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=3))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.MatchValue.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.MatchingRule">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">MatchingRule</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#MatchingRule"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.MatchingRule" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.MatchingRuleId" title="ldap3.protocol.rfc4511.MatchingRuleId"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.MatchingRuleId</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.MatchingRule.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=1))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.MatchingRule.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.MatchingRuleAssertion">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">MatchingRuleAssertion</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#MatchingRuleAssertion"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.MatchingRuleAssertion" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.MatchingRuleAssertion.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(OptionalNamedType('matchingRule', MatchingRule()), OptionalNamedType('type', Type()), NamedType('matchValue', MatchValue()), DefaultedNamedType('dnAttributes', DnAttributes('False')))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.MatchingRuleAssertion.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.MatchingRuleId">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">MatchingRuleId</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#MatchingRuleId"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.MatchingRuleId" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPString" title="ldap3.protocol.rfc4511.LDAPString"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPString</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.MessageID">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">MessageID</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#MessageID"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.MessageID" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.Integer0ToMax" title="ldap3.protocol.rfc4511.Integer0ToMax"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.Integer0ToMax</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ModifyDNRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ModifyDNRequest</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ModifyDNRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyDNRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ModifyDNRequest.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('entry', LDAPDN()), NamedType('newrdn', RelativeLDAPDN()), NamedType('deleteoldrdn', DeleteOldRDN()), OptionalNamedType('newSuperior', NewSuperior()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyDNRequest.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ModifyDNRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=12))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyDNRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ModifyDNResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ModifyDNResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ModifyDNResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyDNResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPResult" title="ldap3.protocol.rfc4511.LDAPResult"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPResult</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ModifyDNResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=13))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyDNResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ModifyRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ModifyRequest</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ModifyRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ModifyRequest.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('object', LDAPDN()), NamedType('changes', Changes()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyRequest.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ModifyRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=6))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ModifyResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ModifyResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ModifyResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPResult" title="ldap3.protocol.rfc4511.LDAPResult"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPResult</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ModifyResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=7))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ModifyResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.NewSuperior">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">NewSuperior</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#NewSuperior"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.NewSuperior" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPDN" title="ldap3.protocol.rfc4511.LDAPDN"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPDN</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.NewSuperior.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.NewSuperior.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Not">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Not</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Not"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Not" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Choice</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Not.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('innerNotFilter', Filter(componentType=NamedTypes(NamedType('and', And(componentType=None)), NamedType('or', Or(componentType=None)), NamedType('notFilter', Not(componentType=NamedTypes(), tagSet=TagSet((), ))), NamedType('equalityMatch', EqualityMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('substringFilter', SubstringFilter(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('substrings', Substrings())))), NamedType('greaterOrEqual', GreaterOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('lessOrEqual', LessOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('present', Present()), NamedType('approxMatch', ApproxMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('extensibleMatch', ExtensibleMatch(componentType=NamedTypes(OptionalNamedType('matchingRule', MatchingRule()), OptionalNamedType('type', Type()), NamedType('matchValue', MatchValue()), DefaultedNamedType('dnAttributes', DnAttributes('False')))))))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Not.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Not.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=2))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Not.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Operation">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Operation</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Operation"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Operation" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Enumerated</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Operation.namedValues">
+<code class="descname">namedValues</code><em class="property"> = NamedValues(('add', 0), ('delete', 1), ('replace', 2), ('increment', 3))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Operation.namedValues" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Or">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Or</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Or"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Or" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SetOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Or.componentType">
+<code class="descname">componentType</code><em class="property"> = Filter(componentType=NamedTypes(NamedType('and', And(componentType=None)), NamedType('or', Or(componentType=None)), NamedType('notFilter', Not(componentType=NamedTypes(), tagSet=TagSet((), ))), NamedType('equalityMatch', EqualityMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('substringFilter', SubstringFilter(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('substrings', Substrings())))), NamedType('greaterOrEqual', GreaterOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('lessOrEqual', LessOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('present', Present()), NamedType('approxMatch', ApproxMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('extensibleMatch', ExtensibleMatch(componentType=NamedTypes(OptionalNamedType('matchingRule', MatchingRule()), OptionalNamedType('type', Type()), NamedType('matchValue', MatchValue()), DefaultedNamedType('dnAttributes', DnAttributes('False')))))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Or.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Or.subtypeSpec">
+<code class="descname">subtypeSpec</code><em class="property"> = ConstraintsIntersection(ConstraintsIntersection(), ValueSizeConstraint(1, Integer(2147483647)))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Or.subtypeSpec" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Or.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=1))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Or.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.PartialAttribute">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">PartialAttribute</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#PartialAttribute"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.PartialAttribute" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.PartialAttribute.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('type', AttributeDescription()), NamedType('vals', Vals()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.PartialAttribute.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.PartialAttributeList">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">PartialAttributeList</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#PartialAttributeList"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.PartialAttributeList" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SequenceOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.PartialAttributeList.componentType">
+<code class="descname">componentType</code><em class="property"> = PartialAttribute(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('vals', Vals())))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.PartialAttributeList.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Present">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Present</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Present"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Present" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AttributeDescription" title="ldap3.protocol.rfc4511.AttributeDescription"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AttributeDescription</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Present.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=7))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Present.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ProtocolOp">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ProtocolOp</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ProtocolOp"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ProtocolOp" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Choice</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ProtocolOp.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('bindRequest', BindRequest(componentType=NamedTypes(NamedType('version', Version()), NamedType('name', LDAPDN()), NamedType('authentication', AuthenticationChoice(componentType=NamedTypes(NamedType('simple', Simple()), NamedType('sasl', SaslCredentials(componentType=NamedTypes(NamedType('mechanism', LDAPString()), OptionalNamedType('credentials', Credentials())))), NamedType('sicilyPackageDiscovery', SicilyPackageDiscovery()), NamedType('sicilyNegotiate', SicilyNegotiate()), NamedType('sicilyResponse', SicilyResponse()))))))), NamedType('bindResponse', BindResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral()), OptionalNamedType('serverSaslCreds', ServerSaslCreds())))), NamedType('unbindRequest', UnbindRequest()), NamedType('searchRequest', SearchRequest(componentType=NamedTypes(NamedType('baseObject', LDAPDN()), NamedType('scope', Scope()), NamedType('derefAliases', DerefAliases()), NamedType('sizeLimit', Integer0ToMax()), NamedType('timeLimit', Integer0ToMax()), NamedType('typesOnly', TypesOnly()), NamedType('filter', Filter(componentType=NamedTypes(NamedType('and', And(componentType=None)), NamedType('or', Or(componentType=None)), NamedType('notFilter', Not(componentType=NamedTypes(), tagSet=TagSet((), ))), NamedType('equalityMatch', EqualityMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('substringFilter', SubstringFilter(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('substrings', Substrings())))), NamedType('greaterOrEqual', GreaterOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('lessOrEqual', LessOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('present', Present()), NamedType('approxMatch', ApproxMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('extensibleMatch', ExtensibleMatch(componentType=NamedTypes(OptionalNamedType('matchingRule', MatchingRule()), OptionalNamedType('type', Type()), NamedType('matchValue', MatchValue()), DefaultedNamedType('dnAttributes', DnAttributes('False')))))))), NamedType('attributes', AttributeSelection())))), NamedType('searchResEntry', SearchResultEntry(componentType=NamedTypes(NamedType('object', LDAPDN()), NamedType('attributes', PartialAttributeList())))), NamedType('searchResDone', SearchResultDone(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('searchResRef', SearchResultReference()), NamedType('modifyRequest', ModifyRequest(componentType=NamedTypes(NamedType('object', LDAPDN()), NamedType('changes', Changes())))), NamedType('modifyResponse', ModifyResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('addRequest', AddRequest(componentType=NamedTypes(NamedType('entry', LDAPDN()), NamedType('attributes', AttributeList())))), NamedType('addResponse', AddResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('delRequest', DelRequest()), NamedType('delResponse', DelResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('modDNRequest', ModifyDNRequest(componentType=NamedTypes(NamedType('entry', LDAPDN()), NamedType('newrdn', RelativeLDAPDN()), NamedType('deleteoldrdn', DeleteOldRDN()), OptionalNamedType('newSuperior', NewSuperior())))), NamedType('modDNResponse', ModifyDNResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('compareRequest', CompareRequest(componentType=NamedTypes(NamedType('entry', LDAPDN()), NamedType('ava', AttributeValueAssertion(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue()))))))), NamedType('compareResponse', CompareResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral())))), NamedType('abandonRequest', AbandonRequest()), NamedType('extendedReq', ExtendedRequest(componentType=NamedTypes(NamedType('requestName', RequestName()), OptionalNamedType('requestValue', RequestValue())))), NamedType('extendedResp', ExtendedResponse(componentType=NamedTypes(NamedType('resultCode', ResultCode()), NamedType('matchedDN', LDAPDN()), NamedType('diagnosticMessage', LDAPString()), OptionalNamedType('referral', Referral()), OptionalNamedType('responseName', ResponseName()), OptionalNamedType('responseValue', ResponseValue())))), NamedType('intermediateResponse', IntermediateResponse(componentType=NamedTypes(OptionalNamedType('responseName', IntermediateResponseName()), OptionalNamedType('responseValue', IntermediateResponseValue())))))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ProtocolOp.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Referral">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Referral</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Referral"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Referral" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SequenceOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Referral.componentType">
+<code class="descname">componentType</code><em class="property"> = URI()</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Referral.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Referral.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=3))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Referral.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.RelativeLDAPDN">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">RelativeLDAPDN</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#RelativeLDAPDN"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.RelativeLDAPDN" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPString" title="ldap3.protocol.rfc4511.LDAPString"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPString</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.RequestName">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">RequestName</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#RequestName"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.RequestName" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPOID" title="ldap3.protocol.rfc4511.LDAPOID"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPOID</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.RequestName.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.RequestName.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.RequestValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">RequestValue</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#RequestValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.RequestValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.RequestValue.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.RequestValue.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.RequestValue.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=1))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.RequestValue.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ResponseName">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ResponseName</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ResponseName"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ResponseName" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPOID" title="ldap3.protocol.rfc4511.LDAPOID"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPOID</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ResponseName.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=10))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ResponseName.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ResponseValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ResponseValue</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ResponseValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ResponseValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ResponseValue.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ResponseValue.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ResponseValue.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=11))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ResponseValue.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ResultCode">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ResultCode</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ResultCode"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ResultCode" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Enumerated</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ResultCode.namedValues">
+<code class="descname">namedValues</code><em class="property"> = NamedValues(('success', 0), ('operationsError', 1), ('protocolError', 2), ('timeLimitExceeded', 3), ('sizeLimitExceeded', 4), ('compareFalse', 5), ('compareTrue', 6), ('authMethodNotSupported', 7), ('strongerAuthRequired', 8), ('referral', 10), ('adminLimitExceeded', 11), ('unavailableCriticalExtension', 12), ('confidentialityRequired', 13), ('saslBindInProgress', 14), ('noSuchAttribute', 16), ('undefinedAttributeType', 17), ('inappropriateMatching', 18), ('constraintViolation', 19), ('attributeOrValueExists', 20), ('invalidAttributeSyntax', 21), ('noSuchObject', 32), ('aliasProblem', 33), ('invalidDNSyntax', 34), ('aliasDereferencingProblem', 36), ('inappropriateAuthentication', 48), ('invalidCredentials', 49), ('insufficientAccessRights', 50), ('busy', 51), ('unavailable', 52), ('unwillingToPerform', 53), ('loopDetected', 54), ('namingViolation', 64), ('objectClassViolation', 65), ('notAllowedOnNonLeaf', 66), ('notAllowedOnRDN', 67), ('entryAlreadyExists', 68), ('objectClassModsProhibited', 69), ('affectMultipleDSAs', 71), ('other', 80), ('lcupResourcesExhausted', 113), ('lcupSecurityViolation', 114), ('lcupInvalidData', 115), ('lcupUnsupportedScheme', 116), ('lcupReloadRequired', 117), ('canceled', 118), ('noSuchOperation', 119), ('tooLate', 120), ('cannotCancel', 121), ('assertionFailed', 122), ('authorizationDenied', 123), ('e-syncRefreshRequired', 4096))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ResultCode.namedValues" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ResultCode.subTypeSpec">
+<code class="descname">subTypeSpec</code><em class="property"> = ConstraintsIntersection(ConstraintsIntersection(), SingleValueConstraint(0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 32, 33, 34, 36, 48, 49, 50, 51, 52, 53, 54, 64, 65, 66, 67, 68, 69, 71, 80, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 4096))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ResultCode.subTypeSpec" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SaslCredentials">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SaslCredentials</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SaslCredentials"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SaslCredentials" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SaslCredentials.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('mechanism', LDAPString()), OptionalNamedType('credentials', Credentials()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SaslCredentials.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SaslCredentials.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=3))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SaslCredentials.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Scope">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Scope</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Scope"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Scope" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Enumerated</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Scope.namedValues">
+<code class="descname">namedValues</code><em class="property"> = NamedValues(('baseObject', 0), ('singleLevel', 1), ('wholeSubtree', 2))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Scope.namedValues" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SearchRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SearchRequest</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SearchRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SearchRequest.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('baseObject', LDAPDN()), NamedType('scope', Scope()), NamedType('derefAliases', DerefAliases()), NamedType('sizeLimit', Integer0ToMax()), NamedType('timeLimit', Integer0ToMax()), NamedType('typesOnly', TypesOnly()), NamedType('filter', Filter(componentType=NamedTypes(NamedType('and', And(componentType=None)), NamedType('or', Or(componentType=None)), NamedType('notFilter', Not(componentType=NamedTypes(), tagSet=TagSet((), ))), NamedType('equalityMatch', EqualityMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('substringFilter', SubstringFilter(componentType=NamedTypes(NamedType('type', AttributeDescription()), NamedType('substrings', Substrings())))), NamedType('greaterOrEqual', GreaterOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('lessOrEqual', LessOrEqual(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('present', Present()), NamedType('approxMatch', ApproxMatch(componentType=NamedTypes(NamedType('attributeDesc', AttributeDescription()), NamedType('assertionValue', AssertionValue())))), NamedType('extensibleMatch', ExtensibleMatch(componentType=NamedTypes(OptionalNamedType('matchingRule', MatchingRule()), OptionalNamedType('type', Type()), NamedType('matchValue', MatchValue()), DefaultedNamedType('dnAttributes', DnAttributes('False')))))))), NamedType('attributes', AttributeSelection()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchRequest.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SearchRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=3))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SearchResultDone">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SearchResultDone</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SearchResultDone"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultDone" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPResult" title="ldap3.protocol.rfc4511.LDAPResult"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPResult</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SearchResultDone.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=5))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultDone.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SearchResultEntry">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SearchResultEntry</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SearchResultEntry"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultEntry" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SearchResultEntry.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('object', LDAPDN()), NamedType('attributes', PartialAttributeList()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultEntry.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SearchResultEntry.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=4))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultEntry.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SearchResultReference">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SearchResultReference</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SearchResultReference"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultReference" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SequenceOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SearchResultReference.componentType">
+<code class="descname">componentType</code><em class="property"> = URI()</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultReference.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SearchResultReference.subtypeSpec">
+<code class="descname">subtypeSpec</code><em class="property"> = ConstraintsIntersection(ConstraintsIntersection(), ValueSizeConstraint(1, Integer(2147483647)))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultReference.subtypeSpec" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SearchResultReference.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=19))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SearchResultReference.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Selector">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Selector</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Selector"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Selector" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPString" title="ldap3.protocol.rfc4511.LDAPString"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPString</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ServerSaslCreds">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ServerSaslCreds</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ServerSaslCreds"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ServerSaslCreds" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ServerSaslCreds.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=7))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ServerSaslCreds.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SicilyNegotiate">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SicilyNegotiate</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SicilyNegotiate"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyNegotiate" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SicilyNegotiate.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyNegotiate.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SicilyNegotiate.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=10))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyNegotiate.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SicilyPackageDiscovery">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SicilyPackageDiscovery</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SicilyPackageDiscovery"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyPackageDiscovery" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SicilyPackageDiscovery.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyPackageDiscovery.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SicilyPackageDiscovery.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=9))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyPackageDiscovery.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SicilyResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SicilyResponse</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SicilyResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SicilyResponse.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyResponse.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SicilyResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=11))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SicilyResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Simple">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Simple</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Simple"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Simple" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Simple.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Simple.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Simple.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Simple.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Substring">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Substring</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Substring"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Substring" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Choice</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Substring.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('initial', Initial()), NamedType('any', Any()), NamedType('final', Final()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Substring.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.SubstringFilter">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">SubstringFilter</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#SubstringFilter"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.SubstringFilter" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SubstringFilter.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('type', AttributeDescription()), NamedType('substrings', Substrings()))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SubstringFilter.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.SubstringFilter.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=32, tagId=4))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.SubstringFilter.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Substrings">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Substrings</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Substrings"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Substrings" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SequenceOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Substrings.componentType">
+<code class="descname">componentType</code><em class="property"> = Substring(componentType=NamedTypes(NamedType('initial', Initial()), NamedType('any', Any()), NamedType('final', Final())))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Substrings.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Substrings.subtypeSpec">
+<code class="descname">subtypeSpec</code><em class="property"> = ConstraintsIntersection(ConstraintsIntersection(), ValueSizeConstraint(1, Integer(2147483647)))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Substrings.subtypeSpec" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Type">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Type</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Type"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Type" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.AttributeDescription" title="ldap3.protocol.rfc4511.AttributeDescription"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.AttributeDescription</span></code></a></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Type.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=2))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Type.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.TypesOnly">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">TypesOnly</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#TypesOnly"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.TypesOnly" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Boolean</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.URI">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">URI</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#URI"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.URI" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4511.LDAPString" title="ldap3.protocol.rfc4511.LDAPString"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4511.LDAPString</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.UnbindRequest">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">UnbindRequest</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#UnbindRequest"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.UnbindRequest" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Null</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.UnbindRequest.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=0, tagId=2))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.UnbindRequest.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Vals">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Vals</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Vals"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Vals" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SetOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Vals.componentType">
+<code class="descname">componentType</code><em class="property"> = AttributeValue()</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Vals.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.ValsAtLeast1">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">ValsAtLeast1</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#ValsAtLeast1"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.ValsAtLeast1" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.SetOf</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ValsAtLeast1.componentType">
+<code class="descname">componentType</code><em class="property"> = AttributeValue()</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ValsAtLeast1.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.ValsAtLeast1.subtypeSpec">
+<code class="descname">subtypeSpec</code><em class="property"> = ConstraintsIntersection(ConstraintsIntersection(), ValueSizeConstraint(1, Integer(2147483647)))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.ValsAtLeast1.subtypeSpec" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4511.Version">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4511.</code><code class="descname">Version</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>namedValues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4511.html#Version"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4511.Version" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Integer</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4511.Version.subtypeSpec">
+<code class="descname">subtypeSpec</code><em class="property"> = ConstraintsIntersection(ConstraintsIntersection(), ValueRangeConstraint(1, 127))</em><a class="headerlink" href="#ldap3.protocol.rfc4511.Version.subtypeSpec" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.protocol.html">ldap3.protocol package</a><ul>
+      <li>Previous: <a href="ldap3.protocol.rfc3062.html" title="上一章">ldap3.protocol.rfc3062 module</a></li>
+      <li>Next: <a href="ldap3.protocol.rfc4512.html" title="下一章">ldap3.protocol.rfc4512 module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.protocol.rfc4511.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.protocol.rfc4511.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

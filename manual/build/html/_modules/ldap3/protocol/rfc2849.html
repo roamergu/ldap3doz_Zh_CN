@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.rfc2849 &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.protocol.rfc2849 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2013.12.08</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">base64</span> <span class="kn">import</span> <span class="n">b64encode</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">LDIF_LINE_LENGTH</span><span class="p">,</span> <span class="n">STRING_TYPES</span>
+<span class="kn">from</span> <span class="nn">..core.exceptions</span> <span class="kn">import</span> <span class="n">LDAPLDIFError</span>
+
+<span class="c1"># LDIF converter RFC 2849 compliant</span>
+
+
+<div class="viewcode-block" id="safe_ldif_string"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.safe_ldif_string">[文档]</a><span class="k">def</span> <span class="nf">safe_ldif_string</span><span class="p">(</span><span class="n">bytes_value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bytes_value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c1"># check SAFE-INIT-CHAR: &lt; 127, not NUL, LF, CR, SPACE, COLON, LESS-THAN</span>
+    <span class="k">if</span> <span class="n">bytes_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">127</span> <span class="ow">or</span> <span class="n">bytes_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">58</span><span class="p">,</span> <span class="mi">60</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="c1"># check SAFE-CHAR: &lt; 127 not NUL, LF, CR</span>
+    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">bytes_value</span> <span class="ow">or</span> <span class="mi">10</span> <span class="ow">in</span> <span class="n">bytes_value</span> <span class="ow">or</span> <span class="mi">13</span> <span class="ow">in</span> <span class="n">bytes_value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="c1"># check last char for SPACE</span>
+    <span class="k">if</span> <span class="n">bytes_value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">bytes_value</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">byte</span> <span class="o">&gt;</span> <span class="mi">127</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">return</span> <span class="bp">True</span></div>
+
+
+<span class="k">def</span> <span class="nf">_convert_to_ldif</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">base64</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">STRING_TYPES</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">base64</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">safe_ldif_string</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">encoded</span> <span class="o">=</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">encoded</span> <span class="o">=</span> <span class="n">b64encode</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>  <span class="c1"># patch for Python 2.6</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoded</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># in Python 3 b64encode returns bytes in Python 2 returns str</span>
+            <span class="n">encoded</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">encoded</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>  <span class="c1"># Python 3</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">descriptor</span> <span class="o">+</span> <span class="s1">&#39;:: &#39;</span> <span class="o">+</span> <span class="n">encoded</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">str</span> <span class="o">!=</span> <span class="nb">bytes</span><span class="p">:</span>  <span class="c1"># Python 3</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Python 2</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">descriptor</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="n">value</span>
+
+    <span class="k">return</span> <span class="n">line</span>
+
+
+<div class="viewcode-block" id="add_controls"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.add_controls">[文档]</a><span class="k">def</span> <span class="nf">add_controls</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">controls</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">control</span> <span class="ow">in</span> <span class="n">controls</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;control: &#39;</span> <span class="o">+</span> <span class="n">control</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;true&#39;</span> <span class="k">if</span> <span class="n">control</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">control</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">control</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+<div class="viewcode-block" id="add_attributes"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.add_attributes">[文档]</a><span class="k">def</span> <span class="nf">add_attributes</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">oc_attr</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c1"># objectclass first, even if this is not specified in the RFC</span>
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;objectclass&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">[</span><span class="n">attr</span><span class="p">]:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">))</span>
+            <span class="n">oc_attr</span> <span class="o">=</span> <span class="n">attr</span>
+            <span class="k">break</span>
+
+    <span class="c1"># remaining attributes</span>
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">attr</span> <span class="o">!=</span> <span class="n">oc_attr</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">[</span><span class="n">attr</span><span class="p">]:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+<div class="viewcode-block" id="search_response_to_ldif"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.search_response_to_ldif">[文档]</a><span class="k">def</span> <span class="nf">search_response_to_ldif</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;dn&#39;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="s1">&#39;dn&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dn&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">add_attributes</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;raw_attributes&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPLDIFError</span><span class="p">(</span><span class="s1">&#39;unable to convert to LDIF-CONTENT - missing DN&#39;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# total number of entries: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+<div class="viewcode-block" id="add_request_to_ldif"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.add_request_to_ldif">[文档]</a><span class="k">def</span> <span class="nf">add_request_to_ldif</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s1">&#39;entry&#39;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="s1">&#39;dn&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;entry&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">add_controls</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;controls&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;changetype: add&#39;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">add_attributes</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">LDAPLDIFError</span><span class="p">(</span><span class="s1">&#39;unable to convert to LDIF-CHANGE-ADD - missing DN &#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+<div class="viewcode-block" id="delete_request_to_ldif"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.delete_request_to_ldif">[文档]</a><span class="k">def</span> <span class="nf">delete_request_to_ldif</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s1">&#39;entry&#39;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="s1">&#39;dn&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;entry&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_controls</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;controls&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;changetype: delete&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">LDAPLDIFError</span><span class="p">(</span><span class="s1">&#39;unable to convert to LDIF-CHANGE-DELETE - missing DN &#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+<div class="viewcode-block" id="modify_request_to_ldif"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.modify_request_to_ldif">[文档]</a><span class="k">def</span> <span class="nf">modify_request_to_ldif</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s1">&#39;entry&#39;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="s1">&#39;dn&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;entry&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">add_controls</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;controls&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;changetype: modify&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;changes&#39;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;changes&#39;</span><span class="p">]:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">,</span> <span class="s1">&#39;increment&#39;</span><span class="p">][</span><span class="n">change</span><span class="p">[</span><span class="s1">&#39;operation&#39;</span><span class="p">]]</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="n">change</span><span class="p">[</span><span class="s1">&#39;attribute&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">change</span><span class="p">[</span><span class="s1">&#39;attribute&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">]:</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s1">&#39;attribute&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">],</span> <span class="n">value</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">))</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+<div class="viewcode-block" id="modify_dn_request_to_ldif"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.modify_dn_request_to_ldif">[文档]</a><span class="k">def</span> <span class="nf">modify_dn_request_to_ldif</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s1">&#39;entry&#39;</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="s1">&#39;dn&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;entry&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">add_controls</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;controls&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;changetype: modrdn&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;newSuperior&#39;</span> <span class="ow">in</span> <span class="n">entry</span> <span class="ow">and</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;newSuperior&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;changetype: moddn&#39;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="s1">&#39;newrdn&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;newRdn&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;deleteoldrdn: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;1&#39;</span> <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;deleteOldRdn&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;0&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s1">&#39;newSuperior&#39;</span> <span class="ow">in</span> <span class="n">entry</span> <span class="ow">and</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;newSuperior&#39;</span><span class="p">]:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_convert_to_ldif</span><span class="p">(</span><span class="s1">&#39;newsuperior&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;newSuperior&#39;</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">LDAPLDIFError</span><span class="p">(</span><span class="s1">&#39;unable to convert to LDIF-CHANGE-MODDN - missing DN &#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+<div class="viewcode-block" id="operation_to_ldif"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.operation_to_ldif">[文档]</a><span class="k">def</span> <span class="nf">operation_to_ldif</span><span class="p">(</span><span class="n">operation_type</span><span class="p">,</span> <span class="n">entries</span><span class="p">,</span> <span class="n">all_base64</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">sort_order</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;searchResponse&#39;</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">search_response_to_ldif</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;addRequest&#39;</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">add_request_to_ldif</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;delRequest&#39;</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">delete_request_to_ldif</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;modifyRequest&#39;</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">modify_request_to_ldif</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">operation_type</span> <span class="o">==</span> <span class="s1">&#39;modDNRequest&#39;</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">modify_dn_request_to_ldif</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">all_base64</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># sort lines as per custom sort_order</span>
+    <span class="c1"># sort order is a list of descriptors, lines will be sorted following the same sequence</span>
+    <span class="k">if</span> <span class="n">sort_order</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">ldif_sort</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sort_order</span><span class="p">))</span>
+
+    <span class="n">ldif_record</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># check max line length and split as per note 2 of RFC 2849</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">ldif_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">LDIF_LINE_LENGTH</span><span class="p">])</span>
+            <span class="n">ldif_record</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">LDIF_LINE_LENGTH</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">LDIF_LINE_LENGTH</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">LDIF_LINE_LENGTH</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">LDIF_LINE_LENGTH</span> <span class="k">else</span> <span class="p">[])</span>
+
+    <span class="k">return</span> <span class="n">ldif_record</span></div>
+
+
+<div class="viewcode-block" id="add_ldif_header"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.add_ldif_header">[文档]</a><span class="k">def</span> <span class="nf">add_ldif_header</span><span class="p">(</span><span class="n">ldif_lines</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ldif_lines</span><span class="p">:</span>
+        <span class="n">ldif_lines</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;version: 1&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ldif_lines</span></div>
+
+
+<div class="viewcode-block" id="ldif_sort"><a class="viewcode-back" href="../../../ldap3.protocol.rfc2849.html#ldap3.protocol.rfc2849.ldif_sort">[文档]</a><span class="k">def</span> <span class="nf">ldif_sort</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">sort_order</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">descriptor</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sort_order</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">descriptor</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">i</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">sort_order</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

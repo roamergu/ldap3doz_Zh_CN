@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.extend package &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3 package" href="ldap3.html" />
+    <link rel="next" title="ldap3.extend.novell package" href="ldap3.extend.novell.html" />
+    <link rel="prev" title="ldap3.core.usage module" href="ldap3.core.usage.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ldap3-extend-package">
+<h1>ldap3.extend package<a class="headerlink" href="#ldap3-extend-package" title="永久链接至标题">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ldap3.extend.novell.html">ldap3.extend.novell package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ldap3.extend.novell.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.novell.getBindDn.html">ldap3.extend.novell.getBindDn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.novell.listReplicas.html">ldap3.extend.novell.listReplicas module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.novell.nmasGetUniversalPassword.html">ldap3.extend.novell.nmasGetUniversalPassword module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.novell.nmasSetUniversalPassword.html">ldap3.extend.novell.nmasSetUniversalPassword module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.novell.partition_entry_count.html">ldap3.extend.novell.partition_entry_count module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.novell.replicaInfo.html">ldap3.extend.novell.replicaInfo module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ldap3.extend.novell.html#module-ldap3.extend.novell">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ldap3.extend.standard.html">ldap3.extend.standard package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ldap3.extend.standard.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.standard.PagedSearch.html">ldap3.extend.standard.PagedSearch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.standard.modifyPassword.html">ldap3.extend.standard.modifyPassword module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ldap3.extend.standard.whoAmI.html">ldap3.extend.standard.whoAmI module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ldap3.extend.standard.html#module-ldap3.extend.standard">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="永久链接至标题">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ldap3.extend.operation.html">ldap3.extend.operation module</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="module-ldap3.extend">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ldap3.extend" title="永久链接至标题">¶</a></h2>
+<dl class="class">
+<dt id="ldap3.extend.ExtendedOperationContainer">
+<em class="property">class </em><code class="descclassname">ldap3.extend.</code><code class="descname">ExtendedOperationContainer</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#ExtendedOperationContainer"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.ExtendedOperationContainer" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.extend.ExtendedOperationsRoot">
+<em class="property">class </em><code class="descclassname">ldap3.extend.</code><code class="descname">ExtendedOperationsRoot</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#ExtendedOperationsRoot"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.ExtendedOperationsRoot" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.extend.ExtendedOperationContainer" title="ldap3.extend.ExtendedOperationContainer"><code class="xref py py-class docutils literal"><span class="pre">ldap3.extend.ExtendedOperationContainer</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.extend.MicrosoftExtendedOperations">
+<em class="property">class </em><code class="descclassname">ldap3.extend.</code><code class="descname">MicrosoftExtendedOperations</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#MicrosoftExtendedOperations"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.MicrosoftExtendedOperations" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.extend.ExtendedOperationContainer" title="ldap3.extend.ExtendedOperationContainer"><code class="xref py py-class docutils literal"><span class="pre">ldap3.extend.ExtendedOperationContainer</span></code></a></p>
+<dl class="method">
+<dt id="ldap3.extend.MicrosoftExtendedOperations.dir_sync">
+<code class="descname">dir_sync</code><span class="sig-paren">(</span><em>sync_base</em>, <em>sync_filter='(objectclass=*)'</em>, <em>attributes='*'</em>, <em>cookie=None</em>, <em>object_security=False</em>, <em>ancestors_first=True</em>, <em>public_data_only=False</em>, <em>incremental_values=True</em>, <em>max_length=2147483647</em>, <em>hex_guid=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#MicrosoftExtendedOperations.dir_sync"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.MicrosoftExtendedOperations.dir_sync" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.extend.MicrosoftExtendedOperations.modify_password">
+<code class="descname">modify_password</code><span class="sig-paren">(</span><em>user</em>, <em>new_password</em>, <em>old_password=None</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#MicrosoftExtendedOperations.modify_password"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.MicrosoftExtendedOperations.modify_password" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.extend.NovellExtendedOperations">
+<em class="property">class </em><code class="descclassname">ldap3.extend.</code><code class="descname">NovellExtendedOperations</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#NovellExtendedOperations"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.NovellExtendedOperations" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.extend.ExtendedOperationContainer" title="ldap3.extend.ExtendedOperationContainer"><code class="xref py py-class docutils literal"><span class="pre">ldap3.extend.ExtendedOperationContainer</span></code></a></p>
+<dl class="method">
+<dt id="ldap3.extend.NovellExtendedOperations.get_bind_dn">
+<code class="descname">get_bind_dn</code><span class="sig-paren">(</span><em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#NovellExtendedOperations.get_bind_dn"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.NovellExtendedOperations.get_bind_dn" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.extend.NovellExtendedOperations.get_universal_password">
+<code class="descname">get_universal_password</code><span class="sig-paren">(</span><em>user</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#NovellExtendedOperations.get_universal_password"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.NovellExtendedOperations.get_universal_password" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.extend.NovellExtendedOperations.list_replicas">
+<code class="descname">list_replicas</code><span class="sig-paren">(</span><em>server_dn</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#NovellExtendedOperations.list_replicas"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.NovellExtendedOperations.list_replicas" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.extend.NovellExtendedOperations.partition_entry_count">
+<code class="descname">partition_entry_count</code><span class="sig-paren">(</span><em>partition_dn</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#NovellExtendedOperations.partition_entry_count"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.NovellExtendedOperations.partition_entry_count" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.extend.NovellExtendedOperations.replica_info">
+<code class="descname">replica_info</code><span class="sig-paren">(</span><em>server_dn</em>, <em>partition_dn</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#NovellExtendedOperations.replica_info"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.NovellExtendedOperations.replica_info" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.extend.NovellExtendedOperations.set_universal_password">
+<code class="descname">set_universal_password</code><span class="sig-paren">(</span><em>user</em>, <em>new_password=None</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#NovellExtendedOperations.set_universal_password"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.NovellExtendedOperations.set_universal_password" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.extend.StandardExtendedOperations">
+<em class="property">class </em><code class="descclassname">ldap3.extend.</code><code class="descname">StandardExtendedOperations</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#StandardExtendedOperations"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.StandardExtendedOperations" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.extend.ExtendedOperationContainer" title="ldap3.extend.ExtendedOperationContainer"><code class="xref py py-class docutils literal"><span class="pre">ldap3.extend.ExtendedOperationContainer</span></code></a></p>
+<dl class="method">
+<dt id="ldap3.extend.StandardExtendedOperations.modify_password">
+<code class="descname">modify_password</code><span class="sig-paren">(</span><em>user=None</em>, <em>old_password=None</em>, <em>new_password=None</em>, <em>hash_algorithm=None</em>, <em>salt=None</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#StandardExtendedOperations.modify_password"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.StandardExtendedOperations.modify_password" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.extend.StandardExtendedOperations.paged_search">
+<code class="descname">paged_search</code><span class="sig-paren">(</span><em>search_base</em>, <em>search_filter</em>, <em>search_scope='SUBTREE'</em>, <em>dereference_aliases='ALWAYS'</em>, <em>attributes=None</em>, <em>size_limit=0</em>, <em>time_limit=0</em>, <em>types_only=False</em>, <em>get_operational_attributes=False</em>, <em>controls=None</em>, <em>paged_size=100</em>, <em>paged_criticality=False</em>, <em>generator=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#StandardExtendedOperations.paged_search"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.StandardExtendedOperations.paged_search" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.extend.StandardExtendedOperations.who_am_i">
+<code class="descname">who_am_i</code><span class="sig-paren">(</span><em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/extend.html#StandardExtendedOperations.who_am_i"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.extend.StandardExtendedOperations.who_am_i" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ldap3.extend package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ldap3.extend">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+      <li>Previous: <a href="ldap3.core.usage.html" title="上一章">ldap3.core.usage module</a></li>
+      <li>Next: <a href="ldap3.extend.novell.html" title="下一章">ldap3.extend.novell package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.extend.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.extend.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

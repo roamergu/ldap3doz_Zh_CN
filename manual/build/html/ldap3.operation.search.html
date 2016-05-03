@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.operation.search module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.operation package" href="ldap3.operation.html" />
+    <link rel="next" title="ldap3.operation.unbind module" href="ldap3.operation.unbind.html" />
+    <link rel="prev" title="ldap3.operation.modifyDn module" href="ldap3.operation.modifyDn.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.operation.search">
+<span id="ldap3-operation-search-module"></span><h1>ldap3.operation.search module<a class="headerlink" href="#module-ldap3.operation.search" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.operation.search.FilterNode">
+<em class="property">class </em><code class="descclassname">ldap3.operation.search.</code><code class="descname">FilterNode</code><span class="sig-paren">(</span><em>tag=None</em>, <em>assertion=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#FilterNode"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.FilterNode" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="ldap3.operation.search.FilterNode.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>filter_node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#FilterNode.append"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.FilterNode.append" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.attributes_to_dict">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">attributes_to_dict</code><span class="sig-paren">(</span><em>attribute_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#attributes_to_dict"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.attributes_to_dict" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.attributes_to_dict_fast">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">attributes_to_dict_fast</code><span class="sig-paren">(</span><em>attribute_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#attributes_to_dict_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.attributes_to_dict_fast" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.build_attribute_selection">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">build_attribute_selection</code><span class="sig-paren">(</span><em>attribute_list</em>, <em>schema</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#build_attribute_selection"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.build_attribute_selection" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.build_filter">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">build_filter</code><span class="sig-paren">(</span><em>search_filter</em>, <em>schema</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#build_filter"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.build_filter" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.checked_attributes_to_dict">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">checked_attributes_to_dict</code><span class="sig-paren">(</span><em>attribute_list</em>, <em>schema=None</em>, <em>custom_formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#checked_attributes_to_dict"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.checked_attributes_to_dict" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.checked_attributes_to_dict_fast">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">checked_attributes_to_dict_fast</code><span class="sig-paren">(</span><em>attribute_list</em>, <em>schema=None</em>, <em>custom_formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#checked_attributes_to_dict_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.checked_attributes_to_dict_fast" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.compile_filter">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">compile_filter</code><span class="sig-paren">(</span><em>filter_node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#compile_filter"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.compile_filter" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.decode_raw_vals">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">decode_raw_vals</code><span class="sig-paren">(</span><em>vals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#decode_raw_vals"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.decode_raw_vals" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.decode_raw_vals_fast">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">decode_raw_vals_fast</code><span class="sig-paren">(</span><em>vals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#decode_raw_vals_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.decode_raw_vals_fast" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.decode_vals">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">decode_vals</code><span class="sig-paren">(</span><em>vals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#decode_vals"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.decode_vals" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.decode_vals_fast">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">decode_vals_fast</code><span class="sig-paren">(</span><em>vals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#decode_vals_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.decode_vals_fast" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.evaluate_match">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">evaluate_match</code><span class="sig-paren">(</span><em>match</em>, <em>schema</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#evaluate_match"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.evaluate_match" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.filter_to_string">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">filter_to_string</code><span class="sig-paren">(</span><em>filter_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#filter_to_string"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.filter_to_string" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.matching_rule_assertion_to_string">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">matching_rule_assertion_to_string</code><span class="sig-paren">(</span><em>matching_rule_assertion</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#matching_rule_assertion_to_string"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.matching_rule_assertion_to_string" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.parse_filter">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">parse_filter</code><span class="sig-paren">(</span><em>search_filter</em>, <em>schema</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#parse_filter"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.parse_filter" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.raw_attributes_to_dict">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">raw_attributes_to_dict</code><span class="sig-paren">(</span><em>attribute_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#raw_attributes_to_dict"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.raw_attributes_to_dict" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.raw_attributes_to_dict_fast">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">raw_attributes_to_dict_fast</code><span class="sig-paren">(</span><em>attribute_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#raw_attributes_to_dict_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.raw_attributes_to_dict_fast" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.search_operation">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">search_operation</code><span class="sig-paren">(</span><em>search_base</em>, <em>search_filter</em>, <em>search_scope</em>, <em>dereference_aliases</em>, <em>attributes</em>, <em>size_limit</em>, <em>time_limit</em>, <em>types_only</em>, <em>schema=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#search_operation"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.search_operation" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.search_request_to_dict">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">search_request_to_dict</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#search_request_to_dict"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.search_request_to_dict" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.search_result_done_response_to_dict">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">search_result_done_response_to_dict</code><span class="sig-paren">(</span><em>response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#search_result_done_response_to_dict"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.search_result_done_response_to_dict" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.search_result_entry_response_to_dict">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">search_result_entry_response_to_dict</code><span class="sig-paren">(</span><em>response</em>, <em>schema</em>, <em>custom_formatter</em>, <em>check_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#search_result_entry_response_to_dict"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.search_result_entry_response_to_dict" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.search_result_entry_response_to_dict_fast">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">search_result_entry_response_to_dict_fast</code><span class="sig-paren">(</span><em>response</em>, <em>schema</em>, <em>custom_formatter</em>, <em>check_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#search_result_entry_response_to_dict_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.search_result_entry_response_to_dict_fast" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.search_result_reference_response_to_dict">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">search_result_reference_response_to_dict</code><span class="sig-paren">(</span><em>response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#search_result_reference_response_to_dict"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.search_result_reference_response_to_dict" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.operation.search.search_result_reference_response_to_dict_fast">
+<code class="descclassname">ldap3.operation.search.</code><code class="descname">search_result_reference_response_to_dict_fast</code><span class="sig-paren">(</span><em>response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/operation/search.html#search_result_reference_response_to_dict_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.operation.search.search_result_reference_response_to_dict_fast" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.operation.html">ldap3.operation package</a><ul>
+      <li>Previous: <a href="ldap3.operation.modifyDn.html" title="上一章">ldap3.operation.modifyDn module</a></li>
+      <li>Next: <a href="ldap3.operation.unbind.html" title="下一章">ldap3.operation.unbind module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.operation.search.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.operation.search.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

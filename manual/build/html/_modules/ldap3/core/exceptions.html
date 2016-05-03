@@ -1,0 +1,674 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.core.exceptions &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.core.exceptions 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2014.05.14</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">RESULT_OPERATIONS_ERROR</span><span class="p">,</span> <span class="n">RESULT_PROTOCOL_ERROR</span><span class="p">,</span> <span class="n">RESULT_TIME_LIMIT_EXCEEDED</span><span class="p">,</span> <span class="n">RESULT_SIZE_LIMIT_EXCEEDED</span><span class="p">,</span> \
+    <span class="n">RESULT_STRONGER_AUTH_REQUIRED</span><span class="p">,</span> <span class="n">RESULT_REFERRAL</span><span class="p">,</span> <span class="n">RESULT_ADMIN_LIMIT_EXCEEDED</span><span class="p">,</span> <span class="n">RESULT_UNAVAILABLE_CRITICAL_EXTENSION</span><span class="p">,</span> \
+    <span class="n">RESULT_AUTH_METHOD_NOT_SUPPORTED</span><span class="p">,</span> <span class="n">RESULT_UNDEFINED_ATTRIBUTE_TYPE</span><span class="p">,</span> <span class="n">RESULT_NO_SUCH_ATTRIBUTE</span><span class="p">,</span> \
+    <span class="n">RESULT_SASL_BIND_IN_PROGRESS</span><span class="p">,</span> <span class="n">RESULT_CONFIDENTIALITY_REQUIRED</span><span class="p">,</span> <span class="n">RESULT_INAPPROPRIATE_MATCHING</span><span class="p">,</span> \
+    <span class="n">RESULT_CONSTRAINT_VIOLATION</span><span class="p">,</span> \
+    <span class="n">RESULT_ATTRIBUTE_OR_VALUE_EXISTS</span><span class="p">,</span> <span class="n">RESULT_INVALID_ATTRIBUTE_SYNTAX</span><span class="p">,</span> <span class="n">RESULT_NO_SUCH_OBJECT</span><span class="p">,</span> <span class="n">RESULT_ALIAS_PROBLEM</span><span class="p">,</span> \
+    <span class="n">RESULT_INVALID_DN_SYNTAX</span><span class="p">,</span> <span class="n">RESULT_ALIAS_DEREFERENCING_PROBLEM</span><span class="p">,</span> <span class="n">RESULT_INVALID_CREDENTIALS</span><span class="p">,</span> <span class="n">RESULT_LOOP_DETECTED</span><span class="p">,</span> \
+    <span class="n">RESULT_ENTRY_ALREADY_EXISTS</span><span class="p">,</span> <span class="n">RESULT_LCUP_SECURITY_VIOLATION</span><span class="p">,</span> <span class="n">RESULT_CANCELED</span><span class="p">,</span> <span class="n">RESULT_E_SYNC_REFRESH_REQUIRED</span><span class="p">,</span> \
+    <span class="n">RESULT_NO_SUCH_OPERATION</span><span class="p">,</span> <span class="n">RESULT_LCUP_INVALID_DATA</span><span class="p">,</span> <span class="n">RESULT_OBJECT_CLASS_MODS_PROHIBITED</span><span class="p">,</span> <span class="n">RESULT_NAMING_VIOLATION</span><span class="p">,</span> \
+    <span class="n">RESULT_INSUFFICIENT_ACCESS_RIGHTS</span><span class="p">,</span> <span class="n">RESULT_OBJECT_CLASS_VIOLATION</span><span class="p">,</span> <span class="n">RESULT_TOO_LATE</span><span class="p">,</span> <span class="n">RESULT_CANNOT_CANCEL</span><span class="p">,</span> \
+    <span class="n">RESULT_LCUP_UNSUPPORTED_SCHEME</span><span class="p">,</span> <span class="n">RESULT_BUSY</span><span class="p">,</span> <span class="n">RESULT_AFFECT_MULTIPLE_DSAS</span><span class="p">,</span> <span class="n">RESULT_UNAVAILABLE</span><span class="p">,</span> \
+    <span class="n">RESULT_NOT_ALLOWED_ON_NON_LEAF</span><span class="p">,</span> \
+    <span class="n">RESULT_UNWILLING_TO_PERFORM</span><span class="p">,</span> <span class="n">RESULT_OTHER</span><span class="p">,</span> <span class="n">RESULT_LCUP_RELOAD_REQUIRED</span><span class="p">,</span> <span class="n">RESULT_ASSERTION_FAILED</span><span class="p">,</span> \
+    <span class="n">RESULT_AUTHORIZATION_DENIED</span><span class="p">,</span> <span class="n">RESULT_LCUP_RESOURCES_EXHAUSTED</span><span class="p">,</span> <span class="n">RESULT_NOT_ALLOWED_ON_RDN</span><span class="p">,</span> \
+    <span class="n">RESULT_INAPPROPRIATE_AUTHENTICATION</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+
+
+<span class="c1"># LDAPException hierarchy</span>
+<div class="viewcode-block" id="LDAPException"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPException">[文档]</a><span class="k">class</span> <span class="nc">LDAPException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPOperationResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPOperationResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPOperationResult</span><span class="p">(</span><span class="n">LDAPException</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">response_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="n">LDAPOperationResult</span> <span class="ow">and</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">exception_table</span><span class="p">:</span>
+            <span class="n">exc</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">,</span> <span class="n">exception_table</span><span class="p">[</span><span class="n">result</span><span class="p">])</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span>
+                <span class="n">exception_table</span><span class="p">[</span><span class="n">result</span><span class="p">])</span>  <span class="c1"># create an exception of the required result error</span>
+            <span class="n">exc</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="n">exc</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+            <span class="n">exc</span><span class="o">.</span><span class="n">dn</span> <span class="o">=</span> <span class="n">dn</span>
+            <span class="n">exc</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+            <span class="n">exc</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">response_type</span>
+            <span class="n">exc</span><span class="o">.</span><span class="n">response</span> <span class="o">=</span> <span class="n">response</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">exc</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">exc</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">response_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dn</span> <span class="o">=</span> <span class="n">dn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">response_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response</span> <span class="o">=</span> <span class="n">response</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+             <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">dn</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dn</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">response</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span> <span class="k">else</span> <span class="bp">None</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="s1">&#39; - &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="LDAPOperationsErrorResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPOperationsErrorResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPOperationsErrorResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPProtocolErrorResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPProtocolErrorResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPProtocolErrorResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPTimeLimitExceededResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPTimeLimitExceededResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPTimeLimitExceededResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSizeLimitExceededResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSizeLimitExceededResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPSizeLimitExceededResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAuthMethodNotSupportedResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAuthMethodNotSupportedResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPAuthMethodNotSupportedResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPStrongerAuthRequiredResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPStrongerAuthRequiredResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPStrongerAuthRequiredResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPReferralResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPReferralResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPReferralResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAdminLimitExceededResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAdminLimitExceededResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPAdminLimitExceededResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUnavailableCriticalExtensionResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUnavailableCriticalExtensionResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPUnavailableCriticalExtensionResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPConfidentialityRequiredResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPConfidentialityRequiredResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPConfidentialityRequiredResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSASLBindInProgressResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSASLBindInProgressResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPSASLBindInProgressResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPNoSuchAttributeResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPNoSuchAttributeResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPNoSuchAttributeResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUndefinedAttributeTypeResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUndefinedAttributeTypeResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPUndefinedAttributeTypeResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInappropriateMatchingResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInappropriateMatchingResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPInappropriateMatchingResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPConstraintViolationResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPConstraintViolationResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPConstraintViolationResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAttributeOrValueExistsResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAttributeOrValueExistsResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPAttributeOrValueExistsResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidAttributeSyntaxResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidAttributeSyntaxResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidAttributeSyntaxResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPNoSuchObjectResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPNoSuchObjectResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPNoSuchObjectResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAliasProblemResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAliasProblemResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPAliasProblemResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidDNSyntaxResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidDNSyntaxResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidDNSyntaxResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAliasDereferencingProblemResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAliasDereferencingProblemResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPAliasDereferencingProblemResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInappropriateAuthenticationResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInappropriateAuthenticationResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPInappropriateAuthenticationResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidCredentialsResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidCredentialsResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidCredentialsResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInsufficientAccessRightsResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInsufficientAccessRightsResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPInsufficientAccessRightsResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPBusyResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPBusyResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPBusyResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUnavailableResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUnavailableResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPUnavailableResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUnwillingToPerformResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUnwillingToPerformResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPUnwillingToPerformResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPLoopDetectedResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPLoopDetectedResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPLoopDetectedResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPNamingViolationResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPNamingViolationResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPNamingViolationResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPObjectClassViolationResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPObjectClassViolationResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPObjectClassViolationResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPNotAllowedOnNotLeafResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPNotAllowedOnNotLeafResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPNotAllowedOnNotLeafResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPNotAllowedOnRDNResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPNotAllowedOnRDNResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPNotAllowedOnRDNResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPEntryAlreadyExistsResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPEntryAlreadyExistsResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPEntryAlreadyExistsResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPObjectClassModsProhibitedResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPObjectClassModsProhibitedResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPObjectClassModsProhibitedResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAffectMultipleDSASResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAffectMultipleDSASResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPAffectMultipleDSASResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPOtherResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPOtherResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPOtherResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPLCUPResourcesExhaustedResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPLCUPResourcesExhaustedResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPLCUPResourcesExhaustedResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPLCUPSecurityViolationResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPLCUPSecurityViolationResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPLCUPSecurityViolationResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPLCUPInvalidDataResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPLCUPInvalidDataResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPLCUPInvalidDataResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPLCUPUnsupportedSchemeResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPLCUPUnsupportedSchemeResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPLCUPUnsupportedSchemeResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPLCUPReloadRequiredResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPLCUPReloadRequiredResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPLCUPReloadRequiredResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPCanceledResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPCanceledResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPCanceledResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPNoSuchOperationResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPNoSuchOperationResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPNoSuchOperationResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPTooLateResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPTooLateResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPTooLateResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPCannotCancelResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPCannotCancelResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPCannotCancelResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAssertionFailedResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAssertionFailedResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPAssertionFailedResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAuthorizationDeniedResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAuthorizationDeniedResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPAuthorizationDeniedResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPESyncRefreshRequiredResult"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPESyncRefreshRequiredResult">[文档]</a><span class="k">class</span> <span class="nc">LDAPESyncRefreshRequiredResult</span><span class="p">(</span><span class="n">LDAPOperationResult</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="n">exception_table</span> <span class="o">=</span> <span class="p">{</span><span class="n">RESULT_OPERATIONS_ERROR</span><span class="p">:</span> <span class="n">LDAPOperationsErrorResult</span><span class="p">,</span>
+                   <span class="n">RESULT_PROTOCOL_ERROR</span><span class="p">:</span> <span class="n">LDAPProtocolErrorResult</span><span class="p">,</span>
+                   <span class="n">RESULT_TIME_LIMIT_EXCEEDED</span><span class="p">:</span> <span class="n">LDAPTimeLimitExceededResult</span><span class="p">,</span>
+                   <span class="n">RESULT_SIZE_LIMIT_EXCEEDED</span><span class="p">:</span> <span class="n">LDAPSizeLimitExceededResult</span><span class="p">,</span>
+                   <span class="n">RESULT_AUTH_METHOD_NOT_SUPPORTED</span><span class="p">:</span> <span class="n">LDAPAuthMethodNotSupportedResult</span><span class="p">,</span>
+                   <span class="n">RESULT_STRONGER_AUTH_REQUIRED</span><span class="p">:</span> <span class="n">LDAPStrongerAuthRequiredResult</span><span class="p">,</span>
+                   <span class="n">RESULT_REFERRAL</span><span class="p">:</span> <span class="n">LDAPReferralResult</span><span class="p">,</span>
+                   <span class="n">RESULT_ADMIN_LIMIT_EXCEEDED</span><span class="p">:</span> <span class="n">LDAPAdminLimitExceededResult</span><span class="p">,</span>
+                   <span class="n">RESULT_UNAVAILABLE_CRITICAL_EXTENSION</span><span class="p">:</span> <span class="n">LDAPUnavailableCriticalExtensionResult</span><span class="p">,</span>
+                   <span class="n">RESULT_CONFIDENTIALITY_REQUIRED</span><span class="p">:</span> <span class="n">LDAPConfidentialityRequiredResult</span><span class="p">,</span>
+                   <span class="n">RESULT_SASL_BIND_IN_PROGRESS</span><span class="p">:</span> <span class="n">LDAPSASLBindInProgressResult</span><span class="p">,</span>
+                   <span class="n">RESULT_NO_SUCH_ATTRIBUTE</span><span class="p">:</span> <span class="n">LDAPNoSuchAttributeResult</span><span class="p">,</span>
+                   <span class="n">RESULT_UNDEFINED_ATTRIBUTE_TYPE</span><span class="p">:</span> <span class="n">LDAPUndefinedAttributeTypeResult</span><span class="p">,</span>
+                   <span class="n">RESULT_INAPPROPRIATE_MATCHING</span><span class="p">:</span> <span class="n">LDAPInappropriateMatchingResult</span><span class="p">,</span>
+                   <span class="n">RESULT_CONSTRAINT_VIOLATION</span><span class="p">:</span> <span class="n">LDAPConstraintViolationResult</span><span class="p">,</span>
+                   <span class="n">RESULT_ATTRIBUTE_OR_VALUE_EXISTS</span><span class="p">:</span> <span class="n">LDAPAttributeOrValueExistsResult</span><span class="p">,</span>
+                   <span class="n">RESULT_INVALID_ATTRIBUTE_SYNTAX</span><span class="p">:</span> <span class="n">LDAPInvalidAttributeSyntaxResult</span><span class="p">,</span>
+                   <span class="n">RESULT_NO_SUCH_OBJECT</span><span class="p">:</span> <span class="n">LDAPNoSuchObjectResult</span><span class="p">,</span>
+                   <span class="n">RESULT_ALIAS_PROBLEM</span><span class="p">:</span> <span class="n">LDAPAliasProblemResult</span><span class="p">,</span>
+                   <span class="n">RESULT_INVALID_DN_SYNTAX</span><span class="p">:</span> <span class="n">LDAPInvalidDNSyntaxResult</span><span class="p">,</span>
+                   <span class="n">RESULT_ALIAS_DEREFERENCING_PROBLEM</span><span class="p">:</span> <span class="n">LDAPAliasDereferencingProblemResult</span><span class="p">,</span>
+                   <span class="n">RESULT_INAPPROPRIATE_AUTHENTICATION</span><span class="p">:</span> <span class="n">LDAPInappropriateAuthenticationResult</span><span class="p">,</span>
+                   <span class="n">RESULT_INVALID_CREDENTIALS</span><span class="p">:</span> <span class="n">LDAPInvalidCredentialsResult</span><span class="p">,</span>
+                   <span class="n">RESULT_INSUFFICIENT_ACCESS_RIGHTS</span><span class="p">:</span> <span class="n">LDAPInsufficientAccessRightsResult</span><span class="p">,</span>
+                   <span class="n">RESULT_BUSY</span><span class="p">:</span> <span class="n">LDAPBusyResult</span><span class="p">,</span>
+                   <span class="n">RESULT_UNAVAILABLE</span><span class="p">:</span> <span class="n">LDAPUnavailableResult</span><span class="p">,</span>
+                   <span class="n">RESULT_UNWILLING_TO_PERFORM</span><span class="p">:</span> <span class="n">LDAPUnwillingToPerformResult</span><span class="p">,</span>
+                   <span class="n">RESULT_LOOP_DETECTED</span><span class="p">:</span> <span class="n">LDAPLoopDetectedResult</span><span class="p">,</span>
+                   <span class="n">RESULT_NAMING_VIOLATION</span><span class="p">:</span> <span class="n">LDAPNamingViolationResult</span><span class="p">,</span>
+                   <span class="n">RESULT_OBJECT_CLASS_VIOLATION</span><span class="p">:</span> <span class="n">LDAPObjectClassViolationResult</span><span class="p">,</span>
+                   <span class="n">RESULT_NOT_ALLOWED_ON_NON_LEAF</span><span class="p">:</span> <span class="n">LDAPNotAllowedOnNotLeafResult</span><span class="p">,</span>
+                   <span class="n">RESULT_NOT_ALLOWED_ON_RDN</span><span class="p">:</span> <span class="n">LDAPNotAllowedOnRDNResult</span><span class="p">,</span>
+                   <span class="n">RESULT_ENTRY_ALREADY_EXISTS</span><span class="p">:</span> <span class="n">LDAPEntryAlreadyExistsResult</span><span class="p">,</span>
+                   <span class="n">RESULT_OBJECT_CLASS_MODS_PROHIBITED</span><span class="p">:</span> <span class="n">LDAPObjectClassModsProhibitedResult</span><span class="p">,</span>
+                   <span class="n">RESULT_AFFECT_MULTIPLE_DSAS</span><span class="p">:</span> <span class="n">LDAPAffectMultipleDSASResult</span><span class="p">,</span>
+                   <span class="n">RESULT_OTHER</span><span class="p">:</span> <span class="n">LDAPOtherResult</span><span class="p">,</span>
+                   <span class="n">RESULT_LCUP_RESOURCES_EXHAUSTED</span><span class="p">:</span> <span class="n">LDAPLCUPResourcesExhaustedResult</span><span class="p">,</span>
+                   <span class="n">RESULT_LCUP_SECURITY_VIOLATION</span><span class="p">:</span> <span class="n">LDAPLCUPSecurityViolationResult</span><span class="p">,</span>
+                   <span class="n">RESULT_LCUP_INVALID_DATA</span><span class="p">:</span> <span class="n">LDAPLCUPInvalidDataResult</span><span class="p">,</span>
+                   <span class="n">RESULT_LCUP_UNSUPPORTED_SCHEME</span><span class="p">:</span> <span class="n">LDAPLCUPUnsupportedSchemeResult</span><span class="p">,</span>
+                   <span class="n">RESULT_LCUP_RELOAD_REQUIRED</span><span class="p">:</span> <span class="n">LDAPLCUPReloadRequiredResult</span><span class="p">,</span>
+                   <span class="n">RESULT_CANCELED</span><span class="p">:</span> <span class="n">LDAPCanceledResult</span><span class="p">,</span>
+                   <span class="n">RESULT_NO_SUCH_OPERATION</span><span class="p">:</span> <span class="n">LDAPNoSuchOperationResult</span><span class="p">,</span>
+                   <span class="n">RESULT_TOO_LATE</span><span class="p">:</span> <span class="n">LDAPTooLateResult</span><span class="p">,</span>
+                   <span class="n">RESULT_CANNOT_CANCEL</span><span class="p">:</span> <span class="n">LDAPCannotCancelResult</span><span class="p">,</span>
+                   <span class="n">RESULT_ASSERTION_FAILED</span><span class="p">:</span> <span class="n">LDAPAssertionFailedResult</span><span class="p">,</span>
+                   <span class="n">RESULT_AUTHORIZATION_DENIED</span><span class="p">:</span> <span class="n">LDAPAuthorizationDeniedResult</span><span class="p">,</span>
+                   <span class="n">RESULT_E_SYNC_REFRESH_REQUIRED</span><span class="p">:</span> <span class="n">LDAPESyncRefreshRequiredResult</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="LDAPExceptionError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPExceptionError">[文档]</a><span class="k">class</span> <span class="nc">LDAPExceptionError</span><span class="p">(</span><span class="n">LDAPException</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># configuration exceptions</span>
+<div class="viewcode-block" id="LDAPConfigurationError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPConfigurationError">[文档]</a><span class="k">class</span> <span class="nc">LDAPConfigurationError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUnknownStrategyError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUnknownStrategyError">[文档]</a><span class="k">class</span> <span class="nc">LDAPUnknownStrategyError</span><span class="p">(</span><span class="n">LDAPConfigurationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUnknownAuthenticationMethodError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUnknownAuthenticationMethodError">[文档]</a><span class="k">class</span> <span class="nc">LDAPUnknownAuthenticationMethodError</span><span class="p">(</span><span class="n">LDAPConfigurationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSSLConfigurationError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSSLConfigurationError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSSLConfigurationError</span><span class="p">(</span><span class="n">LDAPConfigurationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPDefinitionError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPDefinitionError">[文档]</a><span class="k">class</span> <span class="nc">LDAPDefinitionError</span><span class="p">(</span><span class="n">LDAPConfigurationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPPackageUnavailableError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPPackageUnavailableError">[文档]</a><span class="k">class</span> <span class="nc">LDAPPackageUnavailableError</span><span class="p">(</span><span class="n">LDAPConfigurationError</span><span class="p">,</span> <span class="ne">ImportError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPConfigurationParameterError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPConfigurationParameterError">[文档]</a><span class="k">class</span> <span class="nc">LDAPConfigurationParameterError</span><span class="p">(</span><span class="n">LDAPConfigurationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># abstract layer exceptions</span>
+<div class="viewcode-block" id="LDAPKeyError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPKeyError">[文档]</a><span class="k">class</span> <span class="nc">LDAPKeyError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPAttributeError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPAttributeError">[文档]</a><span class="k">class</span> <span class="nc">LDAPAttributeError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPEntryError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPEntryError">[文档]</a><span class="k">class</span> <span class="nc">LDAPEntryError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPObjectError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPObjectError">[文档]</a><span class="k">class</span> <span class="nc">LDAPObjectError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPTypeError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPTypeError">[文档]</a><span class="k">class</span> <span class="nc">LDAPTypeError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPReaderError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPReaderError">[文档]</a><span class="k">class</span> <span class="nc">LDAPReaderError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># security exceptions</span>
+<div class="viewcode-block" id="LDAPSSLNotSupportedError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSSLNotSupportedError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSSLNotSupportedError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">ImportError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidTlsSpecificationError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidTlsSpecificationError">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidTlsSpecificationError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidHashAlgorithmError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidHashAlgorithmError">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidHashAlgorithmError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># connection exceptions</span>
+<div class="viewcode-block" id="LDAPBindError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPBindError">[文档]</a><span class="k">class</span> <span class="nc">LDAPBindError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidServerError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidServerError">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidServerError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSASLMechanismNotSupportedError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSASLMechanismNotSupportedError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSASLMechanismNotSupportedError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPConnectionIsReadOnlyError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPConnectionIsReadOnlyError">[文档]</a><span class="k">class</span> <span class="nc">LDAPConnectionIsReadOnlyError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPChangesError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPChangesError">[文档]</a><span class="k">class</span> <span class="nc">LDAPChangesError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPServerPoolError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPServerPoolError">[文档]</a><span class="k">class</span> <span class="nc">LDAPServerPoolError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPServerPoolExhaustedError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPServerPoolExhaustedError">[文档]</a><span class="k">class</span> <span class="nc">LDAPServerPoolExhaustedError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidPortError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidPortError">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidPortError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPStartTLSError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPStartTLSError">[文档]</a><span class="k">class</span> <span class="nc">LDAPStartTLSError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPCertificateError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPCertificateError">[文档]</a><span class="k">class</span> <span class="nc">LDAPCertificateError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUserNameNotAllowedError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUserNameNotAllowedError">[文档]</a><span class="k">class</span> <span class="nc">LDAPUserNameNotAllowedError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUserNameIsMandatoryError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUserNameIsMandatoryError">[文档]</a><span class="k">class</span> <span class="nc">LDAPUserNameIsMandatoryError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPPasswordIsMandatoryError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPPasswordIsMandatoryError">[文档]</a><span class="k">class</span> <span class="nc">LDAPPasswordIsMandatoryError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidFilterError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidFilterError">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidFilterError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidScopeError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidScopeError">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidScopeError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidDereferenceAliasesError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidDereferenceAliasesError">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidDereferenceAliasesError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPControlsError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPControlsError">[文档]</a><span class="k">class</span> <span class="nc">LDAPControlsError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPExtensionError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPExtensionError">[文档]</a><span class="k">class</span> <span class="nc">LDAPExtensionError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPLDIFError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPLDIFError">[文档]</a><span class="k">class</span> <span class="nc">LDAPLDIFError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSchemaError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSchemaError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSchemaError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSASLPrepError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSASLPrepError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSASLPrepError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSASLBindInProgressError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSASLBindInProgressError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSASLBindInProgressError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPMetricsError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPMetricsError">[文档]</a><span class="k">class</span> <span class="nc">LDAPMetricsError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPObjectClassError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPObjectClassError">[文档]</a><span class="k">class</span> <span class="nc">LDAPObjectClassError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPInvalidDnError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPInvalidDnError">[文档]</a><span class="k">class</span> <span class="nc">LDAPInvalidDnError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPResponseTimeoutError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPResponseTimeoutError">[文档]</a><span class="k">class</span> <span class="nc">LDAPResponseTimeoutError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># communication exceptions</span>
+<div class="viewcode-block" id="LDAPCommunicationError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPCommunicationError">[文档]</a><span class="k">class</span> <span class="nc">LDAPCommunicationError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSocketOpenError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSocketOpenError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSocketOpenError</span><span class="p">(</span><span class="n">LDAPCommunicationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSocketCloseError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSocketCloseError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSocketCloseError</span><span class="p">(</span><span class="n">LDAPCommunicationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSocketReceiveError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSocketReceiveError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSocketReceiveError</span><span class="p">(</span><span class="n">LDAPCommunicationError</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSocketSendError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSocketSendError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSocketSendError</span><span class="p">(</span><span class="n">LDAPCommunicationError</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPSessionTerminatedByServerError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPSessionTerminatedByServerError">[文档]</a><span class="k">class</span> <span class="nc">LDAPSessionTerminatedByServerError</span><span class="p">(</span><span class="n">LDAPCommunicationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUnknownResponseError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUnknownResponseError">[文档]</a><span class="k">class</span> <span class="nc">LDAPUnknownResponseError</span><span class="p">(</span><span class="n">LDAPCommunicationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPUnknownRequestError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPUnknownRequestError">[文档]</a><span class="k">class</span> <span class="nc">LDAPUnknownRequestError</span><span class="p">(</span><span class="n">LDAPCommunicationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPReferralError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPReferralError">[文档]</a><span class="k">class</span> <span class="nc">LDAPReferralError</span><span class="p">(</span><span class="n">LDAPCommunicationError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># pooling exceptions</span>
+<div class="viewcode-block" id="LDAPConnectionPoolNameIsMandatoryError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPConnectionPoolNameIsMandatoryError">[文档]</a><span class="k">class</span> <span class="nc">LDAPConnectionPoolNameIsMandatoryError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="LDAPConnectionPoolNotStartedError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPConnectionPoolNotStartedError">[文档]</a><span class="k">class</span> <span class="nc">LDAPConnectionPoolNotStartedError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># restartable strategy</span>
+<div class="viewcode-block" id="LDAPMaximumRetriesError"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.LDAPMaximumRetriesError">[文档]</a><span class="k">class</span> <span class="nc">LDAPMaximumRetriesError</span><span class="p">(</span><span class="n">LDAPExceptionError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;LDAPMaximumRetriesError: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Exception history:&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">exc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>  <span class="c1"># args[1] contains exception history</span>
+                        <span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">exc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">exc</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Maximum number of retries reached: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LDAPExceptionError</span><span class="o">.</span><span class="n">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<span class="c1"># exception factories</span>
+<div class="viewcode-block" id="communication_exception_factory"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.communication_exception_factory">[文档]</a><span class="k">def</span> <span class="nf">communication_exception_factory</span><span class="p">(</span><span class="n">exc_to_raise</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a new exception class of the requested type (subclass of LDAPCommunication) merged with the exception raised by the interpreter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">exc_to_raise</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">__name__</span> <span class="k">for</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">LDAPCommunicationError</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">()]:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc_to_raise</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">(</span><span class="n">exc_to_raise</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)),</span> <span class="nb">dict</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">LDAPExceptionError</span><span class="p">(</span><span class="s1">&#39;unable to generate exception type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc_to_raise</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="start_tls_exception_factory"><a class="viewcode-back" href="../../../ldap3.core.exceptions.html#ldap3.core.exceptions.start_tls_exception_factory">[文档]</a><span class="k">def</span> <span class="nf">start_tls_exception_factory</span><span class="p">(</span><span class="n">exc_to_raise</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a new exception class of the requested type (subclass of LDAPCommunication) merged with the exception raised by the interpreter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">exc_to_raise</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;LDAPStartTLSError&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc_to_raise</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">(</span><span class="n">exc_to_raise</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)),</span> <span class="nb">dict</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">LDAPExceptionError</span><span class="p">(</span><span class="s1">&#39;unable to generate exception type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc_to_raise</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

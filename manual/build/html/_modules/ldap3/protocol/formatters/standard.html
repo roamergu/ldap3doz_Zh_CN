@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.formatters.standard &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../../index.html" />
+    <link rel="up" title="ldap3" href="../../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.protocol.formatters.standard 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2014.10.28</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">SEQUENCE_TYPES</span>
+<span class="kn">from</span> <span class="nn">...protocol.formatters.formatters</span> <span class="kn">import</span> <span class="n">format_ad_timestamp</span><span class="p">,</span> <span class="n">format_binary</span><span class="p">,</span> <span class="n">format_boolean</span><span class="p">,</span> <span class="n">format_integer</span><span class="p">,</span> <span class="n">format_sid</span><span class="p">,</span> <span class="n">format_time</span><span class="p">,</span> <span class="n">format_unicode</span><span class="p">,</span> <span class="n">format_uuid</span><span class="p">,</span> <span class="n">format_uuid_le</span>
+
+<span class="n">standard_formatter</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.903&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Object (DN-binary) - Microsoft</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.904&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Object (DN-string) - Microsoft</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.905&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># String (Teletex) - Microsoft</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.906&#39;</span><span class="p">:</span> <span class="n">format_integer</span><span class="p">,</span>  <span class="c1"># Large integer - Microsoft</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.907&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># String (NT-sec-desc) - Microsoft</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.1221&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Object (OR-name) - Microsoft</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.1362&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># String (Case) - Microsoft</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.1&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># ACI item [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.2&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Access point [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.3&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Attribute type description</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.4&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Audio [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.5&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Binary [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.6&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Bit String</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.7&#39;</span><span class="p">:</span> <span class="n">format_boolean</span><span class="p">,</span>  <span class="c1"># Boolean</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.8&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Certificate [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.9&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Certificate List [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.10&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Certificate Pair [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.11&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Country String</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.12&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Distinguished name (DN)</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.13&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Data Quality Syntax [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.14&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Delivery method</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.15&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Directory string</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.16&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># DIT Content Rule Description</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.17&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># DIT Structure Rule Description</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.18&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># DL Submit Permission [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.19&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># DSA Quality Syntax [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.20&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># DSE Type [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.21&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Enhanced Guide</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.22&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Facsimile Telephone Number</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.23&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Fax</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.24&#39;</span><span class="p">:</span> <span class="n">format_time</span><span class="p">,</span>  <span class="c1"># Generalized time</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.25&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Guide [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.26&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># IA5 string</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.27&#39;</span><span class="p">:</span> <span class="n">format_integer</span><span class="p">,</span>  <span class="c1"># Integer</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.28&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># JPEG</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.29&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Master and Shadow Access Points [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.30&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Matching rule description</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.31&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Matching rule use description</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.32&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Mail Preference [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.33&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># MHS OR Address [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.34&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Name and optional UID</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.35&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Name form description</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.36&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Numeric string</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.37&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Object class description</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.38&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># OID</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.39&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Other mailbox</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.40&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Octet string</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.41&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Postal address</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.42&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Protocol Information [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.43&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Presentation Address [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.44&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Printable string</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.45&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Subtree specification [OBSOLETE</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.46&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Supplier Information [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.47&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Supplier Or Consumer [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.48&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Supplier And Consumer [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.49&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Supported Algorithm [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.50&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Telephone number</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.51&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Teletex terminal identifier</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.52&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Teletex number</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.53&#39;</span><span class="p">:</span> <span class="n">format_time</span><span class="p">,</span>  <span class="c1"># Utc time  (deprecated)</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.54&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># LDAP syntax description</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.55&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Modify rights [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.56&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># LDAP Schema Definition [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.57&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># LDAP Schema Description [OBSOLETE]</span>
+    <span class="s1">&#39;1.3.6.1.4.1.1466.115.121.1.58&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Substring assertion</span>
+    <span class="s1">&#39;1.3.6.1.1.16.1&#39;</span><span class="p">:</span> <span class="n">format_uuid</span><span class="p">,</span>  <span class="c1"># UUID</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.4.1.501&#39;</span><span class="p">:</span> <span class="n">format_uuid</span><span class="p">,</span>  <span class="c1"># GUID (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.0&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Unknown (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.6&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Case Ignore List (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.12&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Tagged Data (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.13&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># Octet List (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.14&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Tagged String (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.15&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Tagged Name And String (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.16&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># NDS Replica Pointer (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.17&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># NDS ACL (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.19&#39;</span><span class="p">:</span> <span class="n">format_time</span><span class="p">,</span>  <span class="c1"># NDS Timestamp (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.22&#39;</span><span class="p">:</span> <span class="n">format_integer</span><span class="p">,</span>  <span class="c1"># Counter (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.23&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Tagged Name (Novell)</span>
+    <span class="s1">&#39;2.16.840.1.113719.1.1.5.1.25&#39;</span><span class="p">:</span> <span class="n">format_unicode</span><span class="p">,</span>  <span class="c1"># Typed Name (Novell)</span>
+    <span class="s1">&#39;supportedldapversion&#39;</span><span class="p">:</span> <span class="n">format_integer</span><span class="p">,</span>  <span class="c1"># supportedLdapVersion (Microsoft)</span>
+    <span class="s1">&#39;octetstring&#39;</span><span class="p">:</span> <span class="n">format_binary</span><span class="p">,</span>  <span class="c1"># octect string (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.2&#39;</span><span class="p">:</span> <span class="n">format_uuid_le</span><span class="p">,</span>  <span class="c1"># object guid (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.13&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span><span class="p">,</span>  <span class="c1"># builtinCreationTime (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.26&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span><span class="p">,</span>  <span class="c1"># creationTime (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.49&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span><span class="p">,</span>  <span class="c1"># badPasswordTime (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.51&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span><span class="p">,</span>  <span class="c1"># lastLogoff (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.52&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span><span class="p">,</span>  <span class="c1"># lastLogon (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.96&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span><span class="p">,</span>  <span class="c1"># pwdLastSet (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.146&#39;</span><span class="p">:</span> <span class="n">format_sid</span><span class="p">,</span>  <span class="c1"># objectSid (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.159&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span><span class="p">,</span>  <span class="c1"># accountExpires (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.662&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span><span class="p">,</span>  <span class="c1"># lockoutTime (Microsoft)</span>
+    <span class="s1">&#39;1.2.840.113556.1.4.1696&#39;</span><span class="p">:</span> <span class="n">format_ad_timestamp</span>  <span class="c1"># lastLogonTimestamp (Microsoft)</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="format_attribute_values"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.standard.html#ldap3.protocol.formatters.standard.format_attribute_values">[文档]</a><span class="k">def</span> <span class="nf">format_attribute_values</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">custom_formatter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tries to format following the OIDs info and format_helper specification.</span>
+<span class="sd">    Search for attribute oid, then attribute name (can be multiple), then attribute syntax</span>
+<span class="sd">    Precedence is:</span>
+<span class="sd">    1. attribute name</span>
+<span class="sd">    2. attribute oid(from schema)</span>
+<span class="sd">    3. attribute names (from oid_info)</span>
+<span class="sd">    4. attribute syntax (from schema)</span>
+<span class="sd">    Custom formatters can be defined in Server object and have precedence over the standard_formatters</span>
+<span class="sd">    If no formatter is found the raw_value is returned as bytes.</span>
+<span class="sd">    Attributes defined as SINGLE_VALUE in schema are returned as a single object, otherwise are returned as a list of object</span>
+<span class="sd">    Formatter functions can return any kind of object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">schema</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">attribute_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">attribute_types</span><span class="p">:</span>
+        <span class="n">attr_type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">attribute_types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">attr_type</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="n">custom_formatter</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_formatter</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>  <span class="c1"># if custom formatters are defined they have precedence over the standard formatters</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">custom_formatter</span><span class="p">:</span>  <span class="c1"># search for attribute name, as returned by the search operation</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">custom_formatter</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">formatter</span> <span class="ow">and</span> <span class="n">attr_type</span> <span class="ow">and</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">oid</span> <span class="ow">in</span> <span class="n">custom_formatter</span><span class="p">:</span>  <span class="c1"># search for attribute oid as returned by schema</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">custom_formatter</span><span class="p">[</span><span class="n">attr_type</span><span class="o">.</span><span class="n">oid</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">formatter</span> <span class="ow">and</span> <span class="n">attr_type</span> <span class="ow">and</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">SEQUENCE_TYPES</span><span class="p">):</span>  <span class="c1"># search for multiple names defined in oid_info</span>
+                <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="n">custom_formatter</span><span class="p">:</span>
+                        <span class="n">formatter</span> <span class="o">=</span> <span class="n">custom_formatter</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span>
+                        <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">custom_formatter</span><span class="p">:</span>  <span class="c1"># search for name defined in oid_info</span>
+                <span class="n">formatter</span> <span class="o">=</span> <span class="n">custom_formatter</span><span class="p">[</span><span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">formatter</span> <span class="ow">and</span> <span class="n">attr_type</span> <span class="ow">and</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">syntax</span> <span class="ow">in</span> <span class="n">custom_formatter</span><span class="p">:</span>  <span class="c1"># search for syntax defined in schema</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">custom_formatter</span><span class="p">[</span><span class="n">attr_type</span><span class="o">.</span><span class="n">syntax</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">formatter</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">standard_formatter</span><span class="p">:</span>  <span class="c1"># search for attribute name, as returned by the search operation</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">standard_formatter</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">formatter</span> <span class="ow">and</span> <span class="n">attr_type</span> <span class="ow">and</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">oid</span> <span class="ow">in</span> <span class="n">standard_formatter</span><span class="p">:</span>  <span class="c1"># search for attribute oid as returned by schema</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">standard_formatter</span><span class="p">[</span><span class="n">attr_type</span><span class="o">.</span><span class="n">oid</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">formatter</span> <span class="ow">and</span> <span class="n">attr_type</span> <span class="ow">and</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">SEQUENCE_TYPES</span><span class="p">):</span>  <span class="c1"># search for multiple names defined in oid_info</span>
+            <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="n">standard_formatter</span><span class="p">:</span>
+                    <span class="n">formatter</span> <span class="o">=</span> <span class="n">standard_formatter</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span>
+                    <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">standard_formatter</span><span class="p">:</span>  <span class="c1"># search for name defined in oid_info</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">standard_formatter</span><span class="p">[</span><span class="n">attr_type</span><span class="o">.</span><span class="n">oid_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">formatter</span> <span class="ow">and</span> <span class="n">attr_type</span> <span class="ow">and</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">syntax</span> <span class="ow">in</span> <span class="n">standard_formatter</span><span class="p">:</span>  <span class="c1"># search for syntax defined in schema</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">standard_formatter</span><span class="p">[</span><span class="n">attr_type</span><span class="o">.</span><span class="n">syntax</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">formatter</span><span class="p">:</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">format_unicode</span>  <span class="c1"># default formatter</span>
+
+    <span class="n">formatted_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">formatter</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span> <span class="k">for</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">formatted_values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">formatted_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">attr_type</span> <span class="ow">and</span> <span class="n">attr_type</span><span class="o">.</span><span class="n">single_value</span><span class="p">)</span> <span class="k">else</span> <span class="n">formatted_values</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># RFCs states that attributes must always have values, but AD return empty values in DirSync</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">模块代码</a><ul>
+  <li><a href="../../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.microsoft module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.protocol package" href="ldap3.protocol.html" />
+    <link rel="next" title="ldap3.protocol.novell module" href="ldap3.protocol.novell.html" />
+    <link rel="prev" title="ldap3.protocol.convert module" href="ldap3.protocol.convert.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.protocol.microsoft">
+<span id="ldap3-protocol-microsoft-module"></span><h1>ldap3.protocol.microsoft module<a class="headerlink" href="#module-ldap3.protocol.microsoft" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.protocol.microsoft.DirSyncControlRequestValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.microsoft.</code><code class="descname">DirSyncControlRequestValue</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/microsoft.html#DirSyncControlRequestValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.microsoft.DirSyncControlRequestValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.microsoft.DirSyncControlRequestValue.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('Flags', Integer()), NamedType('MaxBytes', Integer()), NamedType('Cookie', OctetString()))</em><a class="headerlink" href="#ldap3.protocol.microsoft.DirSyncControlRequestValue.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.microsoft.DirSyncControlResponseValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.microsoft.</code><code class="descname">DirSyncControlResponseValue</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/microsoft.html#DirSyncControlResponseValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.microsoft.DirSyncControlResponseValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.microsoft.DirSyncControlResponseValue.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('MoreResults', Integer()), NamedType('unused', Integer()), NamedType('CookieServer', OctetString()))</em><a class="headerlink" href="#ldap3.protocol.microsoft.DirSyncControlResponseValue.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.microsoft.ExtendedDN">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.microsoft.</code><code class="descname">ExtendedDN</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/microsoft.html#ExtendedDN"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.microsoft.ExtendedDN" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.microsoft.ExtendedDN.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('option', Integer()))</em><a class="headerlink" href="#ldap3.protocol.microsoft.ExtendedDN.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.microsoft.SicilyBindResponse">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.microsoft.</code><code class="descname">SicilyBindResponse</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/microsoft.html#SicilyBindResponse"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.microsoft.SicilyBindResponse" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="attribute">
+<dt id="ldap3.protocol.microsoft.SicilyBindResponse.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(NamedType('resultCode', ResultCode()), NamedType('serverCreds', OctetString()), NamedType('errorMessage', LDAPString()))</em><a class="headerlink" href="#ldap3.protocol.microsoft.SicilyBindResponse.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.microsoft.SicilyBindResponse.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=64, tagFormat=32, tagId=1))</em><a class="headerlink" href="#ldap3.protocol.microsoft.SicilyBindResponse.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.microsoft.dir_sync_control">
+<code class="descclassname">ldap3.protocol.microsoft.</code><code class="descname">dir_sync_control</code><span class="sig-paren">(</span><em>criticality</em>, <em>object_security</em>, <em>ancestors_first</em>, <em>public_data_only</em>, <em>incremental_values</em>, <em>max_length</em>, <em>cookie</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/microsoft.html#dir_sync_control"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.microsoft.dir_sync_control" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.microsoft.extended_dn_control">
+<code class="descclassname">ldap3.protocol.microsoft.</code><code class="descname">extended_dn_control</code><span class="sig-paren">(</span><em>criticality=False</em>, <em>hex_format=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/microsoft.html#extended_dn_control"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.microsoft.extended_dn_control" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.microsoft.show_deleted_control">
+<code class="descclassname">ldap3.protocol.microsoft.</code><code class="descname">show_deleted_control</code><span class="sig-paren">(</span><em>criticality=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/microsoft.html#show_deleted_control"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.microsoft.show_deleted_control" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.protocol.html">ldap3.protocol package</a><ul>
+      <li>Previous: <a href="ldap3.protocol.convert.html" title="上一章">ldap3.protocol.convert module</a></li>
+      <li>Next: <a href="ldap3.protocol.novell.html" title="下一章">ldap3.protocol.novell module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.protocol.microsoft.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.protocol.microsoft.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

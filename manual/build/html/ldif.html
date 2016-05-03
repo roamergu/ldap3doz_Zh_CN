@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LDIF (LDAP Data Interchange Format) &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="Exceptions" href="exceptions.html" />
+    <link rel="prev" title="Abstraction Layer" href="abstraction.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ldif-ldap-data-interchange-format">
+<h1>LDIF (LDAP Data Interchange Format)<a class="headerlink" href="#ldif-ldap-data-interchange-format" title="永久链接至标题">¶</a></h1>
+<p>LDIF is a data interchange format for LDAP. It is defined in RFC2849 (June 2000) in two different flavours: <em>LDIF-CONTENT</em> and <em>LDIF-CHANGE</em>.
+LDIF-CONTENT is used to describe LDAP entries in an ASCII stream (i.e. a file), while LDIF-CHANGE is used to describe Add, Delete, Modify and
+ModifyDn operations. <em>These two formats have different purposes and cannot be mixed in the same stream.</em>
+If the DN of the entry or an attribute value contains any unicode character the value must be base64 encoded, as specified in RFC2849.
+ldap3 is compliant to the latest LDIF format (version: 1).</p>
+<p>ldap3 can stream the output of a search (LDIF-CONTENT) or of an operation (LDIF-CHANGE) to a file object.
+It cannot read a file with LDIF content because this is not defined in the LDAPv3 standard.
+Each LDAP server has its own tools to import an LDIF-CONTENT or to perform LDIF-CHANGE.</p>
+<div class="section" id="ldif-content">
+<h2>LDIF-CONTENT<a class="headerlink" href="#ldif-content" title="永久链接至标题">¶</a></h2>
+<p>You can use the LDIF-CONTENT flavour with any search result:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="c1"># request a few objects from the ldap server</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;o=test&#39;</span><span class="p">,</span><span class="s1">&#39;(cn=test-ldif*)&#39;</span><span class="p">,</span> <span class="n">SUBTREE</span><span class="p">,</span> <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sn&#39;</span><span class="p">,</span> <span class="s1">&#39;objectClass&#39;</span><span class="p">])</span>
+<span class="n">ldif_output</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">response_to_ldif</span><span class="p">()</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>ldif_output will contain:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">version</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">dn</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">test</span><span class="o">-</span><span class="n">ldif</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">inetOrgPerson</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">organizationalPerson</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">Person</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">ndsLoginProperties</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">Top</span>
+<span class="n">sn</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">ldif</span><span class="o">-</span><span class="mi">1</span>
+
+<span class="n">dn</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">test</span><span class="o">-</span><span class="n">ldif</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">inetOrgPerson</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">organizationalPerson</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">Person</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">ndsLoginProperties</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">Top</span>
+<span class="n">sn</span><span class="p">::</span> <span class="n">dGVzdC1sZGlmLTItw6DDssO5</span>
+
+
+<span class="c1"># total number of entries: 2</span>
+</pre></div>
+</div>
+<p>you can even request a LDIF-CONTENT for a response you saved early:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># request a few objects from the ldap server</span>
+<span class="n">response1</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;o=test&#39;</span><span class="p">,</span><span class="s1">&#39;(cn=test-ldif*)&#39;</span><span class="p">,</span> <span class="n">SUBTREE</span><span class="p">,</span> <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sn&#39;</span><span class="p">,</span> <span class="s1">&#39;objectClass&#39;</span><span class="p">])</span>
+<span class="n">response2</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;o=test&#39;</span><span class="p">,</span><span class="s1">&#39;(!(cn=test-ldif*))&#39;</span><span class="p">,</span> <span class="n">SUBTREE</span><span class="p">,</span> <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sn&#39;</span><span class="p">,</span> <span class="s1">&#39;objectClass&#39;</span><span class="p">])</span>
+<span class="n">ldif_output</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">response_to_ldif</span><span class="p">(</span><span class="n">response1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>ldif_output will contain the LDIF representation of the response entries.</p>
+</div>
+<div class="section" id="ldif-change">
+<h2>LDIF-CHANGE<a class="headerlink" href="#ldif-change" title="永久链接至标题">¶</a></h2>
+<p>To get the LDIF representation of Add, Modify, Delete and ModifyDn operation you must use the LDIF_PRODUCER strategy. With this strategy operations are
+not executed on an LDAP server but are converted to an LDIF-CHANGE format that can be sent to an LDAP server.</p>
+<p>For example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">LDIF</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">client_strategy</span> <span class="o">=</span> <span class="n">LDIF</span><span class="p">)</span>  <span class="c1"># no need of real LDAP server</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;cn=test-add-operation,o=test&#39;</span><span class="p">),</span> <span class="s1">&#39;inetOrgPerson&#39;</span><span class="p">,</span>
+               <span class="p">{</span><span class="s1">&#39;objectClass&#39;</span><span class="p">:</span> <span class="s1">&#39;inetOrgPerson&#39;</span><span class="p">,</span> <span class="s1">&#39;sn&#39;</span><span class="p">:</span> <span class="s1">&#39;test-add&#39;</span><span class="p">,</span> <span class="s1">&#39;cn&#39;</span><span class="p">:</span> <span class="s1">&#39;test-add-operation&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>in connection.response you will find:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">version</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">dn</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">test</span><span class="o">-</span><span class="n">add</span><span class="o">-</span><span class="n">operation</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span>
+<span class="n">changetype</span><span class="p">:</span> <span class="n">add</span>
+<span class="n">objectClass</span><span class="p">:</span> <span class="n">inetorgperson</span>
+<span class="n">sn</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">add</span>
+<span class="n">cn</span><span class="p">:</span> <span class="n">test</span><span class="o">-</span><span class="n">add</span><span class="o">-</span><span class="n">operation</span>
+</pre></div>
+</div>
+<p>A more complex modify operation (from the RFC2849 examples):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>from ldap3 import MODIFY_ADD. MODIFY_DELETE, MODIFY_REPLACE
+connection.modify(&#39;cn=Paula Jensen, ou=Product Development, dc=airius, dc=com&#39;,
+    {&#39;postaladdress&#39;: (MODIFY_ADD, [&#39;123 Anystreet $ Sunnyvale, CA $ 94086&#39;]),
+     &#39;description&#39;: (MODIFY_DELETE, []),
+     &#39;telephonenumber&#39;: (MODIFY_REPLACE, [&#39;+1 408 555 1234&#39;, &#39;+1 408 555 5678&#39;]),
+     &#39;facsimiletelephonenumber&#39;: (MODIFY_DELETE, [&#39;+1 408 555 9876&#39;])
+    })
+
+returns:
+
+version: 1
+dn: cn=Paula Jensen, ou=Product Development, dc=airius, dc=com
+changetype: modify
+add: postaladdress
+postaladdress: 123 Anystreet $ Sunnyvale, CA $ 94086
+-
+delete: description
+-
+replace: telephonenumber
+telephonenumber: +1 408 555 1234
+telephonenumber: +1 408 555 5678
+-
+delete: facsimiletelephonenumber
+facsimiletelephonenumber: +1 408 555 9876
+-
+</pre></div>
+</div>
+</div>
+<div class="section" id="streaming-the-output-to-a-file">
+<h2>Streaming the output to a file<a class="headerlink" href="#streaming-the-output-to-a-file" title="永久链接至标题">¶</a></h2>
+<p>When producing LDIF-CONTENT output you can have all operation results in a single stream. To get this simply set the stream attribute of the Connection to a stream object (for example to a file) and  <em>open</em> the connection.
+If you don&#8217;t specify the stream object a StringIO will be used. You can get the value with the c.stream.getvalue() method:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">LDIF</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">client_strategy</span><span class="o">=</span><span class="n">LDIF</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">c</span><span class="p">:</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;cn=test1, o=test&#39;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;cn=test2, o=test&#39;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>  <span class="c1"># needed because the stream is closed when the connection exits the context</span>
+</pre></div>
+</div>
+<p>result will be:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">version</span><span class="p">:</span> <span class="mi">1</span>
+
+<span class="n">dn</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">test1</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span>
+<span class="n">changetype</span><span class="p">:</span> <span class="n">delete</span>
+
+<span class="n">dn</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">test2</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span>
+<span class="n">changetype</span><span class="p">:</span> <span class="n">delete</span>
+</pre></div>
+</div>
+<p>If you just define a file object as stream you&#8217;ll find the output in the file:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">client_strategy</span><span class="o">=</span><span class="n">LDIF</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;output.ldif&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">c</span><span class="p">:</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;cn=test1, o= test&#39;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;cn=test2, o=test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>you will find the LDIF output in the output.ldif file.</p>
+<p>When producing LDIF-CONTENT you can pass an existing stream object to the response_to_ldif() method to add the LDIF output to the stream. If the stream is empty the ldif version header will be added.</p>
+</div>
+<div class="section" id="custom-line-separator">
+<h2>Custom line separator<a class="headerlink" href="#custom-line-separator" title="永久链接至标题">¶</a></h2>
+<p>The LDIF stream uses the default line separator (os.linesep) of the system where ldap3 is running as line separator in the LDIF stream.
+If you need a different line separator you can specify it in the <em>c.strategy.line_separator</em> attribute:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">line_separator</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">r</span><span class="se">\\</span><span class="s1">n&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="customizable-descriptor-order">
+<h2>Customizable descriptor order<a class="headerlink" href="#customizable-descriptor-order" title="永久链接至标题">¶</a></h2>
+<p>RFC 2849 doesn&#8217;t specify any specific order for the lines in the LDIF output except than <em>version: 1</em> in the first line of the stream.
+The library starts any new record with the dn and all subsequent <em>descriptor: value</em> lines are in the order they are received by the library.
+This should no be an issue with an LDIF import in another system, but if you have problems you can force a specific order for the descriptors in any of the LDIF operation:
+To achieve this you must set the c.strategy.order attribute to a dict where the keys are set to the names of the operations you want their resulting descriptor order is changed
+and the value to a list of descriptor. The LDIF output lines will be ordered following the order of the descriptor in the list.
+For example if you add to the previous code:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">delRequest</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;changetype:&#39;</span><span class="p">,</span> <span class="s1">&#39;dn:&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>you will get:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">version</span><span class="p">:</span> <span class="mi">1</span>
+
+<span class="n">changetype</span><span class="p">:</span> <span class="n">delete</span>
+<span class="n">dn</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">test1</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span>
+
+<span class="n">changetype</span><span class="p">:</span> <span class="n">delete</span>
+<span class="n">dn</span><span class="p">:</span> <span class="n">cn</span><span class="o">=</span><span class="n">test2</span><span class="p">,</span><span class="n">o</span><span class="o">=</span><span class="n">test</span>
+</pre></div>
+</div>
+<p>The possible operation names are: addRequest, delRequest, modifyRequest, modDNRequest.</p>
+<p>To change the order of a searchRequest just pass the list in the requested order.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">LDIF (LDAP Data Interchange Format)</a><ul>
+<li><a class="reference internal" href="#ldif-content">LDIF-CONTENT</a></li>
+<li><a class="reference internal" href="#ldif-change">LDIF-CHANGE</a></li>
+<li><a class="reference internal" href="#streaming-the-output-to-a-file">Streaming the output to a file</a></li>
+<li><a class="reference internal" href="#custom-line-separator">Custom line separator</a></li>
+<li><a class="reference internal" href="#customizable-descriptor-order">Customizable descriptor order</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="abstraction.html" title="上一章">Abstraction Layer</a></li>
+      <li>Next: <a href="exceptions.html" title="下一章">Exceptions</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldif.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldif.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

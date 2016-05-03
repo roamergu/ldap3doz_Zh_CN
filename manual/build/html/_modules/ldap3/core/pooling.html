@@ -1,0 +1,390 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.core.pooling &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.core.pooling 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2014.03.14</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">MINYEAR</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">linesep</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">FIRST</span><span class="p">,</span> <span class="n">ROUND_ROBIN</span><span class="p">,</span> <span class="n">RANDOM</span><span class="p">,</span> <span class="n">POOLING_STRATEGIES</span><span class="p">,</span> <span class="n">SEQUENCE_TYPES</span><span class="p">,</span> <span class="n">STRING_TYPES</span><span class="p">,</span> <span class="n">get_config_parameter</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">LDAPUnknownStrategyError</span><span class="p">,</span> <span class="n">LDAPServerPoolError</span><span class="p">,</span> <span class="n">LDAPServerPoolExhaustedError</span>
+<span class="kn">from</span> <span class="nn">.server</span> <span class="kn">import</span> <span class="n">Server</span>
+<span class="kn">from</span> <span class="nn">..utils.log</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">log_enabled</span><span class="p">,</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">BASIC</span><span class="p">,</span> <span class="n">NETWORK</span>
+
+
+<div class="viewcode-block" id="ServerPoolState"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPoolState">[文档]</a><span class="k">class</span> <span class="nc">ServerPoolState</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_pool</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># each element is a list: [server, last_checked_time, available]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">server_pool</span><span class="o">.</span><span class="n">strategy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span> <span class="o">=</span> <span class="n">server_pool</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;instantiated ServerPoolState: &lt;</span><span class="si">%r</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;servers: &#39;</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">server</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;None&#39;</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;Pool strategy: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strategy</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - Last used server: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;None&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">s</span>
+
+<div class="viewcode-block" id="ServerPoolState.refresh"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPoolState.refresh">[文档]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">server</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="n">MINYEAR</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">True</span><span class="p">])</span>  <span class="c1"># server, smallest date ever, supposed available</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ServerPoolState.get_current_server"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPoolState.get_current_server">[文档]</a>    <span class="k">def</span> <span class="nf">get_current_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ServerPoolState.get_server"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPoolState.get_server">[文档]</a>    <span class="k">def</span> <span class="nf">get_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="n">FIRST</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                    <span class="c1"># returns the first active server</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_active_server</span><span class="p">(</span><span class="n">starting</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># returns always the first server - no pooling</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="n">ROUND_ROBIN</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                    <span class="c1"># returns the next active server in a circular range</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_active_server</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># returns the next server in a circular range</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="n">RANDOM</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_active_random_server</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># returns a random server in the pool</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span> <span class="o">=</span> <span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;unknown server pooling strategy &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">strategy</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">LDAPUnknownStrategyError</span><span class="p">(</span><span class="s1">&#39;unknown server pooling strategy&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;server returned from Server Pool: &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_used_server</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;no servers in Server Pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPServerPoolError</span><span class="p">(</span><span class="s1">&#39;no servers in server pool&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ServerPoolState.find_active_random_server"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPoolState.find_active_random_server">[文档]</a>    <span class="k">def</span> <span class="nf">find_active_random_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">active</span>  <span class="c1"># can be True for &quot;forever&quot; or the number of cycles to try</span>
+        <span class="k">while</span> <span class="n">counter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;entering loop for finding active server in pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">temp_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[:]</span>  <span class="c1"># copy</span>
+            <span class="k">while</span> <span class="n">temp_list</span><span class="p">:</span>
+                <span class="c1"># pops a random server from a temp list and checks its</span>
+                <span class="c1"># availability, if not available tries another one</span>
+                <span class="n">server</span> <span class="o">=</span> <span class="n">temp_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">server</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>  <span class="c1"># server is offline</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">exhaust</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">exhaust</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">server</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">seconds</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">exhaust</span><span class="p">:</span>  <span class="c1"># keeps server offline</span>
+                        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                            <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;server &lt;</span><span class="si">%s</span><span class="s1">&gt; excluded from checking because is offline&#39;</span><span class="p">,</span> <span class="n">server</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                            <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;server &lt;</span><span class="si">%s</span><span class="s1">&gt; reinserted in pool&#39;</span><span class="p">,</span> <span class="n">server</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">server</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;checking server &lt;</span><span class="si">%s</span><span class="s1">&gt; for availability&#39;</span><span class="p">,</span> <span class="n">server</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">server</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">check_availability</span><span class="p">():</span>
+                    <span class="c1"># returns a random active server in the pool</span>
+                    <span class="n">server</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">server</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">active</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;no random active server available in Server Pool &lt;</span><span class="si">%s</span><span class="s1">&gt; after maximum number of tries&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">LDAPServerPoolExhaustedError</span><span class="p">(</span><span class="s1">&#39;no random active server available in server pool after maximum number of tries&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ServerPoolState.find_active_server"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPoolState.find_active_server">[文档]</a>    <span class="k">def</span> <span class="nf">find_active_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">starting</span><span class="p">):</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">active</span>  <span class="c1"># can be True for &quot;forever&quot; or the number of cycles to try</span>
+        <span class="k">if</span> <span class="n">starting</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">):</span>
+            <span class="n">starting</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">counter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;entering loop number &lt;</span><span class="si">%s</span><span class="s1">&gt; for finding active server in pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">pool_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">pool_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="n">starting</span> <span class="k">if</span> <span class="n">index</span> <span class="o">+</span> <span class="n">starting</span> <span class="o">&lt;</span> <span class="n">pool_size</span> <span class="k">else</span> <span class="n">index</span> <span class="o">+</span> <span class="n">starting</span> <span class="o">-</span> <span class="n">pool_size</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">2</span><span class="p">]:</span>  <span class="c1"># server is offline</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">exhaust</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">exhaust</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">seconds</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">exhaust</span><span class="p">:</span>  <span class="c1"># keeps server offline</span>
+                        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">exhaust</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;server &lt;</span><span class="si">%s</span><span class="s1">&gt; excluded from checking because is  offline&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;server &lt;</span><span class="si">%s</span><span class="s1">&gt; excluded from checking because is offline for </span><span class="si">%d</span><span class="s1"> seconds&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">exhaust</span> <span class="o">-</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">seconds</span><span class="p">))</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                            <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;server &lt;</span><span class="si">%s</span><span class="s1">&gt; reinserted in pool&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;checking server &lt;</span><span class="si">%s</span><span class="s1">&gt; for availability&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">check_availability</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">return</span> <span class="n">offset</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">offset</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>  <span class="c1"># sets server offline</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">active</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;waiting for </span><span class="si">%d</span><span class="s1"> seconds before retrying pool servers cycle&#39;</span><span class="p">,</span> <span class="n">get_config_parameter</span><span class="p">(</span><span class="s1">&#39;POOLING_LOOP_TIMEOUT&#39;</span><span class="p">))</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="n">get_config_parameter</span><span class="p">(</span><span class="s1">&#39;POOLING_LOOP_TIMEOUT&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;no active server available in Server Pool &lt;</span><span class="si">%s</span><span class="s1">&gt; after maximum number of tries&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">LDAPServerPoolExhaustedError</span><span class="p">(</span><span class="s1">&#39;no active server available in server pool after maximum number of tries&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ServerPool"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPool">[文档]</a><span class="k">class</span> <span class="nc">ServerPool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">servers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">pool_strategy</span><span class="o">=</span><span class="n">ROUND_ROBIN</span><span class="p">,</span>
+                 <span class="n">active</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">exhaust</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">pool_strategy</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">POOLING_STRATEGIES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;unknown pooling strategy &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">pool_strategy</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPUnknownStrategyError</span><span class="p">(</span><span class="s1">&#39;unknown pooling strategy&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">exhaust</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">active</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;cannot instantiate pool with exhaust and not active&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPServerPoolError</span><span class="p">(</span><span class="s1">&#39;pools can be exhausted only when checking for active servers&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="n">active</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exhaust</span> <span class="o">=</span> <span class="n">exhaust</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">servers</span><span class="p">,</span> <span class="n">SEQUENCE_TYPES</span> <span class="o">+</span> <span class="p">(</span><span class="n">Server</span><span class="p">,</span> <span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">servers</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">servers</span><span class="p">,</span> <span class="n">STRING_TYPES</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Server</span><span class="p">(</span><span class="n">servers</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">pool_strategy</span>
+
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;instantiated ServerPool: &lt;</span><span class="si">%r</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;servers: &#39;</span> <span class="o">+</span> <span class="n">linesep</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">server</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;None&#39;</span> <span class="o">+</span> <span class="n">linesep</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;Pool strategy: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strategy</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="s1">&#39;active: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="k">else</span> <span class="s1">&#39;False&#39;</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="s1">&#39;exhaust pool: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exhaust</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exhaust</span> <span class="k">else</span> <span class="s1">&#39;False&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;ServerPool(servers=&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;[&#39;</span>
+            <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">+=</span> <span class="n">server</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;None&#39;</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;, pool_strategy={0.strategy!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;, active={0.active!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;, exhaust={0.exhaust!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;)&#39;</span>
+
+        <span class="k">return</span> <span class="n">r</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">__iter__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ServerPool.add"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPool.add">[文档]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">servers</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">servers</span><span class="p">,</span> <span class="n">Server</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">servers</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">servers</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">servers</span><span class="p">,</span> <span class="n">STRING_TYPES</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Server</span><span class="p">(</span><span class="n">servers</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">servers</span><span class="p">,</span> <span class="n">SEQUENCE_TYPES</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">server</span> <span class="ow">in</span> <span class="n">servers</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">Server</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">STRING_TYPES</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Server</span><span class="p">(</span><span class="n">server</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                        <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;element must be a server in Server Pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">LDAPServerPoolError</span><span class="p">(</span><span class="s1">&#39;server in ServerPool must be a Server&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;server must be a Server of a list of Servers when adding to Server Pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPServerPoolError</span><span class="p">(</span><span class="s1">&#39;server must be a Server or a list of Server&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">:</span>
+            <span class="c1"># notifies connections using this pool to refresh</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">[</span><span class="n">connection</span><span class="p">]</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ServerPool.remove"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPool.remove">[文档]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">server</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;server </span><span class="si">%s</span><span class="s1"> to be removed not in Server Pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPServerPoolError</span><span class="p">(</span><span class="s1">&#39;server not in server pool&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">:</span>
+            <span class="c1"># notifies connections using this pool to refresh</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">[</span><span class="n">connection</span><span class="p">]</span><span class="o">.</span><span class="n">refresh</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ServerPool.initialize"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPool.initialize">[文档]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+        <span class="n">pool_state</span> <span class="o">=</span> <span class="n">ServerPoolState</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># registers pool_state in ServerPool object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">[</span><span class="n">connection</span><span class="p">]</span> <span class="o">=</span> <span class="n">pool_state</span></div>
+
+<div class="viewcode-block" id="ServerPool.get_server"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPool.get_server">[文档]</a>    <span class="k">def</span> <span class="nf">get_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">connection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">[</span><span class="n">connection</span><span class="p">]</span><span class="o">.</span><span class="n">get_server</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;connection &lt;</span><span class="si">%s</span><span class="s1">&gt; not in Server Pool State &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPServerPoolError</span><span class="p">(</span><span class="s1">&#39;connection not in ServerPoolState&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ServerPool.get_current_server"><a class="viewcode-back" href="../../../ldap3.core.pooling.html#ldap3.core.pooling.ServerPool.get_current_server">[文档]</a>    <span class="k">def</span> <span class="nf">get_current_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">connection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool_states</span><span class="p">[</span><span class="n">connection</span><span class="p">]</span><span class="o">.</span><span class="n">get_current_server</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;connection &lt;</span><span class="si">%s</span><span class="s1">&gt; not in Server Pool State &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPServerPoolError</span><span class="p">(</span><span class="s1">&#39;connection not in ServerPoolState&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

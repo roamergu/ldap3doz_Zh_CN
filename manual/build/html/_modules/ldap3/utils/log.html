@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.utils.log &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.utils.log 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2015.05.01</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span><span class="p">,</span> <span class="n">getLevelName</span><span class="p">,</span> <span class="n">DEBUG</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">linesep</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pformat</span>
+<span class="kn">from</span> <span class="nn">..protocol.rfc4511</span> <span class="kn">import</span> <span class="n">LDAPMessage</span>
+
+<span class="c1"># logging</span>
+<span class="n">OFF</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">ERROR</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">BASIC</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">PROTOCOL</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">NETWORK</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">EXTENDED</span> <span class="o">=</span> <span class="mi">50</span>
+
+<span class="n">_sensitive_lines</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;simple&#39;</span><span class="p">,</span> <span class="s1">&#39;credentials&#39;</span><span class="p">,</span> <span class="s1">&#39;serversaslcreds&#39;</span><span class="p">)</span>  <span class="c1"># must be a tuple, not a list</span>
+<span class="n">_sensitive_args</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;simple&#39;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="s1">&#39;sasl_credentials&#39;</span><span class="p">,</span> <span class="s1">&#39;saslcreds&#39;</span><span class="p">,</span> <span class="s1">&#39;server_creds&#39;</span><span class="p">)</span>
+<span class="n">_hide_sensitive_data</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="n">DETAIL_LEVELS</span> <span class="o">=</span> <span class="p">[</span><span class="n">OFF</span><span class="p">,</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">BASIC</span><span class="p">,</span> <span class="n">PROTOCOL</span><span class="p">,</span> <span class="n">NETWORK</span><span class="p">,</span> <span class="n">EXTENDED</span><span class="p">]</span>
+
+<span class="n">_max_line_length</span> <span class="o">=</span> <span class="mi">4096</span>
+<span class="n">_logging_level</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">_detail_level</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">_logging_encoding</span> <span class="o">=</span> <span class="s1">&#39;ascii&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">NullHandler</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># NullHandler not present in Python &lt; 2.7</span>
+    <span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">Handler</span>
+
+    <span class="k">class</span> <span class="nc">NullHandler</span><span class="p">(</span><span class="n">Handler</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span> <span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">def</span> <span class="nf">createLock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<span class="k">def</span> <span class="nf">_strip_sensitive_data_from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">d</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># if deepcopy goes wrong gives up and return the dict unchanged</span>
+        <span class="k">return</span> <span class="n">d</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">_strip_sensitive_data_from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">_sensitive_args</span> <span class="ow">and</span> <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&lt;stripped </span><span class="si">%d</span><span class="s1"> characters of sensitive data&gt;&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">d</span>
+
+
+<div class="viewcode-block" id="get_detail_level_name"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.get_detail_level_name">[文档]</a><span class="k">def</span> <span class="nf">get_detail_level_name</span><span class="p">(</span><span class="n">level_name</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">level_name</span> <span class="o">==</span> <span class="n">OFF</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;OFF&#39;</span>
+    <span class="k">elif</span> <span class="n">level_name</span> <span class="o">==</span> <span class="n">ERROR</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;ERROR&#39;</span>
+    <span class="k">elif</span> <span class="n">level_name</span> <span class="o">==</span> <span class="n">BASIC</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;BASIC&#39;</span>
+    <span class="k">elif</span> <span class="n">level_name</span> <span class="o">==</span> <span class="n">PROTOCOL</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;PROTOCOL&#39;</span>
+    <span class="k">elif</span> <span class="n">level_name</span> <span class="o">==</span> <span class="n">NETWORK</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;NETWORK&#39;</span>
+    <span class="k">elif</span> <span class="n">level_name</span> <span class="o">==</span> <span class="n">EXTENDED</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;EXTENDED&#39;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;unknown detail level&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.log">[文档]</a><span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">detail</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">detail</span> <span class="o">&lt;=</span> <span class="n">_detail_level</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_hide_sensitive_data</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">_strip_sensitive_data_from_dict</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
+
+        <span class="n">encoded_message</span> <span class="o">=</span> <span class="p">(</span><span class="n">get_detail_level_name</span><span class="p">(</span><span class="n">detail</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">message</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">_logging_encoding</span><span class="p">,</span> <span class="s1">&#39;backslashreplace&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">str</span> <span class="o">!=</span> <span class="nb">bytes</span><span class="p">:</span>  <span class="c1"># Python 3</span>
+            <span class="n">encoded_message</span> <span class="o">=</span> <span class="n">encoded_message</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded_message</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">_max_line_length</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_logging_level</span><span class="p">,</span> <span class="n">encoded_message</span><span class="p">[:</span><span class="n">_max_line_length</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &lt;removed </span><span class="si">%d</span><span class="s1"> remaining bytes in this log line&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">encoded_message</span><span class="p">)</span> <span class="o">-</span> <span class="n">_max_line_length</span><span class="p">,</span> <span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">_logging_level</span><span class="p">,</span> <span class="n">encoded_message</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="log_enabled"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.log_enabled">[文档]</a><span class="k">def</span> <span class="nf">log_enabled</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">detail</span> <span class="o">&lt;=</span> <span class="n">_detail_level</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">logger</span><span class="o">.</span><span class="n">isEnabledFor</span><span class="p">(</span><span class="n">_logging_level</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="set_library_log_hide_sensitive_data"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.set_library_log_hide_sensitive_data">[文档]</a><span class="k">def</span> <span class="nf">set_library_log_hide_sensitive_data</span><span class="p">(</span><span class="n">hide</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">_hide_sensitive_data</span>
+    <span class="k">if</span> <span class="n">hide</span><span class="p">:</span>
+        <span class="n">_hide_sensitive_data</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_hide_sensitive_data</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+        <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;hide sensitive data set to &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">_hide_sensitive_data</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_library_log_hide_sensitive_data"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.get_library_log_hide_sensitive_data">[文档]</a><span class="k">def</span> <span class="nf">get_library_log_hide_sensitive_data</span><span class="p">():</span>
+    <span class="k">return</span> <span class="bp">True</span> <span class="k">if</span> <span class="n">_hide_sensitive_data</span> <span class="k">else</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="set_library_log_activation_level"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.set_library_log_activation_level">[文档]</a><span class="k">def</span> <span class="nf">set_library_log_activation_level</span><span class="p">(</span><span class="n">logging_level</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logging_level</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">_logging_level</span>
+        <span class="n">_logging_level</span> <span class="o">=</span> <span class="n">logging_level</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;invalid library log activation level &lt;</span><span class="si">%s</span><span class="s1">&gt; &#39;</span><span class="p">,</span> <span class="n">logging_level</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid library log activation level&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_library_log_activation_lavel"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.get_library_log_activation_lavel">[文档]</a><span class="k">def</span> <span class="nf">get_library_log_activation_lavel</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">_logging_level</span></div>
+
+
+<div class="viewcode-block" id="set_library_log_max_line_length"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.set_library_log_max_line_length">[文档]</a><span class="k">def</span> <span class="nf">set_library_log_max_line_length</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">_max_line_length</span>
+        <span class="n">_max_line_length</span> <span class="o">=</span> <span class="n">length</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;invalid log max line length &lt;</span><span class="si">%s</span><span class="s1">&gt; &#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid library log max line length&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_library_log_max_line_length"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.get_library_log_max_line_length">[文档]</a><span class="k">def</span> <span class="nf">get_library_log_max_line_length</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">_max_line_length</span></div>
+
+
+<div class="viewcode-block" id="set_library_log_detail_level"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.set_library_log_detail_level">[文档]</a><span class="k">def</span> <span class="nf">set_library_log_detail_level</span><span class="p">(</span><span class="n">detail</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">detail</span> <span class="ow">in</span> <span class="n">DETAIL_LEVELS</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">_detail_level</span>
+        <span class="n">_detail_level</span> <span class="o">=</span> <span class="n">detail</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;detail level set to &#39;</span> <span class="o">+</span> <span class="n">get_detail_level_name</span><span class="p">(</span><span class="n">_detail_level</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;unable to set log detail level to &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid library log detail level&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_library_log_detail_level"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.get_library_log_detail_level">[文档]</a><span class="k">def</span> <span class="nf">get_library_log_detail_level</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">_detail_level</span></div>
+
+
+<div class="viewcode-block" id="format_ldap_message"><a class="viewcode-back" href="../../../ldap3.utils.log.html#ldap3.utils.log.format_ldap_message">[文档]</a><span class="k">def</span> <span class="nf">format_ldap_message</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="n">prefixed</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">prettyPrint</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">LDAPMessage</span><span class="p">)</span> <span class="k">else</span> <span class="n">pformat</span><span class="p">(</span><span class="n">message</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)):</span>  <span class="c1"># uses pyasn1 LDAP message prettyPrint() method</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_hide_sensitive_data</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">_sensitive_lines</span><span class="p">):</span>  <span class="c1"># _sensitive_lines is a tuple. startswith() method check each tuple element</span>
+                <span class="n">tag</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;b&#39;&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;b&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">):</span>
+                    <span class="n">prefixed</span> <span class="o">+=</span> <span class="n">linesep</span> <span class="o">+</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;=&lt;stripped </span><span class="si">%d</span><span class="s1"> characters of sensitive data&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span> <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">prefixed</span> <span class="o">+=</span> <span class="n">linesep</span> <span class="o">+</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;=&lt;stripped </span><span class="si">%d</span><span class="s1"> characters of sensitive data&gt;&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prefixed</span> <span class="o">+=</span> <span class="n">linesep</span> <span class="o">+</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">line</span>
+    <span class="k">return</span> <span class="n">prefixed</span></div>
+
+<span class="c1"># sets a logger for the library with NullHandler. It can be used by the application with its own logging configuration</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;ldap3&#39;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">NullHandler</span><span class="p">())</span>
+
+<span class="c1"># set defaults for the library logging</span>
+<span class="n">set_library_log_activation_level</span><span class="p">(</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="n">set_library_log_detail_level</span><span class="p">(</span><span class="n">OFF</span><span class="p">)</span>
+<span class="n">set_library_log_hide_sensitive_data</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># emits a info message to let the application know that ldap3 logging is available when the log level is set to _logging_level</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ldap3 library initialized - logging emitted with loglevel set to &#39;</span> <span class="o">+</span> <span class="n">getLevelName</span><span class="p">(</span><span class="n">_logging_level</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; - available detail levels are: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">get_detail_level_name</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">DETAIL_LEVELS</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; - sensitive data will &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">_hide_sensitive_data</span> <span class="k">else</span> <span class="s1">&#39;not &#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;be hidden&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

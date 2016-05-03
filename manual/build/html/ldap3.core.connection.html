@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.core.connection module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.core package" href="ldap3.core.html" />
+    <link rel="next" title="ldap3.core.exceptions module" href="ldap3.core.exceptions.html" />
+    <link rel="prev" title="ldap3.core package" href="ldap3.core.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.core.connection">
+<span id="ldap3-core-connection-module"></span><h1>ldap3.core.connection module<a class="headerlink" href="#module-ldap3.core.connection" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.core.connection.Connection">
+<em class="property">class </em><code class="descclassname">ldap3.core.connection.</code><code class="descname">Connection</code><span class="sig-paren">(</span><em>server</em>, <em>user=None</em>, <em>password=None</em>, <em>auto_bind='NONE'</em>, <em>version=3</em>, <em>authentication=None</em>, <em>client_strategy='SYNC'</em>, <em>auto_referrals=True</em>, <em>auto_range=False</em>, <em>sasl_mechanism=None</em>, <em>sasl_credentials=None</em>, <em>check_names=True</em>, <em>collect_usage=False</em>, <em>read_only=False</em>, <em>lazy=False</em>, <em>raise_exceptions=False</em>, <em>pool_name=None</em>, <em>pool_size=None</em>, <em>pool_lifetime=None</em>, <em>fast_decoder=True</em>, <em>receive_timeout=None</em>, <em>return_empty_attributes=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Main ldap connection class.</p>
+<p>Controls, if used, must be a list of tuples. Each tuple must have 3
+elements, the control OID, a boolean meaning if the control is
+critical, a value.</p>
+<p>If the boolean is set to True the server must honor the control or
+refuse the operation</p>
+<p>Mixing controls must be defined in controls specification (as per
+RFC 4511)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first last simple">
+<li><strong>server</strong> (<em>Server, str</em>) &#8211; the Server object to connect to</li>
+<li><strong>user</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(在 Python v2.7)"><em>str</em></a>) &#8211; the user name for simple authentication</li>
+<li><strong>password</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(在 Python v2.7)"><em>str</em></a>) &#8211; the password for simple authentication</li>
+<li><strong>auto_bind</strong> (<em>int, can be one of AUTO_BIND_NONE, AUTO_BIND_NO_TLS, AUTO_BIND_TLS_BEFORE_BIND, AUTO_BIND_TLS_AFTER_BIND as specified in ldap3</em>) &#8211; specify if the bind will be performed automatically when defining the Connection object</li>
+<li><strong>version</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(在 Python v2.7)"><em>int</em></a>) &#8211; LDAP version, default to 3</li>
+<li><strong>authentication</strong> (<em>int, can be one of AUTH_ANONYMOUS, AUTH_SIMPLE or AUTH_SASL, as specified in ldap3</em>) &#8211; type of authentication</li>
+<li><strong>client_strategy</strong> (<em>can be one of STRATEGY_SYNC, STRATEGY_ASYNC_THREADED, STRATEGY_LDIF_PRODUCER, STRATEGY_SYNC_RESTARTABLE, STRATEGY_REUSABLE_THREADED as specified in ldap3</em>) &#8211; communication strategy used in the Connection</li>
+<li><strong>auto_referrals</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; specify if the connection object must automatically follow referrals</li>
+<li><strong>sasl_mechanism</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(在 Python v2.7)"><em>str</em></a>) &#8211; mechanism for SASL authentication, can be one of &#8216;EXTERNAL&#8217;, &#8216;DIGEST-MD5&#8217;</li>
+<li><strong>sasl_credentials</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#tuple" title="(在 Python v2.7)"><em>tuple</em></a>) &#8211; credentials for SASL mechanism</li>
+<li><strong>check_names</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; if True the library will check names of attributes and object classes against the schema. Also values found in entries will be formatted as indicated by the schema</li>
+<li><strong>collect_usage</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; collect usage metrics in the usage attribute</li>
+<li><strong>read_only</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; disable operations that modify data in the LDAP server</li>
+<li><strong>lazy</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; open and bind the connection only when an actual operation is performed</li>
+<li><strong>raise_exceptions</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; raise exceptions when operations are not successful, if False operations return False if not successful but not raise exceptions</li>
+<li><strong>pool_name</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(在 Python v2.7)"><em>str</em></a>) &#8211; pool name for pooled strategies</li>
+<li><strong>pool_size</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(在 Python v2.7)"><em>int</em></a>) &#8211; pool size for pooled strategies</li>
+<li><strong>pool_lifetime</strong> &#8211; pool lifetime for pooled strategies</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.abandon">
+<code class="descname">abandon</code><span class="sig-paren">(</span><em>message_id</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.abandon"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.abandon" title="永久链接至目标">¶</a></dt>
+<dd><p>Abandon the operation indicated by message_id</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>dn</em>, <em>object_class=None</em>, <em>attributes=None</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.add"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.add" title="永久链接至目标">¶</a></dt>
+<dd><p>Add dn to the DIT, object_class is None, a class name or a list
+of class names.</p>
+<p>Attributes is a dictionary in the form &#8216;attr&#8217;: &#8216;val&#8217; or &#8216;attr&#8217;:
+[&#8216;val1&#8217;, &#8216;val2&#8217;, ...] for multivalued attributes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.bind">
+<code class="descname">bind</code><span class="sig-paren">(</span><em>read_server_info=True</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.bind"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.bind" title="永久链接至目标">¶</a></dt>
+<dd><p>Bind to ldap Server with the authentication method and the user defined in the connection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>read_server_info</strong> &#8211; reads info from server</li>
+<li><strong>controls</strong> (<em>list of tuple</em>) &#8211; LDAP controls to send along with the bind operation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.compare">
+<code class="descname">compare</code><span class="sig-paren">(</span><em>dn</em>, <em>attribute</em>, <em>value</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.compare"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.compare" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform a compare operation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>dn</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.delete"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.delete" title="永久链接至目标">¶</a></dt>
+<dd><p>Delete the entry identified by the DN from the DIB.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.do_ntlm_bind">
+<code class="descname">do_ntlm_bind</code><span class="sig-paren">(</span><em>controls</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.do_ntlm_bind"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.do_ntlm_bind" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.do_sasl_bind">
+<code class="descname">do_sasl_bind</code><span class="sig-paren">(</span><em>controls</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.do_sasl_bind"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.do_sasl_bind" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.core.connection.Connection.entries">
+<code class="descname">entries</code><a class="headerlink" href="#ldap3.core.connection.Connection.entries" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.extended">
+<code class="descname">extended</code><span class="sig-paren">(</span><em>request_name</em>, <em>request_value=None</em>, <em>controls=None</em>, <em>no_encode=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.extended"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.extended" title="永久链接至目标">¶</a></dt>
+<dd><p>Performs an extended operation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.modify">
+<code class="descname">modify</code><span class="sig-paren">(</span><em>dn</em>, <em>changes</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.modify"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.modify" title="永久链接至目标">¶</a></dt>
+<dd><p>Modify attributes of entry</p>
+<ul class="simple">
+<li>Changes is a dictionary in the form {&#8216;attribute1&#8217;: change),</li>
+</ul>
+<p>&#8216;attribute2&#8217;: [change, change, ...], ...}
+change is (operation, [value1, value2, ...])
+- Operation is 0 (MODIFY_ADD), 1 (MODIFY_DELETE), 2 (MODIFY_REPLACE), 3 (MODIFY_INCREMENT)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.modify_dn">
+<code class="descname">modify_dn</code><span class="sig-paren">(</span><em>dn</em>, <em>relative_dn</em>, <em>delete_old_dn=True</em>, <em>new_superior=None</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.modify_dn"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.modify_dn" title="永久链接至目标">¶</a></dt>
+<dd><p>Modify DN of the entry or performs a move of the entry in the
+DIT.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.rebind">
+<code class="descname">rebind</code><span class="sig-paren">(</span><em>user=None</em>, <em>password=None</em>, <em>authentication=None</em>, <em>sasl_mechanism=None</em>, <em>sasl_credentials=None</em>, <em>read_server_info=True</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.rebind"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.rebind" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.refresh_server_info">
+<code class="descname">refresh_server_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.refresh_server_info"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.refresh_server_info" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.repr_with_sensitive_data_stripped">
+<code class="descname">repr_with_sensitive_data_stripped</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.repr_with_sensitive_data_stripped"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.repr_with_sensitive_data_stripped" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.response_to_file">
+<code class="descname">response_to_file</code><span class="sig-paren">(</span><em>target</em>, <em>raw=False</em>, <em>indent=4</em>, <em>sort=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.response_to_file"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.response_to_file" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.response_to_json">
+<code class="descname">response_to_json</code><span class="sig-paren">(</span><em>raw=False</em>, <em>search_result=None</em>, <em>indent=4</em>, <em>sort=True</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.response_to_json"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.response_to_json" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.response_to_ldif">
+<code class="descname">response_to_ldif</code><span class="sig-paren">(</span><em>search_result=None</em>, <em>all_base64=False</em>, <em>line_separator=None</em>, <em>sort_order=None</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.response_to_ldif"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.response_to_ldif" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.search">
+<code class="descname">search</code><span class="sig-paren">(</span><em>search_base</em>, <em>search_filter</em>, <em>search_scope='SUBTREE'</em>, <em>dereference_aliases='ALWAYS'</em>, <em>attributes=None</em>, <em>size_limit=0</em>, <em>time_limit=0</em>, <em>types_only=False</em>, <em>get_operational_attributes=False</em>, <em>controls=None</em>, <em>paged_size=None</em>, <em>paged_criticality=False</em>, <em>paged_cookie=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.search"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.search" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform an ldap search:</p>
+<ul class="simple">
+<li>If attributes is empty no attribute is returned</li>
+<li>If attributes is ALL_ATTRIBUTES all attributes are returned</li>
+<li>If paged_size is an int greater than 0 a simple paged search
+is tried as described in RFC2696 with the specified size</li>
+<li>If paged is 0 and cookie is present the search is abandoned on
+server</li>
+<li>Cookie is an opaque string received in the last paged search
+and must be used on the next paged search response</li>
+<li>If lazy == True open and bind will be deferred until another
+LDAP operation is performed</li>
+<li>If mssing_attributes == True then an attribute not returned by the server is set to None</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.start_tls">
+<code class="descname">start_tls</code><span class="sig-paren">(</span><em>read_server_info=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.start_tls"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.start_tls" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.core.connection.Connection.stream">
+<code class="descname">stream</code><a class="headerlink" href="#ldap3.core.connection.Connection.stream" title="永久链接至目标">¶</a></dt>
+<dd><p>Used by the LDIFProducer strategy to accumulate the ldif-change operations with a single LDIF header
+:return: reference to the response stream if defined in the strategy.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.connection.Connection.unbind">
+<code class="descname">unbind</code><span class="sig-paren">(</span><em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/connection.html#Connection.unbind"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.connection.Connection.unbind" title="永久链接至目标">¶</a></dt>
+<dd><p>Unbind the connected user. Unbind implies closing session as per RFC4511 (4.3)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>controls</strong> &#8211; LDAP controls to send along with the bind operation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.core.connection.Connection.usage">
+<code class="descname">usage</code><a class="headerlink" href="#ldap3.core.connection.Connection.usage" title="永久链接至目标">¶</a></dt>
+<dd><p>Usage statistics for the connection.
+:return: Usage object</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.core.html">ldap3.core package</a><ul>
+      <li>Previous: <a href="ldap3.core.html" title="上一章">ldap3.core package</a></li>
+      <li>Next: <a href="ldap3.core.exceptions.html" title="下一章">ldap3.core.exceptions module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.core.connection.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.core.connection.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

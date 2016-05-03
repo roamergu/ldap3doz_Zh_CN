@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.strategy.sync &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.strategy.sync 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2013.07.15</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">import</span> <span class="nn">socket</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">SESSION_TERMINATED_BY_SERVER</span><span class="p">,</span> <span class="n">RESPONSE_COMPLETE</span><span class="p">,</span> <span class="n">SEQUENCE_TYPES</span><span class="p">,</span> <span class="n">get_config_parameter</span>
+<span class="kn">from</span> <span class="nn">..core.exceptions</span> <span class="kn">import</span> <span class="n">LDAPSocketReceiveError</span><span class="p">,</span> <span class="n">communication_exception_factory</span><span class="p">,</span> <span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="n">LDAPExtensionError</span><span class="p">,</span> <span class="n">LDAPOperationResult</span>
+<span class="kn">from</span> <span class="nn">..strategy.base</span> <span class="kn">import</span> <span class="n">BaseStrategy</span>
+<span class="kn">from</span> <span class="nn">..protocol.rfc4511</span> <span class="kn">import</span> <span class="n">LDAPMessage</span>
+<span class="kn">from</span> <span class="nn">..utils.log</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">log_enabled</span><span class="p">,</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">NETWORK</span><span class="p">,</span> <span class="n">EXTENDED</span><span class="p">,</span> <span class="n">format_ldap_message</span>
+<span class="kn">from</span> <span class="nn">..utils.asn1</span> <span class="kn">import</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">decode_message_fast</span>
+
+<span class="n">LDAP_MESSAGE_TEMPLATE</span> <span class="o">=</span> <span class="n">LDAPMessage</span><span class="p">()</span>
+
+
+<span class="c1"># noinspection PyProtectedMember</span>
+<div class="viewcode-block" id="SyncStrategy"><a class="viewcode-back" href="../../../ldap3.strategy.sync.html#ldap3.strategy.sync.SyncStrategy">[文档]</a><span class="k">class</span> <span class="nc">SyncStrategy</span><span class="p">(</span><span class="n">BaseStrategy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This strategy is synchronous. You send the request and get the response</span>
+<span class="sd">    Requests return a boolean value to indicate the result of the requested Operation</span>
+<span class="sd">    Connection.response will contain the whole LDAP response for the messageId requested in a dict form</span>
+<span class="sd">    Connection.request will contain the result LDAP message in a dict form</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldap_connection</span><span class="p">):</span>
+        <span class="n">BaseStrategy</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldap_connection</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sync</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_real_dsa</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pooled</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">can_stream</span> <span class="o">=</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="SyncStrategy.open"><a class="viewcode-back" href="../../../ldap3.strategy.sync.html#ldap3.strategy.sync.SyncStrategy.open">[文档]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_usage</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">read_server_info</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">BaseStrategy</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_usage</span><span class="p">,</span> <span class="n">read_server_info</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">read_server_info</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">refresh_server_info</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">LDAPOperationResult</span><span class="p">:</span>  <span class="c1"># catch errors from server if raise_exception = True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">_dsa_info</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">_schema_info</span> <span class="o">=</span> <span class="bp">None</span></div>
+
+    <span class="k">def</span> <span class="nf">_start_listen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">listening</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">listening</span> <span class="o">=</span> <span class="bp">True</span>
+
+<div class="viewcode-block" id="SyncStrategy.receiving"><a class="viewcode-back" href="../../../ldap3.strategy.sync.html#ldap3.strategy.sync.SyncStrategy.receiving">[文档]</a>    <span class="k">def</span> <span class="nf">receiving</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Receive data over the socket</span>
+<span class="sd">        Checks if the socket is closed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">receiving</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">unprocessed</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+        <span class="n">get_more_data</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">exc</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">socket_size</span> <span class="o">=</span> <span class="n">get_config_parameter</span><span class="p">(</span><span class="s1">&#39;SOCKET_SIZE&#39;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">receiving</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">get_more_data</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">socket_size</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span> <span class="o">=</span> <span class="s1">&#39;error receiving data: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">exc</span> <span class="o">=</span> <span class="n">e</span>
+
+                <span class="k">if</span> <span class="n">exc</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>  <span class="c1"># try to close the connection before raising exception</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">LDAPExceptionError</span><span class="p">):</span>
+                        <span class="k">pass</span>
+                    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                        <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt; for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">communication_exception_factory</span><span class="p">(</span><span class="n">LDAPSocketReceiveError</span><span class="p">,</span> <span class="n">exc</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">)</span>
+
+                <span class="n">unprocessed</span> <span class="o">+=</span> <span class="n">data</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">BaseStrategy</span><span class="o">.</span><span class="n">compute_ldap_message_size</span><span class="p">(</span><span class="n">unprocessed</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># too few data to decode message length</span>
+                    <span class="n">get_more_data</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unprocessed</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+                    <span class="n">get_more_data</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                        <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;received </span><span class="si">%d</span><span class="s1"> bytes via &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">unprocessed</span><span class="p">[:</span><span class="n">length</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+                    <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">unprocessed</span><span class="p">[:</span><span class="n">length</span><span class="p">])</span>
+                    <span class="n">unprocessed</span> <span class="o">=</span> <span class="n">unprocessed</span><span class="p">[</span><span class="n">length</span><span class="p">:]</span>
+                    <span class="n">get_more_data</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unprocessed</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">receiving</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">receiving</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;received </span><span class="si">%d</span><span class="s1"> ldap messages via &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">messages</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">messages</span></div>
+
+<div class="viewcode-block" id="SyncStrategy.post_send_single_response"><a class="viewcode-back" href="../../../ldap3.strategy.sync.html#ldap3.strategy.sync.SyncStrategy.post_send_single_response">[文档]</a>    <span class="k">def</span> <span class="nf">post_send_single_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executed after an Operation Request (except Search)</span>
+<span class="sd">        Returns the result message or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">responses</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">message_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;intermediateResponse&#39;</span><span class="p">:</span>  <span class="c1"># checks that all responses are intermediates (there should be only one)</span>
+            <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;intermediateResponse&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span> <span class="o">=</span> <span class="s1">&#39;multiple messages received error&#39;</span>
+                    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                        <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt; for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">LDAPSocketReceiveError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">)</span>
+
+        <span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">responses</span></div>
+
+<div class="viewcode-block" id="SyncStrategy.post_send_search"><a class="viewcode-back" href="../../../ldap3.strategy.sync.html#ldap3.strategy.sync.SyncStrategy.post_send_search">[文档]</a>    <span class="k">def</span> <span class="nf">post_send_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Executed after a search request</span>
+<span class="sd">        Returns the result message and store in connection.response the objects found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">responses</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">message_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">SEQUENCE_TYPES</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">response</span> <span class="o">=</span> <span class="n">responses</span><span class="p">[:]</span>  <span class="c1"># copy search result entries</span>
+            <span class="k">return</span> <span class="n">responses</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span> <span class="o">=</span> <span class="s1">&#39;error receiving response&#39;</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt; for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">LDAPSocketReceiveError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the capture of LDAP response for SyncStrategy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ldap_responses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">response_complete</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">response_complete</span><span class="p">:</span>
+            <span class="n">responses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">receiving</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">responses</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">usage</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">_usage</span><span class="o">.</span><span class="n">update_received_message</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">fast_decoder</span><span class="p">:</span>
+                            <span class="n">ldap_resp</span> <span class="o">=</span> <span class="n">decode_message_fast</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+                            <span class="n">dict_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_response_fast</span><span class="p">(</span><span class="n">ldap_resp</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">ldap_resp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">asn1Spec</span><span class="o">=</span><span class="n">LDAP_MESSAGE_TEMPLATE</span><span class="p">)</span>  <span class="c1"># unprocessed unused because receiving() waits for the whole message</span>
+                            <span class="n">dict_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_response</span><span class="p">(</span><span class="n">ldap_resp</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">EXTENDED</span><span class="p">):</span>
+                            <span class="n">log</span><span class="p">(</span><span class="n">EXTENDED</span><span class="p">,</span> <span class="s1">&#39;ldap message received via &lt;</span><span class="si">%s</span><span class="s1">&gt;:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">,</span> <span class="n">format_ldap_message</span><span class="p">(</span><span class="n">ldap_resp</span><span class="p">,</span> <span class="s1">&#39;&lt;&lt;&#39;</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ldap_resp</span><span class="p">[</span><span class="s1">&#39;messageID&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">message_id</span><span class="p">:</span>
+                            <span class="n">ldap_responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dict_response</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">dict_response</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;searchResEntry&#39;</span><span class="p">,</span> <span class="s1">&#39;searchResRef&#39;</span><span class="p">,</span> <span class="s1">&#39;intermediateResponse&#39;</span><span class="p">]:</span>
+                                <span class="n">response_complete</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">elif</span> <span class="nb">int</span><span class="p">(</span><span class="n">ldap_resp</span><span class="p">[</span><span class="s1">&#39;messageID&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># 0 is reserved for &#39;Unsolicited Notification&#39; from server as per RFC4511 (paragraph 4.4)</span>
+                            <span class="k">if</span> <span class="n">dict_response</span><span class="p">[</span><span class="s1">&#39;responseName&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1.3.6.1.4.1.1466.20036&#39;</span><span class="p">:</span>  <span class="c1"># Notice of Disconnection as per RFC4511 (paragraph 4.4.1)</span>
+                                <span class="k">return</span> <span class="n">SESSION_TERMINATED_BY_SERVER</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span> <span class="o">=</span> <span class="s1">&#39;unknown unsolicited notification from server&#39;</span>
+                                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                                    <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt; for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+                                <span class="k">raise</span> <span class="n">LDAPSocketReceiveError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="nb">int</span><span class="p">(</span><span class="n">ldap_resp</span><span class="p">[</span><span class="s1">&#39;messageID&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="n">message_id</span> <span class="ow">and</span> <span class="n">dict_response</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;extendedResp&#39;</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span> <span class="o">=</span> <span class="s1">&#39;multiple extended responses to a single extended request&#39;</span>
+                            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt; for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="n">LDAPExtensionError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">)</span>
+                            <span class="c1"># pass  # ignore message with invalid messageId when receiving multiple extendedResp. This is not allowed by RFC4511 but some LDAP server do it</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span> <span class="o">=</span> <span class="s1">&#39;invalid messageId received&#39;</span>
+                            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt; for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="n">LDAPSocketReceiveError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">)</span>
+                        <span class="c1"># response = unprocessed</span>
+                        <span class="c1"># if response:  # if this statement is removed unprocessed data will be processed as another message</span>
+                        <span class="c1">#     self.connection.last_error = &#39;unprocessed substrate error&#39;</span>
+                        <span class="c1">#     if log_enabled(ERROR):</span>
+                        <span class="c1">#         log(ERROR, &#39;&lt;%s&gt; for &lt;%s&gt;&#39;, self.connection.last_error, self.connection)</span>
+                        <span class="c1">#     raise LDAPSocketReceiveError(self.connection.last_error)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">SESSION_TERMINATED_BY_SERVER</span>
+        <span class="n">ldap_responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RESPONSE_COMPLETE</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ldap_responses</span>
+
+<div class="viewcode-block" id="SyncStrategy.set_stream"><a class="viewcode-back" href="../../../ldap3.strategy.sync.html#ldap3.strategy.sync.SyncStrategy.set_stream">[文档]</a>    <span class="k">def</span> <span class="nf">set_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="SyncStrategy.get_stream"><a class="viewcode-back" href="../../../ldap3.strategy.sync.html#ldap3.strategy.sync.SyncStrategy.get_stream">[文档]</a>    <span class="k">def</span> <span class="nf">get_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

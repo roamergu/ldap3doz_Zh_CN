@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The ABANDON operation &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="LDAP Operations" href="operations.html" />
+    <link rel="next" title="The EXTENDED operation" href="extended.html" />
+    <link rel="prev" title="The COMPARE operation" href="compare.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-abandon-operation">
+<h1>The ABANDON operation<a class="headerlink" href="#the-abandon-operation" title="永久链接至标题">¶</a></h1>
+<p>The use of the <strong>Abandon</strong> operation is very limited. Its function is to allow a client to request that the server
+gives up an uncompleted operation. Since there is no response from the server the client cannot tell the difference
+between a successfully abandoned operation and a completed operation. The Bind, Unbind and the Abandon operations
+cannot be abandoned.</p>
+<p>Clients should not send multiple Abandon requests for the same message ID and must be prepared to receive a response to
+the original operation, in case the server has already completed the request before receiving the Abandon request.</p>
+<p>The only (and indirect) way to know if the operation has been abandoned is to wait for a reasonable time to see if you
+get the response to the original operation (the one that has to be abandoned).</p>
+<p>The Abandon operation can be used with asynchronous strategies only because you need the message ID that is returned
+by the operation method of the connection object.</p>
+<p>The Abandon Request is defined as follows:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">abandon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">message_id</span><span class="p">,</span>
+            <span class="n">controls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+
+<span class="o">*</span> <span class="n">message_id</span><span class="p">:</span> <span class="nb">id</span> <span class="n">of</span> <span class="n">the</span> <span class="n">previously</span> <span class="n">sent</span> <span class="n">request</span> <span class="n">to</span> <span class="n">be</span> <span class="n">abandoned</span>
+
+<span class="o">*</span> <span class="n">controls</span><span class="p">:</span> <span class="n">additional</span> <span class="n">controls</span> <span class="n">to</span> <span class="n">send</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">request</span>
+</pre></div>
+</div>
+<p>The abandon method returns True if the abandon request was sent, returns False if the request cannot
+be sent (for Bind, Unbind and Abandon requests).</p>
+<p>You perform an Abandon operation as in the following example (using the asynchronous strategy):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># import class and constants</span>
+<span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">ALL</span><span class="p">,</span> <span class="n">ASYNC</span>
+
+<span class="c1"># define the server</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;servername&#39;</span><span class="p">,</span> <span class="n">get_info</span><span class="o">=</span><span class="n">ALL</span><span class="p">)</span>  <span class="c1"># define an unsecure LDAP server, requesting info on DSE and schema</span>
+
+<span class="c1"># define the connection</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;user_dn&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;user_password&#39;</span><span class="p">,</span> <span class="n">client_strategy</span><span class="o">=</span><span class="n">ASYNC</span><span class="p">)</span>
+
+<span class="c1"># perform a Delete operation</span>
+<span class="n">message_id</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;cn=user1,ou=users,o=company&#39;</span><span class="p">)</span>
+
+<span class="c1"># perform the Abandon operation</span>
+<span class="n">c</span><span class="o">.</span><span class="n">abandon</span><span class="p">(</span><span class="n">message_id</span><span class="p">)</span>
+
+<span class="c1"># check if the operation to be abandoned has been already executed</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">message_id</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Abandon successful&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Too late... Cannot abandon&#39;</span><span class="p">)</span>
+
+<span class="c1"># close the connection</span>
+<span class="n">c</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="operations.html">LDAP Operations</a><ul>
+      <li>Previous: <a href="compare.html" title="上一章">The COMPARE operation</a></li>
+      <li>Next: <a href="extended.html" title="下一章">The EXTENDED operation</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/abandon.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/abandon.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

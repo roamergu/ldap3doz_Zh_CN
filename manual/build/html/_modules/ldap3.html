@@ -1,0 +1,523 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3 &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../index.html" />
+    <link rel="up" title="模块代码" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2013.05.15</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c1"># authentication</span>
+<span class="n">ANONYMOUS</span> <span class="o">=</span> <span class="s1">&#39;ANONYMOUS&#39;</span>
+<span class="n">SIMPLE</span> <span class="o">=</span> <span class="s1">&#39;SIMPLE&#39;</span>
+<span class="n">SASL</span> <span class="o">=</span> <span class="s1">&#39;SASL&#39;</span>
+<span class="n">NTLM</span> <span class="o">=</span> <span class="s1">&#39;NTLM&#39;</span>
+
+<span class="c1"># SASL MECHANISMS</span>
+<span class="n">EXTERNAL</span> <span class="o">=</span> <span class="s1">&#39;EXTERNAL&#39;</span>
+<span class="n">DIGEST_MD5</span> <span class="o">=</span> <span class="s1">&#39;DIGEST-MD5&#39;</span>
+<span class="n">KERBEROS</span> <span class="o">=</span> <span class="n">GSSAPI</span> <span class="o">=</span> <span class="s1">&#39;GSSAPI&#39;</span>
+
+<span class="n">SASL_AVAILABLE_MECHANISMS</span> <span class="o">=</span> <span class="p">[</span><span class="n">EXTERNAL</span><span class="p">,</span> <span class="n">DIGEST_MD5</span><span class="p">,</span> <span class="n">GSSAPI</span><span class="p">]</span>
+
+<span class="n">AUTO_BIND_NONE</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>  <span class="c1"># same as False</span>
+<span class="n">AUTO_BIND_NO_TLS</span> <span class="o">=</span> <span class="s1">&#39;NO_TLS&#39;</span>  <span class="c1"># same as True</span>
+<span class="n">AUTO_BIND_TLS_BEFORE_BIND</span> <span class="o">=</span> <span class="s1">&#39;TLS_BEFORE_BIND&#39;</span>
+<span class="n">AUTO_BIND_TLS_AFTER_BIND</span> <span class="o">=</span> <span class="s1">&#39;TLS_AFTER_BIND&#39;</span>
+
+<span class="c1"># server IP dual stack mode</span>
+<span class="n">IP_SYSTEM_DEFAULT</span> <span class="o">=</span> <span class="s1">&#39;IP_SYSTEM_DEFAULT&#39;</span>
+<span class="n">IP_V4_ONLY</span> <span class="o">=</span> <span class="s1">&#39;IP_V4_ONLY&#39;</span>
+<span class="n">IP_V6_ONLY</span> <span class="o">=</span> <span class="s1">&#39;IP_V6_ONLY&#39;</span>
+<span class="n">IP_V4_PREFERRED</span> <span class="o">=</span> <span class="s1">&#39;IP_V4_PREFERRED&#39;</span>
+<span class="n">IP_V6_PREFERRED</span> <span class="o">=</span> <span class="s1">&#39;IP_V6_PREFERRED&#39;</span>
+<span class="n">ADDRESS_INFO_REFRESH_TIME</span> <span class="o">=</span> <span class="mi">300</span>  <span class="c1"># seconds to wait before refreshing address info from dns</span>
+
+<span class="c1"># search scope</span>
+<span class="n">BASE</span> <span class="o">=</span> <span class="s1">&#39;BASE&#39;</span>
+<span class="n">LEVEL</span> <span class="o">=</span> <span class="s1">&#39;LEVEL&#39;</span>
+<span class="n">SUBTREE</span> <span class="o">=</span> <span class="s1">&#39;SUBTREE&#39;</span>
+
+<span class="c1"># search alias</span>
+<span class="n">DEREF_NEVER</span> <span class="o">=</span> <span class="s1">&#39;NEVER&#39;</span>
+<span class="n">DEREF_SEARCH</span> <span class="o">=</span> <span class="s1">&#39;SEARCH&#39;</span>
+<span class="n">DEREF_BASE</span> <span class="o">=</span> <span class="s1">&#39;FINDING_BASE&#39;</span>
+<span class="n">DEREF_ALWAYS</span> <span class="o">=</span> <span class="s1">&#39;ALWAYS&#39;</span>
+
+<span class="c1"># search attributes</span>
+<span class="n">ALL_ATTRIBUTES</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
+<span class="n">NO_ATTRIBUTES</span> <span class="o">=</span> <span class="s1">&#39;1.1&#39;</span>  <span class="c1"># as per RFC 4511</span>
+<span class="n">ALL_OPERATIONAL_ATTRIBUTES</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span>  <span class="c1"># as per RFC 3673</span>
+
+<span class="n">CASE_INSENSITIVE_ATTRIBUTE_NAMES</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1"># configurable parameter</span>
+<span class="n">CASE_INSENSITIVE_SCHEMA_NAMES</span> <span class="o">=</span> <span class="bp">True</span>  <span class="c1"># configurable parameter</span>
+
+<span class="c1"># checks</span>
+<span class="n">ATTRIBUTES_EXCLUDED_FROM_CHECK</span> <span class="o">=</span> <span class="p">[</span><span class="n">ALL_ATTRIBUTES</span><span class="p">,</span>
+                                  <span class="n">ALL_OPERATIONAL_ATTRIBUTES</span><span class="p">,</span>
+                                  <span class="n">NO_ATTRIBUTES</span><span class="p">,</span>
+                                  <span class="s1">&#39;ldapSyntaxes&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;matchingRules&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;matchingRuleUse&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;dITContentRules&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;dITStructureRules&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;nameForms&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;altServer&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;namingContexts&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;supportedControl&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;supportedExtension&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;supportedFeatures&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;supportedCapabilities&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;supportedLdapVersion&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;supportedSASLMechanisms&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;vendorName&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;vendorVersion&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;subschemaSubentry&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;ACL&#39;</span><span class="p">]</span>
+
+<span class="c1"># modify type</span>
+<span class="n">MODIFY_ADD</span> <span class="o">=</span> <span class="s1">&#39;MODIFY_ADD&#39;</span>
+<span class="n">MODIFY_DELETE</span> <span class="o">=</span> <span class="s1">&#39;MODIFY_DELETE&#39;</span>
+<span class="n">MODIFY_REPLACE</span> <span class="o">=</span> <span class="s1">&#39;MODIFY_REPLACE&#39;</span>
+<span class="n">MODIFY_INCREMENT</span> <span class="o">=</span> <span class="s1">&#39;MODIFY_INCREMENT&#39;</span>
+
+<span class="c1"># client strategies</span>
+<span class="n">SYNC</span> <span class="o">=</span> <span class="s1">&#39;SYNC&#39;</span>
+<span class="n">ASYNC</span> <span class="o">=</span> <span class="s1">&#39;ASYNC&#39;</span>
+<span class="n">LDIF</span> <span class="o">=</span> <span class="s1">&#39;LDIF&#39;</span>
+<span class="n">RESTARTABLE</span> <span class="o">=</span> <span class="s1">&#39;RESTARTABLE&#39;</span>
+<span class="n">REUSABLE</span> <span class="o">=</span> <span class="s1">&#39;REUSABLE&#39;</span>
+<span class="n">MOCK_SYNC</span> <span class="o">=</span> <span class="s1">&#39;MOCK_SYNC&#39;</span>
+<span class="n">MOCK_ASYNC</span> <span class="o">=</span> <span class="s1">&#39;MOCK_ASYNC&#39;</span>
+
+<span class="n">CLIENT_STRATEGIES</span> <span class="o">=</span> <span class="p">[</span><span class="n">SYNC</span><span class="p">,</span>
+                     <span class="n">ASYNC</span><span class="p">,</span>
+                     <span class="n">LDIF</span><span class="p">,</span>
+                     <span class="n">RESTARTABLE</span><span class="p">,</span>
+                     <span class="n">REUSABLE</span><span class="p">,</span>
+                     <span class="n">MOCK_SYNC</span><span class="p">]</span>
+
+<span class="c1"># get rootDSE info</span>
+<span class="n">NONE</span> <span class="o">=</span> <span class="s1">&#39;NO_INFO&#39;</span>
+<span class="n">DSA</span> <span class="o">=</span> <span class="s1">&#39;DSA&#39;</span>
+<span class="n">SCHEMA</span> <span class="o">=</span> <span class="s1">&#39;SCHEMA&#39;</span>
+<span class="n">ALL</span> <span class="o">=</span> <span class="s1">&#39;ALL&#39;</span>
+
+<span class="n">OFFLINE_EDIR_8_8_8</span> <span class="o">=</span> <span class="s1">&#39;EDIR_8_8_8&#39;</span>
+<span class="n">OFFLINE_AD_2012_R2</span> <span class="o">=</span> <span class="s1">&#39;AD_2012_R2&#39;</span>
+<span class="n">OFFLINE_SLAPD_2_4</span> <span class="o">=</span> <span class="s1">&#39;SLAPD_2_4&#39;</span>
+<span class="n">OFFLINE_DS389_1_3_3</span> <span class="o">=</span> <span class="s1">&#39;DS389_1_3_3&#39;</span>
+
+<span class="c1"># abstraction layer</span>
+<span class="n">ABSTRACTION_OPERATIONAL_ATTRIBUTE_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;OPER_&#39;</span>  <span class="c1"># configurable parameter</span>
+
+<span class="c1"># server pooling</span>
+<span class="n">FIRST</span> <span class="o">=</span> <span class="s1">&#39;FIRST&#39;</span>
+<span class="n">ROUND_ROBIN</span> <span class="o">=</span> <span class="s1">&#39;ROUND_ROBIN&#39;</span>
+<span class="n">RANDOM</span> <span class="o">=</span> <span class="s1">&#39;RANDOM&#39;</span>
+
+<span class="n">POOLING_STRATEGIES</span> <span class="o">=</span> <span class="p">[</span><span class="n">FIRST</span><span class="p">,</span> <span class="n">ROUND_ROBIN</span><span class="p">,</span> <span class="n">RANDOM</span><span class="p">]</span>
+<span class="n">POOLING_LOOP_TIMEOUT</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># number of seconds to wait before restarting a cycle to find an active server in the pool - configurable parameter</span>
+
+<span class="c1"># communication</span>
+<span class="n">SESSION_TERMINATED_BY_SERVER</span> <span class="o">=</span> <span class="s1">&#39;TERMINATED_BY_SERVER&#39;</span>
+<span class="n">RESPONSE_COMPLETE</span> <span class="o">=</span> <span class="s1">&#39;RESPONSE_FROM_SERVER_COMPLETE&#39;</span>
+<span class="n">RESPONSE_SLEEPTIME</span> <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># seconds to wait while waiting for a response in asynchronous strategies - configurable parameter</span>
+<span class="n">RESPONSE_WAITING_TIMEOUT</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># waiting timeout for receiving a response in asynchronous strategies - configurable parameter</span>
+<span class="n">SOCKET_SIZE</span> <span class="o">=</span> <span class="mi">4096</span>  <span class="c1"># socket byte size - configurable parameter</span>
+<span class="n">CHECK_AVAILABILITY_TIMEOUT</span> <span class="o">=</span> <span class="mf">2.5</span>  <span class="c1"># default timeout for socket connect when checking availability - configurable parameter</span>
+
+<span class="c1"># restartable strategy</span>
+<span class="n">RESTARTABLE_SLEEPTIME</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># time to wait in a restartable strategy before retrying the request - configurable parameter</span>
+<span class="n">RESTARTABLE_TRIES</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># number of times to retry in a restartable strategy before giving up. Set to True for unlimited retries - configurable parameter</span>
+
+<span class="c1"># reusable strategies (Threaded)</span>
+<span class="n">TERMINATE_REUSABLE</span> <span class="o">=</span> <span class="s1">&#39;TERMINATE_REUSABLE_CONNECTION&#39;</span>
+<span class="n">REUSABLE_THREADED_POOL_SIZE</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># configurable parameter</span>
+<span class="n">REUSABLE_THREADED_LIFETIME</span> <span class="o">=</span> <span class="mi">3600</span>  <span class="c1"># 1 hour - configurable parameter</span>
+<span class="n">DEFAULT_THREADED_POOL_NAME</span> <span class="o">=</span> <span class="s1">&#39;reusable_default_pool&#39;</span>
+
+<span class="c1"># LDAP protocol</span>
+<span class="n">LDAP_MAX_INT</span> <span class="o">=</span> <span class="mi">2147483647</span>
+
+<span class="c1"># LDIF</span>
+<span class="n">LDIF_LINE_LENGTH</span> <span class="o">=</span> <span class="mi">78</span>
+
+<span class="c1"># Hashed password</span>
+<span class="n">HASHED_NONE</span> <span class="o">=</span> <span class="s1">&#39;PLAIN&#39;</span>
+<span class="n">HASHED_SHA</span> <span class="o">=</span> <span class="s1">&#39;SHA&#39;</span>
+<span class="n">HASHED_SHA256</span> <span class="o">=</span> <span class="s1">&#39;SHA256&#39;</span>
+<span class="n">HASHED_SHA384</span> <span class="o">=</span> <span class="s1">&#39;SHA384&#39;</span>
+<span class="n">HASHED_SHA512</span> <span class="o">=</span> <span class="s1">&#39;SHA512&#39;</span>
+<span class="n">HASHED_MD5</span> <span class="o">=</span> <span class="s1">&#39;MD5&#39;</span>
+<span class="n">HASHED_SALTED_SHA</span> <span class="o">=</span> <span class="s1">&#39;SALTED_SHA&#39;</span>
+<span class="n">HASHED_SALTED_SHA256</span> <span class="o">=</span> <span class="s1">&#39;SALTED_SHA256&#39;</span>
+<span class="n">HASHED_SALTED_SHA384</span> <span class="o">=</span> <span class="s1">&#39;SALTED_SHA384&#39;</span>
+<span class="n">HASHED_SALTED_SHA512</span> <span class="o">=</span> <span class="s1">&#39;SALTED_SHA512&#39;</span>
+<span class="n">HASHED_SALTED_MD5</span> <span class="o">=</span> <span class="s1">&#39;SALTED_MD5&#39;</span>
+
+<span class="c1"># result codes</span>
+<span class="n">RESULT_SUCCESS</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">RESULT_OPERATIONS_ERROR</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">RESULT_PROTOCOL_ERROR</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">RESULT_TIME_LIMIT_EXCEEDED</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">RESULT_SIZE_LIMIT_EXCEEDED</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">RESULT_COMPARE_FALSE</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">RESULT_COMPARE_TRUE</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">RESULT_AUTH_METHOD_NOT_SUPPORTED</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">RESULT_STRONGER_AUTH_REQUIRED</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">RESULT_REFERRAL</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">RESULT_ADMIN_LIMIT_EXCEEDED</span> <span class="o">=</span> <span class="mi">11</span>
+<span class="n">RESULT_UNAVAILABLE_CRITICAL_EXTENSION</span> <span class="o">=</span> <span class="mi">12</span>
+<span class="n">RESULT_CONFIDENTIALITY_REQUIRED</span> <span class="o">=</span> <span class="mi">13</span>
+<span class="n">RESULT_SASL_BIND_IN_PROGRESS</span> <span class="o">=</span> <span class="mi">14</span>
+<span class="n">RESULT_NO_SUCH_ATTRIBUTE</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">RESULT_UNDEFINED_ATTRIBUTE_TYPE</span> <span class="o">=</span> <span class="mi">17</span>
+<span class="n">RESULT_INAPPROPRIATE_MATCHING</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="n">RESULT_CONSTRAINT_VIOLATION</span> <span class="o">=</span> <span class="mi">19</span>
+<span class="n">RESULT_ATTRIBUTE_OR_VALUE_EXISTS</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">RESULT_INVALID_ATTRIBUTE_SYNTAX</span> <span class="o">=</span> <span class="mi">21</span>
+<span class="n">RESULT_NO_SUCH_OBJECT</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="n">RESULT_ALIAS_PROBLEM</span> <span class="o">=</span> <span class="mi">33</span>
+<span class="n">RESULT_INVALID_DN_SYNTAX</span> <span class="o">=</span> <span class="mi">34</span>
+<span class="n">RESULT_ALIAS_DEREFERENCING_PROBLEM</span> <span class="o">=</span> <span class="mi">36</span>
+<span class="n">RESULT_INAPPROPRIATE_AUTHENTICATION</span> <span class="o">=</span> <span class="mi">48</span>
+<span class="n">RESULT_INVALID_CREDENTIALS</span> <span class="o">=</span> <span class="mi">49</span>
+<span class="n">RESULT_INSUFFICIENT_ACCESS_RIGHTS</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">RESULT_BUSY</span> <span class="o">=</span> <span class="mi">51</span>
+<span class="n">RESULT_UNAVAILABLE</span> <span class="o">=</span> <span class="mi">52</span>
+<span class="n">RESULT_UNWILLING_TO_PERFORM</span> <span class="o">=</span> <span class="mi">53</span>
+<span class="n">RESULT_LOOP_DETECTED</span> <span class="o">=</span> <span class="mi">54</span>
+<span class="n">RESULT_NAMING_VIOLATION</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">RESULT_OBJECT_CLASS_VIOLATION</span> <span class="o">=</span> <span class="mi">65</span>
+<span class="n">RESULT_NOT_ALLOWED_ON_NON_LEAF</span> <span class="o">=</span> <span class="mi">66</span>
+<span class="n">RESULT_NOT_ALLOWED_ON_RDN</span> <span class="o">=</span> <span class="mi">67</span>
+<span class="n">RESULT_ENTRY_ALREADY_EXISTS</span> <span class="o">=</span> <span class="mi">68</span>
+<span class="n">RESULT_OBJECT_CLASS_MODS_PROHIBITED</span> <span class="o">=</span> <span class="mi">69</span>
+<span class="n">RESULT_AFFECT_MULTIPLE_DSAS</span> <span class="o">=</span> <span class="mi">71</span>
+<span class="n">RESULT_OTHER</span> <span class="o">=</span> <span class="mi">80</span>
+<span class="n">RESULT_LCUP_RESOURCES_EXHAUSTED</span> <span class="o">=</span> <span class="mi">113</span>
+<span class="n">RESULT_LCUP_SECURITY_VIOLATION</span> <span class="o">=</span> <span class="mi">114</span>
+<span class="n">RESULT_LCUP_INVALID_DATA</span> <span class="o">=</span> <span class="mi">115</span>
+<span class="n">RESULT_LCUP_UNSUPPORTED_SCHEME</span> <span class="o">=</span> <span class="mi">116</span>
+<span class="n">RESULT_LCUP_RELOAD_REQUIRED</span> <span class="o">=</span> <span class="mi">117</span>
+<span class="n">RESULT_CANCELED</span> <span class="o">=</span> <span class="mi">118</span>
+<span class="n">RESULT_NO_SUCH_OPERATION</span> <span class="o">=</span> <span class="mi">119</span>
+<span class="n">RESULT_TOO_LATE</span> <span class="o">=</span> <span class="mi">120</span>
+<span class="n">RESULT_CANNOT_CANCEL</span> <span class="o">=</span> <span class="mi">121</span>
+<span class="n">RESULT_ASSERTION_FAILED</span> <span class="o">=</span> <span class="mi">122</span>
+<span class="n">RESULT_AUTHORIZATION_DENIED</span> <span class="o">=</span> <span class="mi">123</span>
+<span class="n">RESULT_E_SYNC_REFRESH_REQUIRED</span> <span class="o">=</span> <span class="mi">4096</span>
+
+<span class="n">RESULT_CODES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">RESULT_SUCCESS</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_OPERATIONS_ERROR</span><span class="p">:</span> <span class="s1">&#39;operationsError&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_PROTOCOL_ERROR</span><span class="p">:</span> <span class="s1">&#39;protocolError&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_TIME_LIMIT_EXCEEDED</span><span class="p">:</span> <span class="s1">&#39;timeLimitExceeded&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_SIZE_LIMIT_EXCEEDED</span><span class="p">:</span> <span class="s1">&#39;sizeLimitExceeded&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_COMPARE_FALSE</span><span class="p">:</span> <span class="s1">&#39;compareFalse&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_COMPARE_TRUE</span><span class="p">:</span> <span class="s1">&#39;compareTrue&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_AUTH_METHOD_NOT_SUPPORTED</span><span class="p">:</span> <span class="s1">&#39;authMethodNotSupported&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_STRONGER_AUTH_REQUIRED</span><span class="p">:</span> <span class="s1">&#39;strongerAuthRequired&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_REFERRAL</span><span class="p">:</span> <span class="s1">&#39;referral&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_ADMIN_LIMIT_EXCEEDED</span><span class="p">:</span> <span class="s1">&#39;adminLimitExceeded&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_UNAVAILABLE_CRITICAL_EXTENSION</span><span class="p">:</span> <span class="s1">&#39;unavailableCriticalExtension&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_CONFIDENTIALITY_REQUIRED</span><span class="p">:</span> <span class="s1">&#39;confidentialityRequired&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_SASL_BIND_IN_PROGRESS</span><span class="p">:</span> <span class="s1">&#39;saslBindInProgress&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_NO_SUCH_ATTRIBUTE</span><span class="p">:</span> <span class="s1">&#39;noSuchAttribute&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_UNDEFINED_ATTRIBUTE_TYPE</span><span class="p">:</span> <span class="s1">&#39;undefinedAttributeType&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_INAPPROPRIATE_MATCHING</span><span class="p">:</span> <span class="s1">&#39;inappropriateMatching&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_CONSTRAINT_VIOLATION</span><span class="p">:</span> <span class="s1">&#39;constraintViolation&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_ATTRIBUTE_OR_VALUE_EXISTS</span><span class="p">:</span> <span class="s1">&#39;attributeOrValueExists&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_INVALID_ATTRIBUTE_SYNTAX</span><span class="p">:</span> <span class="s1">&#39;invalidAttributeSyntax&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_NO_SUCH_OBJECT</span><span class="p">:</span> <span class="s1">&#39;noSuchObject&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_ALIAS_PROBLEM</span><span class="p">:</span> <span class="s1">&#39;aliasProblem&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_INVALID_DN_SYNTAX</span><span class="p">:</span> <span class="s1">&#39;invalidDNSyntax&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_ALIAS_DEREFERENCING_PROBLEM</span><span class="p">:</span> <span class="s1">&#39;aliasDereferencingProblem&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_INAPPROPRIATE_AUTHENTICATION</span><span class="p">:</span> <span class="s1">&#39;inappropriateAuthentication&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_INVALID_CREDENTIALS</span><span class="p">:</span> <span class="s1">&#39;invalidCredentials&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_INSUFFICIENT_ACCESS_RIGHTS</span><span class="p">:</span> <span class="s1">&#39;insufficientAccessRights&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_BUSY</span><span class="p">:</span> <span class="s1">&#39;busy&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_UNAVAILABLE</span><span class="p">:</span> <span class="s1">&#39;unavailable&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_UNWILLING_TO_PERFORM</span><span class="p">:</span> <span class="s1">&#39;unwillingToPerform&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_LOOP_DETECTED</span><span class="p">:</span> <span class="s1">&#39;loopDetected&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_NAMING_VIOLATION</span><span class="p">:</span> <span class="s1">&#39;namingViolation&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_OBJECT_CLASS_VIOLATION</span><span class="p">:</span> <span class="s1">&#39;objectClassViolation&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_NOT_ALLOWED_ON_NON_LEAF</span><span class="p">:</span> <span class="s1">&#39;notAllowedOnNonLeaf&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_NOT_ALLOWED_ON_RDN</span><span class="p">:</span> <span class="s1">&#39;notAllowedOnRDN&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_ENTRY_ALREADY_EXISTS</span><span class="p">:</span> <span class="s1">&#39;entryAlreadyExists&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_OBJECT_CLASS_MODS_PROHIBITED</span><span class="p">:</span> <span class="s1">&#39;objectClassModsProhibited&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_AFFECT_MULTIPLE_DSAS</span><span class="p">:</span> <span class="s1">&#39;affectMultipleDSAs&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_OTHER</span><span class="p">:</span> <span class="s1">&#39;other&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_LCUP_RESOURCES_EXHAUSTED</span><span class="p">:</span> <span class="s1">&#39;lcupResourcesExhausted&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_LCUP_SECURITY_VIOLATION</span><span class="p">:</span> <span class="s1">&#39;lcupSecurityViolation&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_LCUP_INVALID_DATA</span><span class="p">:</span> <span class="s1">&#39;lcupInvalidData&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_LCUP_UNSUPPORTED_SCHEME</span><span class="p">:</span> <span class="s1">&#39;lcupUnsupportedScheme&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_LCUP_RELOAD_REQUIRED</span><span class="p">:</span> <span class="s1">&#39;lcupReloadRequired&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_CANCELED</span><span class="p">:</span> <span class="s1">&#39;canceled&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_NO_SUCH_OPERATION</span><span class="p">:</span> <span class="s1">&#39;noSuchOperation&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_TOO_LATE</span><span class="p">:</span> <span class="s1">&#39;tooLate&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_CANNOT_CANCEL</span><span class="p">:</span> <span class="s1">&#39;cannotCancel&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_ASSERTION_FAILED</span><span class="p">:</span> <span class="s1">&#39;assertionFailed&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_AUTHORIZATION_DENIED</span><span class="p">:</span> <span class="s1">&#39;authorizationDenied&#39;</span><span class="p">,</span>
+    <span class="n">RESULT_E_SYNC_REFRESH_REQUIRED</span><span class="p">:</span> <span class="s1">&#39;e-syncRefreshRequired&#39;</span>
+<span class="p">}</span>
+
+<span class="c1"># do not raise exception for (in raise_exceptions connection mode)</span>
+<span class="n">DO_NOT_RAISE_EXCEPTIONS</span> <span class="o">=</span> <span class="p">[</span><span class="n">RESULT_SUCCESS</span><span class="p">,</span> <span class="n">RESULT_COMPARE_FALSE</span><span class="p">,</span> <span class="n">RESULT_COMPARE_TRUE</span><span class="p">,</span> <span class="n">RESULT_REFERRAL</span><span class="p">]</span>
+
+<span class="c1"># types for string and sequence</span>
+<span class="k">if</span> <span class="nb">str</span> <span class="o">!=</span> <span class="nb">bytes</span><span class="p">:</span>  <span class="c1"># python 3</span>
+    <span class="n">STRING_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>  <span class="c1"># python 2</span>
+    <span class="n">STRING_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">GeneratorType</span>
+<span class="n">SEQUENCE_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">GeneratorType</span><span class="p">)</span>
+
+<span class="c1"># older and longer constants</span>
+<span class="n">AUTH_ANONYMOUS</span> <span class="o">=</span> <span class="n">ANONYMOUS</span>
+<span class="n">AUTH_SIMPLE</span> <span class="o">=</span> <span class="n">SIMPLE</span>
+<span class="n">AUTH_SASL</span> <span class="o">=</span> <span class="n">SASL</span>
+
+<span class="n">SEARCH_SCOPE_BASE_OBJECT</span> <span class="o">=</span> <span class="n">BASE</span>
+<span class="n">SEARCH_SCOPE_SINGLE_LEVEL</span> <span class="o">=</span> <span class="n">LEVEL</span>
+<span class="n">SEARCH_SCOPE_WHOLE_SUBTREE</span> <span class="o">=</span> <span class="n">SUBTREE</span>
+
+<span class="n">SEARCH_NEVER_DEREFERENCE_ALIASES</span> <span class="o">=</span> <span class="n">DEREF_NEVER</span>
+<span class="n">SEARCH_DEREFERENCE_IN_SEARCHING</span> <span class="o">=</span> <span class="n">DEREF_SEARCH</span>
+<span class="n">SEARCH_DEREFERENCE_FINDING_BASE_OBJECT</span> <span class="o">=</span> <span class="n">DEREF_BASE</span>
+<span class="n">SEARCH_DEREFERENCE_ALWAYS</span> <span class="o">=</span> <span class="n">DEREF_ALWAYS</span>
+
+<span class="n">STRATEGY_SYNC</span> <span class="o">=</span> <span class="n">SYNC</span>
+<span class="n">STRATEGY_ASYNC_THREADED</span> <span class="o">=</span> <span class="n">ASYNC</span>
+<span class="n">STRATEGY_LDIF_PRODUCER</span> <span class="o">=</span> <span class="n">LDIF</span>
+<span class="n">STRATEGY_SYNC_RESTARTABLE</span> <span class="o">=</span> <span class="n">RESTARTABLE</span>
+<span class="n">STRATEGY_REUSABLE_THREADED</span> <span class="o">=</span> <span class="n">REUSABLE</span>
+<span class="n">STRATEGY_MOCK_SYNC</span> <span class="o">=</span> <span class="n">MOCK_SYNC</span>
+<span class="n">STRATEGY_MOCK_ASYNC</span> <span class="o">=</span> <span class="n">MOCK_SYNC</span>
+
+<span class="n">POOLING_STRATEGY_FIRST</span> <span class="o">=</span> <span class="n">FIRST</span>
+<span class="n">POOLING_STRATEGY_ROUND_ROBIN</span> <span class="o">=</span> <span class="n">ROUND_ROBIN</span>
+<span class="n">POOLING_STRATEGY_RANDOM</span> <span class="o">=</span> <span class="n">RANDOM</span>
+
+<span class="n">GET_NO_INFO</span> <span class="o">=</span> <span class="n">NONE</span>
+<span class="n">GET_DSA_INFO</span> <span class="o">=</span> <span class="n">DSA</span>
+<span class="n">GET_SCHEMA_INFO</span> <span class="o">=</span> <span class="n">SCHEMA</span>
+<span class="n">GET_ALL_INFO</span> <span class="o">=</span> <span class="n">ALL</span>
+
+
+<div class="viewcode-block" id="get_config_parameter"><a class="viewcode-back" href="../ldap3.html#ldap3.get_config_parameter">[文档]</a><span class="k">def</span> <span class="nf">get_config_parameter</span><span class="p">(</span><span class="n">parameter</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;CASE_INSENSITIVE_ATTRIBUTE_NAMES&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">CASE_INSENSITIVE_ATTRIBUTE_NAMES</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;CASE_INSENSITIVE_SCHEMA_NAMES&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">CASE_INSENSITIVE_SCHEMA_NAMES</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;ABSTRACTION_OPERATIONAL_ATTRIBUTE_PREFIX&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ABSTRACTION_OPERATIONAL_ATTRIBUTE_PREFIX</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;POOLING_LOOP_TIMEOUT&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">POOLING_LOOP_TIMEOUT</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;RESPONSE_SLEEPTIME&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RESPONSE_SLEEPTIME</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;RESPONSE_WAITING_TIMEOUT&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RESPONSE_WAITING_TIMEOUT</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;SOCKET_SIZE&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SOCKET_SIZE</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;CHECK_AVAILABILITY_TIMEOUT&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">CHECK_AVAILABILITY_TIMEOUT</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;RESTARTABLE_SLEEPTIME&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RESTARTABLE_SLEEPTIME</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;RESTARTABLE_TRIES&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">RESTARTABLE_TRIES</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;REUSABLE_THREADED_POOL_SIZE&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">REUSABLE_THREADED_POOL_SIZE</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;REUSABLE_THREADED_LIFETIME&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">REUSABLE_THREADED_LIFETIME</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;DEFAULT_THREADED_POOL_NAME&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DEFAULT_THREADED_POOL_NAME</span>
+
+    <span class="k">raise</span> <span class="n">LDAPConfigurationParameterError</span><span class="p">(</span><span class="s1">&#39;configuration parameter </span><span class="si">%s</span><span class="s1"> not valid&#39;</span> <span class="o">%</span> <span class="n">parameter</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="set_config_parameter"><a class="viewcode-back" href="../ldap3.html#ldap3.set_config_parameter">[文档]</a><span class="k">def</span> <span class="nf">set_config_parameter</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;CASE_INSENSITIVE_ATTRIBUTE_NAMES&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">CASE_INSENSITIVE_ATTRIBUTE_NAMES</span>
+        <span class="n">CASE_INSENSITIVE_ATTRIBUTE_NAMES</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;CASE_INSENSITIVE_SCHEMA_NAMES&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">CASE_INSENSITIVE_SCHEMA_NAMES</span>
+        <span class="n">CASE_INSENSITIVE_SCHEMA_NAMES</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;ABSTRACTION_OPERATIONAL_ATTRIBUTE_PREFIX&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">ABSTRACTION_OPERATIONAL_ATTRIBUTE_PREFIX</span>
+        <span class="n">ABSTRACTION_OPERATIONAL_ATTRIBUTE_PREFIX</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;POOLING_LOOP_TIMEOUT&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">POOLING_LOOP_TIMEOUT</span>
+        <span class="n">POOLING_LOOP_TIMEOUT</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;RESPONSE_SLEEPTIME&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">RESPONSE_SLEEPTIME</span>
+        <span class="n">RESPONSE_SLEEPTIME</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;RESPONSE_WAITING_TIMEOUT&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">RESPONSE_WAITING_TIMEOUT</span>
+        <span class="n">RESPONSE_WAITING_TIMEOUT</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;SOCKET_SIZE&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">SOCKET_SIZE</span>
+        <span class="n">SOCKET_SIZE</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;CHECK_AVAILABILITY_TIMEOUT&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">CHECK_AVAILABILITY_TIMEOUT</span>
+        <span class="n">CHECK_AVAILABILITY_TIMEOUT</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;RESTARTABLE_SLEEPTIME&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">RESTARTABLE_SLEEPTIME</span>
+        <span class="n">RESTARTABLE_SLEEPTIME</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;RESTARTABLE_TRIES&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">RESTARTABLE_TRIES</span>
+        <span class="n">RESTARTABLE_TRIES</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;REUSABLE_THREADED_POOL_SIZE&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">REUSABLE_THREADED_POOL_SIZE</span>
+        <span class="n">REUSABLE_THREADED_POOL_SIZE</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;REUSABLE_THREADED_LIFETIME&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">REUSABLE_THREADED_LIFETIME</span>
+        <span class="n">REUSABLE_THREADED_LIFETIME</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s1">&#39;DEFAULT_THREADED_POOL_NAME&#39;</span><span class="p">:</span>
+        <span class="k">global</span> <span class="n">DEFAULT_THREADED_POOL_NAME</span>
+        <span class="n">DEFAULT_THREADED_POOL_NAME</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">LDAPConfigurationParameterError</span><span class="p">(</span><span class="s1">&#39;unable to set configuration parameter </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">parameter</span><span class="p">)</span></div>
+
+<span class="c1"># centralized imports</span>
+<span class="kn">from</span> <span class="nn">.version</span> <span class="kn">import</span> <span class="n">__author__</span><span class="p">,</span> <span class="n">__version__</span><span class="p">,</span> <span class="n">__email__</span><span class="p">,</span> <span class="n">__description__</span><span class="p">,</span> <span class="n">__status__</span><span class="p">,</span> <span class="n">__license__</span><span class="p">,</span> <span class="n">__url__</span>
+<span class="kn">from</span> <span class="nn">.core.server</span> <span class="kn">import</span> <span class="n">Server</span>
+<span class="kn">from</span> <span class="nn">.core.connection</span> <span class="kn">import</span> <span class="n">Connection</span>
+<span class="kn">from</span> <span class="nn">.core.tls</span> <span class="kn">import</span> <span class="n">Tls</span>
+<span class="kn">from</span> <span class="nn">.core.pooling</span> <span class="kn">import</span> <span class="n">ServerPool</span>
+<span class="kn">from</span> <span class="nn">.abstract</span> <span class="kn">import</span> <span class="n">ObjectDef</span><span class="p">,</span> <span class="n">AttrDef</span><span class="p">,</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">Entry</span><span class="p">,</span> <span class="n">Reader</span><span class="p">,</span> <span class="n">OperationalAttribute</span>
+<span class="kn">from</span> <span class="nn">.protocol.rfc4512</span> <span class="kn">import</span> <span class="n">DsaInfo</span><span class="p">,</span> <span class="n">SchemaInfo</span>
+
+<span class="c1"># imports error Exceptions</span>
+<span class="kn">from</span> <span class="nn">.core.exceptions</span> <span class="kn">import</span> <span class="n">LDAPException</span><span class="p">,</span> <span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="n">LDAPConfigurationError</span><span class="p">,</span> <span class="n">LDAPSocketCloseError</span><span class="p">,</span> <span class="n">LDAPReferralError</span><span class="p">,</span> \
+    <span class="n">LDAPAttributeError</span><span class="p">,</span> <span class="n">LDAPBindError</span><span class="p">,</span> <span class="n">LDAPCertificateError</span><span class="p">,</span> <span class="n">LDAPChangesError</span><span class="p">,</span> <span class="n">LDAPCommunicationError</span><span class="p">,</span> <span class="n">LDAPConnectionIsReadOnlyError</span><span class="p">,</span> \
+    <span class="n">LDAPConnectionPoolNameIsMandatoryError</span><span class="p">,</span> <span class="n">LDAPConnectionPoolNotStartedError</span><span class="p">,</span> <span class="n">LDAPControlsError</span><span class="p">,</span> <span class="n">LDAPEntryError</span><span class="p">,</span> \
+    <span class="n">LDAPInvalidDereferenceAliasesError</span><span class="p">,</span> <span class="n">LDAPInvalidFilterError</span><span class="p">,</span> <span class="n">LDAPInvalidScopeError</span><span class="p">,</span> <span class="n">LDAPInvalidServerError</span><span class="p">,</span> <span class="n">LDAPKeyError</span><span class="p">,</span>\
+    <span class="n">LDAPLDIFError</span><span class="p">,</span> <span class="n">LDAPMetricsError</span><span class="p">,</span> <span class="n">LDAPObjectClassError</span><span class="p">,</span> <span class="n">LDAPObjectError</span><span class="p">,</span> <span class="n">LDAPPasswordIsMandatoryError</span><span class="p">,</span> <span class="n">LDAPReaderError</span><span class="p">,</span>\
+    <span class="n">LDAPSASLBindInProgressError</span><span class="p">,</span> <span class="n">LDAPSASLMechanismNotSupportedError</span><span class="p">,</span> <span class="n">LDAPSASLPrepError</span><span class="p">,</span> <span class="n">LDAPSchemaError</span><span class="p">,</span> <span class="n">LDAPServerPoolError</span><span class="p">,</span> \
+    <span class="n">LDAPServerPoolExhaustedError</span><span class="p">,</span> <span class="n">LDAPSocketOpenError</span><span class="p">,</span> <span class="n">LDAPSocketReceiveError</span><span class="p">,</span> <span class="n">LDAPSocketSendError</span><span class="p">,</span> <span class="n">LDAPSSLConfigurationError</span><span class="p">,</span>\
+    <span class="n">LDAPSSLNotSupportedError</span><span class="p">,</span> <span class="n">LDAPStartTLSError</span><span class="p">,</span> <span class="n">LDAPTypeError</span><span class="p">,</span> <span class="n">LDAPUnknownAuthenticationMethodError</span><span class="p">,</span> <span class="n">LDAPUnknownRequestError</span><span class="p">,</span> \
+    <span class="n">LDAPUnknownResponseError</span><span class="p">,</span> <span class="n">LDAPUnknownStrategyError</span><span class="p">,</span> <span class="n">LDAPDefinitionError</span><span class="p">,</span> <span class="n">LDAPResponseTimeoutError</span><span class="p">,</span> <span class="n">LDAPInvalidHashAlgorithmError</span><span class="p">,</span> \
+    <span class="n">LDAPSessionTerminatedByServerError</span><span class="p">,</span> <span class="n">LDAPMaximumRetriesError</span><span class="p">,</span> <span class="n">LDAPExtensionError</span><span class="p">,</span> <span class="n">LDAPInvalidDnError</span><span class="p">,</span> <span class="n">LDAPInvalidPortError</span><span class="p">,</span> \
+    <span class="n">LDAPPackageUnavailableError</span><span class="p">,</span> <span class="n">LDAPConfigurationParameterError</span><span class="p">,</span> <span class="n">LDAPInvalidTlsSpecificationError</span><span class="p">,</span> <span class="n">LDAPUserNameNotAllowedError</span><span class="p">,</span> \
+    <span class="n">LDAPUserNameIsMandatoryError</span>
+
+<span class="c1"># imports result code Exceptions</span>
+<span class="kn">from</span> <span class="nn">.core.exceptions</span> <span class="kn">import</span> <span class="n">LDAPAdminLimitExceededResult</span><span class="p">,</span> <span class="n">LDAPAffectMultipleDSASResult</span><span class="p">,</span> <span class="n">LDAPAliasDereferencingProblemResult</span><span class="p">,</span>\
+    <span class="n">LDAPAliasProblemResult</span><span class="p">,</span> <span class="n">LDAPAssertionFailedResult</span><span class="p">,</span> <span class="n">LDAPAttributeOrValueExistsResult</span><span class="p">,</span> <span class="n">LDAPAuthMethodNotSupportedResult</span><span class="p">,</span> \
+    <span class="n">LDAPAuthorizationDeniedResult</span><span class="p">,</span> <span class="n">LDAPBusyResult</span><span class="p">,</span> <span class="n">LDAPCanceledResult</span><span class="p">,</span> <span class="n">LDAPCannotCancelResult</span><span class="p">,</span> <span class="n">LDAPConfidentialityRequiredResult</span><span class="p">,</span>\
+    <span class="n">LDAPConstraintViolationResult</span><span class="p">,</span> <span class="n">LDAPEntryAlreadyExistsResult</span><span class="p">,</span> <span class="n">LDAPESyncRefreshRequiredResult</span><span class="p">,</span> \
+    <span class="n">LDAPInappropriateAuthenticationResult</span><span class="p">,</span> <span class="n">LDAPInappropriateMatchingResult</span><span class="p">,</span> <span class="n">LDAPInsufficientAccessRightsResult</span><span class="p">,</span> \
+    <span class="n">LDAPInvalidAttributeSyntaxResult</span><span class="p">,</span> <span class="n">LDAPInvalidCredentialsResult</span><span class="p">,</span> <span class="n">LDAPInvalidDNSyntaxResult</span><span class="p">,</span> <span class="n">LDAPLCUPInvalidDataResult</span><span class="p">,</span> \
+    <span class="n">LDAPLCUPReloadRequiredResult</span><span class="p">,</span> <span class="n">LDAPLCUPResourcesExhaustedResult</span><span class="p">,</span> <span class="n">LDAPLCUPSecurityViolationResult</span><span class="p">,</span> <span class="n">LDAPLCUPUnsupportedSchemeResult</span><span class="p">,</span> \
+    <span class="n">LDAPLoopDetectedResult</span><span class="p">,</span> <span class="n">LDAPNamingViolationResult</span><span class="p">,</span> <span class="n">LDAPNoSuchAttributeResult</span><span class="p">,</span> <span class="n">LDAPNoSuchObjectResult</span><span class="p">,</span> \
+    <span class="n">LDAPNoSuchOperationResult</span><span class="p">,</span> <span class="n">LDAPNotAllowedOnNotLeafResult</span><span class="p">,</span> <span class="n">LDAPNotAllowedOnRDNResult</span><span class="p">,</span> <span class="n">LDAPObjectClassModsProhibitedResult</span><span class="p">,</span> \
+    <span class="n">LDAPObjectClassViolationResult</span><span class="p">,</span> <span class="n">LDAPOperationResult</span><span class="p">,</span> <span class="n">LDAPOperationsErrorResult</span><span class="p">,</span> <span class="n">LDAPOtherResult</span><span class="p">,</span> <span class="n">LDAPProtocolErrorResult</span><span class="p">,</span> \
+    <span class="n">LDAPReferralResult</span><span class="p">,</span> <span class="n">LDAPSASLBindInProgressResult</span><span class="p">,</span> <span class="n">LDAPSizeLimitExceededResult</span><span class="p">,</span> <span class="n">LDAPStrongerAuthRequiredResult</span><span class="p">,</span> \
+    <span class="n">LDAPTimeLimitExceededResult</span><span class="p">,</span> <span class="n">LDAPTooLateResult</span><span class="p">,</span> <span class="n">LDAPUnavailableCriticalExtensionResult</span><span class="p">,</span> <span class="n">LDAPUnavailableResult</span><span class="p">,</span> \
+    <span class="n">LDAPUndefinedAttributeTypeResult</span><span class="p">,</span> <span class="n">LDAPUnwillingToPerformResult</span>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">模块代码</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

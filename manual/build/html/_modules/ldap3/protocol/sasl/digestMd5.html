@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.sasl.digestMd5 &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../../index.html" />
+    <link rel="up" title="ldap3" href="../../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.protocol.sasl.digestMd5 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2014.01.04</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">binascii</span> <span class="kn">import</span> <span class="n">hexlify</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">hmac</span>
+
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">SEQUENCE_TYPES</span>
+<span class="kn">from</span> <span class="nn">...protocol.sasl.sasl</span> <span class="kn">import</span> <span class="n">abort_sasl_negotiation</span><span class="p">,</span> <span class="n">send_sasl_negotiation</span><span class="p">,</span> <span class="n">random_hex_string</span>
+
+
+<span class="n">STATE_KEY</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">STATE_VALUE</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="md5_h"><a class="viewcode-back" href="../../../../ldap3.protocol.sasl.digestMd5.html#ldap3.protocol.sasl.digestMd5.md5_h">[文档]</a><span class="k">def</span> <span class="nf">md5_h</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="md5_kd"><a class="viewcode-back" href="../../../../ldap3.protocol.sasl.digestMd5.html#ldap3.protocol.sasl.digestMd5.md5_kd">[文档]</a><span class="k">def</span> <span class="nf">md5_kd</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">md5_h</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">s</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="md5_hex"><a class="viewcode-back" href="../../../../ldap3.protocol.sasl.digestMd5.html#ldap3.protocol.sasl.digestMd5.md5_hex">[文档]</a><span class="k">def</span> <span class="nf">md5_hex</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">hexlify</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="md5_hmac"><a class="viewcode-back" href="../../../../ldap3.protocol.sasl.digestMd5.html#ldap3.protocol.sasl.digestMd5.md5_hmac">[文档]</a><span class="k">def</span> <span class="nf">md5_hmac</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">hmac</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="sasl_digest_md5"><a class="viewcode-back" href="../../../../ldap3.protocol.sasl.digestMd5.html#ldap3.protocol.sasl.digestMd5.sasl_digest_md5">[文档]</a><span class="k">def</span> <span class="nf">sasl_digest_md5</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">controls</span><span class="p">):</span>
+    <span class="c1"># sasl_credential must be a tuple made up of the following elements: (realm, user, password, authorization_id)</span>
+    <span class="c1"># if realm is None will be used the realm received from the server, if available</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">,</span> <span class="n">SEQUENCE_TYPES</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c1"># step One of RFC2831</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">send_sasl_negotiation</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;saslCreds&#39;</span> <span class="ow">in</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;saslCreds&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">server_directives</span> <span class="o">=</span> <span class="n">decode_directives</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;saslCreds&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="s1">&#39;realm&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">server_directives</span> <span class="ow">or</span> <span class="s1">&#39;nonce&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">server_directives</span> <span class="ow">or</span> <span class="s1">&#39;algorithm&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">server_directives</span><span class="p">:</span>  <span class="c1"># mandatory directives, as per RFC2831</span>
+        <span class="n">abort_sasl_negotiation</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">controls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c1"># step Two of RFC2831</span>
+    <span class="n">charset</span> <span class="o">=</span> <span class="n">server_directives</span><span class="p">[</span><span class="s1">&#39;charset&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;charset&#39;</span> <span class="ow">in</span> <span class="n">server_directives</span> <span class="ow">and</span> <span class="n">server_directives</span><span class="p">[</span><span class="s1">&#39;charset&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;utf-8&#39;</span> <span class="k">else</span> <span class="s1">&#39;iso8859-1&#39;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span><span class="p">)</span>
+    <span class="n">realm</span> <span class="o">=</span> <span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="p">(</span><span class="n">server_directives</span><span class="p">[</span><span class="s1">&#39;realm&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;realm&#39;</span> <span class="ow">in</span> <span class="n">server_directives</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span><span class="p">)</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span><span class="p">)</span>
+    <span class="n">authz_id</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span><span class="p">)</span> <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">else</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+    <span class="n">nonce</span> <span class="o">=</span> <span class="n">server_directives</span><span class="p">[</span><span class="s1">&#39;nonce&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span><span class="p">)</span>
+    <span class="n">cnonce</span> <span class="o">=</span> <span class="n">random_hex_string</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">charset</span><span class="p">)</span>
+    <span class="n">uri</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;ldap/&#39;</span>
+    <span class="n">qop</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;auth&#39;</span>
+
+    <span class="n">digest_response</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;username=&quot;&#39;</span> <span class="o">+</span> <span class="n">user</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;&quot;,&#39;</span>
+    <span class="n">digest_response</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;realm=&quot;&#39;</span> <span class="o">+</span> <span class="n">realm</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;&quot;,&#39;</span>
+    <span class="n">digest_response</span> <span class="o">+=</span> <span class="p">(</span><span class="n">b</span><span class="s1">&#39;authzid=&quot;&#39;</span> <span class="o">+</span> <span class="n">authz_id</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;&quot;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">authz_id</span> <span class="k">else</span> <span class="n">b</span><span class="s1">&#39;&#39;</span>
+    <span class="n">digest_response</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;nonce=&quot;&#39;</span> <span class="o">+</span> <span class="n">nonce</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;&quot;,&#39;</span>
+    <span class="n">digest_response</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;cnonce=&quot;&#39;</span> <span class="o">+</span> <span class="n">cnonce</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;&quot;,&#39;</span>
+    <span class="n">digest_response</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;digest-uri=&quot;&#39;</span> <span class="o">+</span> <span class="n">uri</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;&quot;,&#39;</span>
+    <span class="n">digest_response</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;qop=&#39;</span> <span class="o">+</span> <span class="n">qop</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;,&#39;</span>
+    <span class="n">digest_response</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;nc=00000001&#39;</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;,&#39;</span>
+    <span class="k">if</span> <span class="n">charset</span> <span class="o">==</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">:</span>
+        <span class="n">digest_response</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;charset=&quot;utf-8&quot;,&#39;</span>
+
+    <span class="n">a0</span> <span class="o">=</span> <span class="n">md5_h</span><span class="p">(</span><span class="n">b</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">user</span><span class="p">,</span> <span class="n">realm</span><span class="p">,</span> <span class="n">password</span><span class="p">]))</span>
+    <span class="n">a1</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">a0</span><span class="p">,</span> <span class="n">nonce</span><span class="p">,</span> <span class="n">cnonce</span><span class="p">,</span> <span class="n">authz_id</span><span class="p">])</span> <span class="k">if</span> <span class="n">authz_id</span> <span class="k">else</span> <span class="n">b</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">a0</span><span class="p">,</span> <span class="n">nonce</span><span class="p">,</span> <span class="n">cnonce</span><span class="p">])</span>
+    <span class="n">a2</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;AUTHENTICATE:&#39;</span> <span class="o">+</span> <span class="n">uri</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;:00000000000000000000000000000000&#39;</span> <span class="k">if</span> <span class="n">qop</span> <span class="ow">in</span> <span class="p">[</span><span class="n">b</span><span class="s1">&#39;auth-int&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;auth-conf&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">b</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">digest_response</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;response=&quot;&#39;</span> <span class="o">+</span> <span class="n">md5_hex</span><span class="p">(</span><span class="n">md5_kd</span><span class="p">(</span><span class="n">md5_hex</span><span class="p">(</span><span class="n">md5_h</span><span class="p">(</span><span class="n">a1</span><span class="p">)),</span> <span class="n">b</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">nonce</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;00000001&#39;</span><span class="p">,</span> <span class="n">cnonce</span><span class="p">,</span> <span class="n">qop</span><span class="p">,</span> <span class="n">md5_hex</span><span class="p">(</span><span class="n">md5_h</span><span class="p">(</span><span class="n">a2</span><span class="p">))])))</span> <span class="o">+</span> <span class="n">b</span><span class="s1">&#39;&quot;&#39;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">send_sasl_negotiation</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">controls</span><span class="p">,</span> <span class="n">digest_response</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="decode_directives"><a class="viewcode-back" href="../../../../ldap3.protocol.sasl.digestMd5.html#ldap3.protocol.sasl.digestMd5.decode_directives">[文档]</a><span class="k">def</span> <span class="nf">decode_directives</span><span class="p">(</span><span class="n">directives_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    converts directives to dict, unquote values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># old_directives = dict((attr[0], attr[1].strip(&#39;&quot;&#39;)) for attr in [line.split(&#39;=&#39;) for line in directives_string.split(&#39;,&#39;)])</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">STATE_KEY</span>
+    <span class="n">tmp_buffer</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">quoting</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">directives</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">directives_string</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">STATE_KEY</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;=&#39;</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">tmp_buffer</span>
+            <span class="n">tmp_buffer</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">STATE_VALUE</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">STATE_VALUE</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">quoting</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tmp_buffer</span><span class="p">:</span>
+            <span class="n">quoting</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">STATE_VALUE</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span> <span class="ow">and</span> <span class="n">quoting</span><span class="p">:</span>
+            <span class="n">quoting</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">elif</span> <span class="n">state</span> <span class="o">==</span> <span class="n">STATE_VALUE</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;,&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">quoting</span><span class="p">:</span>
+            <span class="n">directives</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_buffer</span>
+            <span class="n">tmp_buffer</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">STATE_KEY</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tmp_buffer</span> <span class="o">+=</span> <span class="n">c</span>
+
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">tmp_buffer</span><span class="p">:</span>
+        <span class="n">directives</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_buffer</span>
+
+    <span class="k">return</span> <span class="n">directives</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">模块代码</a><ul>
+  <li><a href="../../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

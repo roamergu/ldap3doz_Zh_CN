@@ -1,0 +1,369 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.core.tls &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.core.tls 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2013.08.05</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">LDAPSSLNotSupportedError</span><span class="p">,</span> <span class="n">LDAPSSLConfigurationError</span><span class="p">,</span> <span class="n">LDAPStartTLSError</span><span class="p">,</span> <span class="n">LDAPCertificateError</span><span class="p">,</span> <span class="n">start_tls_exception_factory</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">SEQUENCE_TYPES</span>
+<span class="kn">from</span> <span class="nn">..utils.log</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">log_enabled</span><span class="p">,</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">BASIC</span><span class="p">,</span> <span class="n">NETWORK</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># noinspection PyUnresolvedReferences</span>
+    <span class="kn">import</span> <span class="nn">ssl</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+        <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;SSL not supported in this Python interpreter&#39;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">LDAPSSLNotSupportedError</span><span class="p">(</span><span class="s1">&#39;SSL not supported in this Python interpreter&#39;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ssl</span> <span class="kn">import</span> <span class="n">match_hostname</span><span class="p">,</span> <span class="n">CertificateError</span>  <span class="c1"># backport for python2 missing ssl functionalities</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">..utils.tls_backport</span> <span class="kn">import</span> <span class="n">CertificateError</span>
+    <span class="kn">from</span> <span class="nn">..utils.tls_backport</span> <span class="kn">import</span> <span class="n">match_hostname</span>
+    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+        <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;using tls_backport&#39;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>  <span class="c1"># try to use SSLContext</span>
+    <span class="c1"># noinspection PyUnresolvedReferences</span>
+    <span class="kn">from</span> <span class="nn">ssl</span> <span class="kn">import</span> <span class="n">create_default_context</span><span class="p">,</span> <span class="n">Purpose</span>  <span class="c1"># defined in Python 3.4</span>
+    <span class="n">use_ssl_context</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">use_ssl_context</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+        <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;SSLContext unavailable&#39;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+
+
+<span class="c1"># noinspection PyProtectedMember</span>
+<div class="viewcode-block" id="Tls"><a class="viewcode-back" href="../../../ldap3.core.tls.html#ldap3.core.tls.Tls">[文档]</a><span class="k">class</span> <span class="nc">Tls</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    tls/ssl configuration for Server object</span>
+<span class="sd">    Starting from python 2.7.9 and python 3.4 uses the SSLContext object</span>
+<span class="sd">    that tries to read the CAs defined at system level</span>
+<span class="sd">    ca_certs_path and ca_certs_data are valid only when using SSLContext</span>
+<span class="sd">    local_private_key_password is valid only when using SSLContext</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">local_private_key_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">local_certificate_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">validate</span><span class="o">=</span><span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span><span class="p">,</span>
+                 <span class="n">version</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">ca_certs_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">valid_names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">ca_certs_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">ca_certs_data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">local_private_key_password</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">validate</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span><span class="p">,</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_OPTIONAL</span><span class="p">,</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_REQUIRED</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">=</span> <span class="n">validate</span>
+        <span class="k">elif</span> <span class="n">validate</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;invalid validate parameter &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">validate</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPSSLConfigurationError</span><span class="p">(</span><span class="s1">&#39;invalid validate parameter&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ca_certs_file</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ca_certs_file</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_file</span> <span class="o">=</span> <span class="n">ca_certs_file</span>
+        <span class="k">elif</span> <span class="n">ca_certs_file</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;invalid CA public key file &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">ca_certs_file</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPSSLConfigurationError</span><span class="p">(</span><span class="s1">&#39;invalid CA public key file&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_file</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">ca_certs_path</span> <span class="ow">and</span> <span class="n">use_ssl_context</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ca_certs_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_path</span> <span class="o">=</span> <span class="n">ca_certs_path</span>
+        <span class="k">elif</span> <span class="n">ca_certs_path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">use_ssl_context</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;cannot use CA public keys path, SSLContext not available&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPSSLNotSupportedError</span><span class="p">(</span><span class="s1">&#39;cannot use CA public keys path, SSLContext not available&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ca_certs_path</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;invalid CA public keys path &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">ca_certs_path</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPSSLConfigurationError</span><span class="p">(</span><span class="s1">&#39;invalid CA public keys path&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_path</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">ca_certs_data</span> <span class="ow">and</span> <span class="n">use_ssl_context</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_data</span> <span class="o">=</span> <span class="n">ca_certs_data</span>
+        <span class="k">elif</span> <span class="n">ca_certs_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;cannot use CA data, SSLContext not available&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPSSLNotSupportedError</span><span class="p">(</span><span class="s1">&#39;cannot use CA data, SSLContext not available&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_data</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">local_private_key_password</span> <span class="ow">and</span> <span class="n">use_ssl_context</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">private_key_password</span> <span class="o">=</span> <span class="n">local_private_key_password</span>
+        <span class="k">elif</span> <span class="n">local_private_key_password</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;cannot use local private key password, SSLContext not available&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPSSLNotSupportedError</span><span class="p">(</span><span class="s1">&#39;cannot use local private key password, SSLContext is not available&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">private_key_password</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">private_key_file</span> <span class="o">=</span> <span class="n">local_private_key_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">certificate_file</span> <span class="o">=</span> <span class="n">local_certificate_file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_names</span> <span class="o">=</span> <span class="n">valid_names</span>
+
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;instantiated Tls: &lt;</span><span class="si">%r</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;protocol: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">),</span>
+            <span class="s1">&#39;client private key: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;present &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_key_file</span> <span class="k">else</span> <span class="s1">&#39;not present&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;client certificate: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;present &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">certificate_file</span> <span class="k">else</span> <span class="s1">&#39;not present&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;private key password: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;present &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_key_password</span> <span class="k">else</span> <span class="s1">&#39;not present&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;CA certificates file: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;present &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_file</span> <span class="k">else</span> <span class="s1">&#39;not present&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;CA certificates path: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;present &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_path</span> <span class="k">else</span> <span class="s1">&#39;not present&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;CA certificates data: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;present &#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_data</span> <span class="k">else</span> <span class="s1">&#39;not present&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;verify mode: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
+            <span class="s1">&#39;valid names: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valid_names</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="s1">&#39; - &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_key_file</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="s1">&#39;, local_private_key_file={0.private_key_file!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">certificate_file</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="s1">&#39;, local_certificate_file={0.certificate_file!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="s1">&#39;, validate={0.validate!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="s1">&#39;, version={0.version!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_file</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="s1">&#39;, ca_certs_file={0.ca_certs_file!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_path</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="s1">&#39;, ca_certs_path={0.ca_certs_path!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="s1">&#39;, ca_certs_data={0.ca_certs_data!r}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;Tls(&#39;</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+        <span class="k">return</span> <span class="n">r</span>
+
+<div class="viewcode-block" id="Tls.wrap_socket"><a class="viewcode-back" href="../../../ldap3.core.tls.html#ldap3.core.tls.Tls.wrap_socket">[文档]</a>    <span class="k">def</span> <span class="nf">wrap_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="n">do_handshake</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds TLS to the connection socket</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">use_ssl_context</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>  <span class="c1"># uses the default ssl context for reasonable security</span>
+                <span class="n">ssl_context</span> <span class="o">=</span> <span class="n">create_default_context</span><span class="p">(</span><span class="n">purpose</span><span class="o">=</span><span class="n">Purpose</span><span class="o">.</span><span class="n">SERVER_AUTH</span><span class="p">,</span>
+                                                     <span class="n">cafile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_file</span><span class="p">,</span>
+                                                     <span class="n">capath</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_path</span><span class="p">,</span>
+                                                     <span class="n">cadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># code from create_default_context in the Python standard library 3.5.1, creates a ssl context with the specificd protocol version</span>
+                <span class="n">ssl_context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">SSLContext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+                <span class="n">ssl_context</span><span class="o">.</span><span class="n">load_verify_locations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">!=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span><span class="p">:</span>
+                    <span class="n">ssl_context</span><span class="o">.</span><span class="n">load_default_certs</span><span class="p">(</span><span class="n">Purpose</span><span class="o">.</span><span class="n">SERVER_AUTH</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_key_file</span><span class="p">:</span>
+                <span class="n">ssl_context</span><span class="o">.</span><span class="n">load_cert_chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">certificate_file</span><span class="p">,</span> <span class="n">keyfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">private_key_file</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">private_key_password</span><span class="p">)</span>
+            <span class="n">ssl_context</span><span class="o">.</span><span class="n">check_hostname</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">ssl_context</span><span class="o">.</span><span class="n">verify_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate</span>
+
+            <span class="n">wrapped_socket</span> <span class="o">=</span> <span class="n">ssl_context</span><span class="o">.</span><span class="n">wrap_socket</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">socket</span><span class="p">,</span> <span class="n">server_side</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">do_handshake_on_connect</span><span class="o">=</span><span class="n">do_handshake</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;socket wrapped with SSL using SSLContext for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ssl</span><span class="p">,</span> <span class="s1">&#39;PROTOCOL_SSLv23&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">PROTOCOL_SSLv23</span>
+            <span class="n">wrapped_socket</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">wrap_socket</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">socket</span><span class="p">,</span>
+                                             <span class="n">keyfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">private_key_file</span><span class="p">,</span>
+                                             <span class="n">certfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">certificate_file</span><span class="p">,</span>
+                                             <span class="n">server_side</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                                             <span class="n">cert_reqs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span><span class="p">,</span>
+                                             <span class="n">ssl_version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                                             <span class="n">ca_certs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ca_certs_file</span><span class="p">,</span>
+                                             <span class="n">do_handshake_on_connect</span><span class="o">=</span><span class="n">do_handshake</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;socket wrapped with SSL for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">do_handshake</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">==</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_REQUIRED</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">validate</span> <span class="o">==</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_OPTIONAL</span><span class="p">):</span>
+            <span class="n">check_hostname</span><span class="p">(</span><span class="n">wrapped_socket</span><span class="p">,</span> <span class="n">connection</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_names</span><span class="p">)</span>
+
+        <span class="n">connection</span><span class="o">.</span><span class="n">socket</span> <span class="o">=</span> <span class="n">wrapped_socket</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Tls.start_tls"><a class="viewcode-back" href="../../../ldap3.core.tls.html#ldap3.core.tls.Tls.start_tls">[文档]</a>    <span class="k">def</span> <span class="nf">start_tls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">ssl</span><span class="p">:</span>  <span class="c1"># ssl already established at server level</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">tls_started</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">connection</span><span class="o">.</span><span class="n">_executing_deferred</span><span class="p">)</span> <span class="ow">or</span> <span class="n">connection</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">_outstanding</span> <span class="ow">or</span> <span class="n">connection</span><span class="o">.</span><span class="n">sasl_in_progress</span><span class="p">:</span>
+            <span class="c1"># Per RFC 4513 (3.1.1)</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">&quot;can&#39;t start tls because operations are in progress for &lt;</span><span class="si">%s</span><span class="s2">&gt;&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">starting_tls</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;starting tls for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">extended</span><span class="p">(</span><span class="s1">&#39;1.3.6.1.4.1.1466.20037&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connection</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">sync</span><span class="p">:</span>
+            <span class="c1"># async - _start_tls must be executed by the strategy</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;tls started for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;tls not started for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]:</span>
+                <span class="c1"># startTLS failed</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">last_error</span> <span class="o">=</span> <span class="s1">&#39;startTLS failed - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">LDAPStartTLSError</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;tls started for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_tls</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_start_tls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+        <span class="n">exc</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrap_socket</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">do_handshake</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">last_error</span> <span class="o">=</span> <span class="s1">&#39;wrap socket error: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">exc</span> <span class="o">=</span> <span class="n">e</span>
+
+        <span class="n">connection</span><span class="o">.</span><span class="n">starting_tls</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;error &lt;</span><span class="si">%s</span><span class="s1">&gt; wrapping socket for TLS in &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">start_tls_exception_factory</span><span class="p">(</span><span class="n">LDAPStartTLSError</span><span class="p">,</span> <span class="n">exc</span><span class="p">)(</span><span class="n">connection</span><span class="o">.</span><span class="n">last_error</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">usage</span><span class="p">:</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">_usage</span><span class="o">.</span><span class="n">wrapped_sockets</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">connection</span><span class="o">.</span><span class="n">tls_started</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">True</span></div>
+
+
+<div class="viewcode-block" id="check_hostname"><a class="viewcode-back" href="../../../ldap3.core.tls.html#ldap3.core.tls.check_hostname">[文档]</a><span class="k">def</span> <span class="nf">check_hostname</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">server_name</span><span class="p">,</span> <span class="n">additional_names</span><span class="p">):</span>
+    <span class="n">server_certificate</span> <span class="o">=</span> <span class="n">sock</span><span class="o">.</span><span class="n">getpeercert</span><span class="p">()</span>
+    <span class="n">host_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">server_name</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">additional_names</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">additional_names</span><span class="p">,</span> <span class="n">SEQUENCE_TYPES</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">additional_names</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">host_name</span> <span class="ow">in</span> <span class="n">host_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">host_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">host_name</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;certificate matches * wildcard&#39;</span><span class="p">)</span>
+            <span class="k">return</span>  <span class="c1"># valid</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">match_hostname</span><span class="p">(</span><span class="n">server_certificate</span><span class="p">,</span> <span class="n">host_name</span><span class="p">)</span>  <span class="c1"># raise CertificateError if certificate doesn&#39;t match server name</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s1">&#39;certificate matches host name &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">host_name</span><span class="p">)</span>
+            <span class="k">return</span>  <span class="c1"># valid</span>
+        <span class="k">except</span> <span class="n">CertificateError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">NETWORK</span><span class="p">,</span> <span class="s2">&quot;certificate doesn&#39;t match host name &lt;</span><span class="si">%s</span><span class="s2">&gt;&quot;</span><span class="p">,</span> <span class="n">host_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+        <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">&quot;host name doesn&#39;t match&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">LDAPCertificateError</span><span class="p">(</span><span class="s2">&quot;hostname doesn&#39;t match&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

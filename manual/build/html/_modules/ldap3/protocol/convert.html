@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.convert &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.protocol.convert 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2013.07.24</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">SEQUENCE_TYPES</span>
+<span class="kn">from</span> <span class="nn">..core.exceptions</span> <span class="kn">import</span> <span class="n">LDAPControlsError</span><span class="p">,</span> <span class="n">LDAPAttributeError</span><span class="p">,</span> <span class="n">LDAPObjectClassError</span>
+<span class="kn">from</span> <span class="nn">..protocol.rfc4511</span> <span class="kn">import</span> <span class="n">Controls</span><span class="p">,</span> <span class="n">Control</span>
+
+<div class="viewcode-block" id="attribute_to_dict"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.attribute_to_dict">[文档]</a><span class="k">def</span> <span class="nf">attribute_to_dict</span><span class="p">(</span><span class="n">attribute</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">attribute</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]),</span> <span class="s1">&#39;values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">attribute</span><span class="p">[</span><span class="s1">&#39;vals&#39;</span><span class="p">]]}</span></div>
+
+
+<div class="viewcode-block" id="attributes_to_dict"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.attributes_to_dict">[文档]</a><span class="k">def</span> <span class="nf">attributes_to_dict</span><span class="p">(</span><span class="n">attributes</span><span class="p">):</span>
+    <span class="n">attributes_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+        <span class="n">attribute_dict</span> <span class="o">=</span> <span class="n">attribute_to_dict</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+        <span class="n">attributes_dict</span><span class="p">[</span><span class="n">attribute_dict</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">attribute_dict</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">attributes_dict</span></div>
+
+
+<div class="viewcode-block" id="referrals_to_list"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.referrals_to_list">[文档]</a><span class="k">def</span> <span class="nf">referrals_to_list</span><span class="p">(</span><span class="n">referrals</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">referral</span><span class="p">)</span> <span class="k">for</span> <span class="n">referral</span> <span class="ow">in</span> <span class="n">referrals</span> <span class="k">if</span> <span class="n">referral</span><span class="p">]</span> <span class="k">if</span> <span class="n">referrals</span> <span class="k">else</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="search_refs_to_list"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.search_refs_to_list">[文档]</a><span class="k">def</span> <span class="nf">search_refs_to_list</span><span class="p">(</span><span class="n">search_refs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">search_ref</span><span class="p">)</span> <span class="k">for</span> <span class="n">search_ref</span> <span class="ow">in</span> <span class="n">search_refs</span> <span class="k">if</span> <span class="n">search_ref</span><span class="p">]</span> <span class="k">if</span> <span class="n">search_refs</span> <span class="k">else</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="sasl_to_dict"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.sasl_to_dict">[文档]</a><span class="k">def</span> <span class="nf">sasl_to_dict</span><span class="p">(</span><span class="n">sasl</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;mechanism&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">sasl</span><span class="p">[</span><span class="s1">&#39;mechanism&#39;</span><span class="p">]),</span> <span class="s1">&#39;credentials&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">sasl</span><span class="p">[</span><span class="s1">&#39;credentials&#39;</span><span class="p">])}</span></div>
+
+
+<div class="viewcode-block" id="authentication_choice_to_dict"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.authentication_choice_to_dict">[文档]</a><span class="k">def</span> <span class="nf">authentication_choice_to_dict</span><span class="p">(</span><span class="n">authentication_choice</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;simple&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">authentication_choice</span><span class="p">[</span><span class="s1">&#39;simple&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">authentication_choice</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;simple&#39;</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;sasl&#39;</span><span class="p">:</span> <span class="n">sasl_to_dict</span><span class="p">(</span><span class="n">authentication_choice</span><span class="p">[</span><span class="s1">&#39;sasl&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">authentication_choice</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;sasl&#39;</span> <span class="k">else</span> <span class="bp">None</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="decode_referrals"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.decode_referrals">[文档]</a><span class="k">def</span> <span class="nf">decode_referrals</span><span class="p">(</span><span class="n">referrals</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">referral</span><span class="p">)</span> <span class="k">for</span> <span class="n">referral</span> <span class="ow">in</span> <span class="n">referrals</span> <span class="k">if</span> <span class="n">referral</span><span class="p">]</span> <span class="k">if</span> <span class="n">referrals</span> <span class="k">else</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="partial_attribute_to_dict"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.partial_attribute_to_dict">[文档]</a><span class="k">def</span> <span class="nf">partial_attribute_to_dict</span><span class="p">(</span><span class="n">modification</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">modification</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]),</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">modification</span><span class="p">[</span><span class="s1">&#39;vals&#39;</span><span class="p">]]}</span></div>
+
+
+<div class="viewcode-block" id="change_to_dict"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.change_to_dict">[文档]</a><span class="k">def</span> <span class="nf">change_to_dict</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;operation&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s1">&#39;operation&#39;</span><span class="p">]),</span> <span class="s1">&#39;attribute&#39;</span><span class="p">:</span> <span class="n">partial_attribute_to_dict</span><span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s1">&#39;modification&#39;</span><span class="p">])}</span></div>
+
+
+<div class="viewcode-block" id="changes_to_list"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.changes_to_list">[文档]</a><span class="k">def</span> <span class="nf">changes_to_list</span><span class="p">(</span><span class="n">changes</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">change_to_dict</span><span class="p">(</span><span class="n">change</span><span class="p">)</span> <span class="k">for</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="attributes_to_list"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.attributes_to_list">[文档]</a><span class="k">def</span> <span class="nf">attributes_to_list</span><span class="p">(</span><span class="n">attributes</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span> <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ava_to_dict"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.ava_to_dict">[文档]</a><span class="k">def</span> <span class="nf">ava_to_dict</span><span class="p">(</span><span class="n">ava</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;attribute&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ava</span><span class="p">[</span><span class="s1">&#39;attributeDesc&#39;</span><span class="p">]),</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">ava</span><span class="p">[</span><span class="s1">&#39;assertionValue&#39;</span><span class="p">])}</span></div>
+
+
+<div class="viewcode-block" id="substring_to_dict"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.substring_to_dict">[文档]</a><span class="k">def</span> <span class="nf">substring_to_dict</span><span class="p">(</span><span class="n">substring</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;initial&#39;</span><span class="p">:</span> <span class="n">substring</span><span class="p">[</span><span class="s1">&#39;initial&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">substring</span><span class="p">[</span><span class="s1">&#39;initial&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;any&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">middle</span> <span class="k">for</span> <span class="n">middle</span> <span class="ow">in</span> <span class="n">substring</span><span class="p">[</span><span class="s1">&#39;any&#39;</span><span class="p">]]</span> <span class="k">if</span> <span class="n">substring</span><span class="p">[</span><span class="s1">&#39;any&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;final&#39;</span><span class="p">:</span> <span class="n">substring</span><span class="p">[</span><span class="s1">&#39;final&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">substring</span><span class="p">[</span><span class="s1">&#39;final&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="prepare_changes_for_request"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.prepare_changes_for_request">[文档]</a><span class="k">def</span> <span class="nf">prepare_changes_for_request</span><span class="p">(</span><span class="n">changes</span><span class="p">):</span>
+    <span class="n">prepared</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
+        <span class="n">prepared</span><span class="p">[</span><span class="n">change</span><span class="p">[</span><span class="s1">&#39;attribute&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">change</span><span class="p">[</span><span class="s1">&#39;operation&#39;</span><span class="p">],</span> <span class="n">change</span><span class="p">[</span><span class="s1">&#39;attribute&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">prepared</span></div>
+
+
+<div class="viewcode-block" id="build_controls_list"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.build_controls_list">[文档]</a><span class="k">def</span> <span class="nf">build_controls_list</span><span class="p">(</span><span class="n">controls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    controls is a list of Control() or tuples</span>
+<span class="sd">    each tuple must have 3 elements: the control OID, the criticality, the value</span>
+<span class="sd">    criticality must be a boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">controls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">controls</span><span class="p">,</span> <span class="n">SEQUENCE_TYPES</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">LDAPControlsError</span><span class="p">(</span><span class="s1">&#39;controls must be a sequence&#39;</span><span class="p">)</span>
+
+    <span class="n">built_controls</span> <span class="o">=</span> <span class="n">Controls</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">control</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">controls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">control</span><span class="p">,</span> <span class="n">Control</span><span class="p">):</span>
+            <span class="n">built_controls</span><span class="o">.</span><span class="n">setComponentByPosition</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">control</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">control</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">control</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="n">built_control</span> <span class="o">=</span> <span class="n">Control</span><span class="p">()</span>
+            <span class="n">built_control</span><span class="p">[</span><span class="s1">&#39;controlType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">control</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">built_control</span><span class="p">[</span><span class="s1">&#39;criticality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">control</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">control</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">built_control</span><span class="p">[</span><span class="s1">&#39;controlValue&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">control</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">built_controls</span><span class="o">.</span><span class="n">setComponentByPosition</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">built_control</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPControlsError</span><span class="p">(</span><span class="s1">&#39;control must be a tuple of 3 elements: controlType, criticality (boolean) and controlValue (None if not provided)&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">built_controls</span></div>
+
+
+<div class="viewcode-block" id="validate_assertion_value"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.validate_assertion_value">[文档]</a><span class="k">def</span> <span class="nf">validate_assertion_value</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">schema</span> <span class="ow">and</span> <span class="n">schema</span><span class="o">.</span><span class="n">attribute_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">attribute_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPAttributeError</span><span class="p">(</span><span class="s1">&#39;invalid attribute type in assertion: &#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="n">validated_value</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">pos</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">:</span>
+            <span class="n">byte</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">pos</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">validated_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">pos</span> <span class="o">+</span> <span class="mi">3</span><span class="p">],</span> <span class="mi">16</span><span class="p">))</span>
+                    <span class="n">pos</span> <span class="o">+=</span> <span class="mi">3</span>
+                    <span class="k">continue</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+        <span class="n">validated_value</span> <span class="o">+=</span> <span class="n">value</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">validated_value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="validate_attribute_value"><a class="viewcode-back" href="../../../ldap3.protocol.convert.html#ldap3.protocol.convert.validate_attribute_value">[文档]</a><span class="k">def</span> <span class="nf">validate_attribute_value</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">schema</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">attribute_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">attribute_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPAttributeError</span><span class="p">(</span><span class="s1">&#39;invalid attribute type in attribute&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">object_classes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;objectClass&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">object_classes</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">LDAPObjectClassError</span><span class="p">(</span><span class="s1">&#39;invalid class in ObjectClass attribute: &#39;</span> <span class="o">+</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">value</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

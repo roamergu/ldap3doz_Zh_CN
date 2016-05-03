@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.rfc3062 module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.protocol package" href="ldap3.protocol.html" />
+    <link rel="next" title="ldap3.protocol.rfc4511 module" href="ldap3.protocol.rfc4511.html" />
+    <link rel="prev" title="ldap3.protocol.rfc2849 module" href="ldap3.protocol.rfc2849.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.protocol.rfc3062">
+<span id="ldap3-protocol-rfc3062-module"></span><h1>ldap3.protocol.rfc3062 module<a class="headerlink" href="#module-ldap3.protocol.rfc3062" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.protocol.rfc3062.GenPasswd">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc3062.</code><code class="descname">GenPasswd</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc3062.html#GenPasswd"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc3062.GenPasswd" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<p>newPasswd [2] OCTET STRING OPTIONAL</p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.GenPasswd.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc3062.GenPasswd.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.GenPasswd.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc3062.GenPasswd.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc3062.NewPasswd">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc3062.</code><code class="descname">NewPasswd</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc3062.html#NewPasswd"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc3062.NewPasswd" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<p>newPasswd [2] OCTET STRING OPTIONAL</p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.NewPasswd.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc3062.NewPasswd.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.NewPasswd.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=2))</em><a class="headerlink" href="#ldap3.protocol.rfc3062.NewPasswd.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc3062.OldPasswd">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc3062.</code><code class="descname">OldPasswd</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc3062.html#OldPasswd"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc3062.OldPasswd" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<p>oldPasswd [1] OCTET STRING OPTIONAL</p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.OldPasswd.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc3062.OldPasswd.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.OldPasswd.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=1))</em><a class="headerlink" href="#ldap3.protocol.rfc3062.OldPasswd.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc3062.PasswdModifyRequestValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc3062.</code><code class="descname">PasswdModifyRequestValue</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc3062.html#PasswdModifyRequestValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc3062.PasswdModifyRequestValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="docutils">
+<dt>PasswdModifyRequestValue ::= SEQUENCE {</dt>
+<dd>userIdentity [0] OCTET STRING OPTIONAL
+oldPasswd [1] OCTET STRING OPTIONAL
+newPasswd [2] OCTET STRING OPTIONAL }</dd>
+</dl>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.PasswdModifyRequestValue.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(OptionalNamedType('userIdentity', UserIdentity()), OptionalNamedType('oldPasswd', OldPasswd()), OptionalNamedType('newPasswd', NewPasswd()))</em><a class="headerlink" href="#ldap3.protocol.rfc3062.PasswdModifyRequestValue.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc3062.PasswdModifyResponseValue">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc3062.</code><code class="descname">PasswdModifyResponseValue</code><span class="sig-paren">(</span><em>componentType=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>sizeSpec=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc3062.html#PasswdModifyResponseValue"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc3062.PasswdModifyResponseValue" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.Sequence</span></code></p>
+<dl class="docutils">
+<dt>PasswdModifyResponseValue ::= SEQUENCE {</dt>
+<dd>genPasswd [0] OCTET STRING OPTIONAL }</dd>
+</dl>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.PasswdModifyResponseValue.componentType">
+<code class="descname">componentType</code><em class="property"> = NamedTypes(OptionalNamedType('genPasswd', GenPasswd()))</em><a class="headerlink" href="#ldap3.protocol.rfc3062.PasswdModifyResponseValue.componentType" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc3062.UserIdentity">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc3062.</code><code class="descname">UserIdentity</code><span class="sig-paren">(</span><em>value=None</em>, <em>tagSet=None</em>, <em>subtypeSpec=None</em>, <em>encoding=None</em>, <em>binValue=None</em>, <em>hexValue=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc3062.html#UserIdentity"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc3062.UserIdentity" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<code class="xref py py-class docutils literal"><span class="pre">pyasn1.type.univ.OctetString</span></code></p>
+<p>userIdentity [0] OCTET STRING OPTIONAL</p>
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.UserIdentity.encoding">
+<code class="descname">encoding</code><em class="property"> = 'utf-8'</em><a class="headerlink" href="#ldap3.protocol.rfc3062.UserIdentity.encoding" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc3062.UserIdentity.tagSet">
+<code class="descname">tagSet</code><em class="property"> = TagSet((), Tag(tagClass=128, tagFormat=0, tagId=0))</em><a class="headerlink" href="#ldap3.protocol.rfc3062.UserIdentity.tagSet" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.protocol.html">ldap3.protocol package</a><ul>
+      <li>Previous: <a href="ldap3.protocol.rfc2849.html" title="上一章">ldap3.protocol.rfc2849 module</a></li>
+      <li>Next: <a href="ldap3.protocol.rfc4511.html" title="下一章">ldap3.protocol.rfc4511 module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.protocol.rfc3062.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.protocol.rfc3062.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

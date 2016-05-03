@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.abstract.entry module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.abstract package" href="ldap3.abstract.html" />
+    <link rel="next" title="ldap3.abstract.objectDef module" href="ldap3.abstract.objectDef.html" />
+    <link rel="prev" title="ldap3.abstract.attribute module" href="ldap3.abstract.attribute.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.abstract.entry">
+<span id="ldap3-abstract-entry-module"></span><h1>ldap3.abstract.entry module<a class="headerlink" href="#module-ldap3.abstract.entry" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.abstract.entry.Entry">
+<em class="property">class </em><code class="descclassname">ldap3.abstract.entry.</code><code class="descname">Entry</code><span class="sig-paren">(</span><em>dn</em>, <em>reader</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>The Entry object contains a single entry from the result of an LDAP
+search.  Attributes can be accessed either by sequence, by assignment
+or as dictionary keys. Keys are not case sensitive.</p>
+<p>The Entry object is read only</p>
+<ul class="simple">
+<li>The DN is retrieved by get_entry_dn()</li>
+<li>The Reader reference is in get_entry_reader()</li>
+<li>Raw attributes values are retrieved by the get_raw_attributes() and
+get_raw_attribute() methods</li>
+</ul>
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_get_attribute_names">
+<code class="descname">entry_get_attribute_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_get_attribute_names"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_get_attribute_names" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_get_attributes_dict">
+<code class="descname">entry_get_attributes_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_get_attributes_dict"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_get_attributes_dict" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_get_dn">
+<code class="descname">entry_get_dn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_get_dn"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_get_dn" title="永久链接至目标">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">The distinguished name of the Entry</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_get_raw_attribute">
+<code class="descname">entry_get_raw_attribute</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_get_raw_attribute"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_get_raw_attribute" title="永久链接至目标">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>name</strong> &#8211; name of the attribute</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">raw (unencoded) value of the attribute, None if attribute is not found</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_get_raw_attributes">
+<code class="descname">entry_get_raw_attributes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_get_raw_attributes"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_get_raw_attributes" title="永久链接至目标">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">The raw (unencoded) attributes of the Entry as bytes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_get_reader">
+<code class="descname">entry_get_reader</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_get_reader"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_get_reader" title="永久链接至目标">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">the Reader object of the Entry</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_get_response">
+<code class="descname">entry_get_response</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_get_response"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_get_response" title="永久链接至目标">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">The origininal search response for the Entry</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_refresh_from_reader">
+<code class="descname">entry_refresh_from_reader</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_refresh_from_reader"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_refresh_from_reader" title="永久链接至目标">¶</a></dt>
+<dd><p>Re-read the entry from the LDAP Server</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_to_json">
+<code class="descname">entry_to_json</code><span class="sig-paren">(</span><em>raw=False</em>, <em>indent=4</em>, <em>sort=True</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_to_json"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_to_json" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.entry.Entry.entry_to_ldif">
+<code class="descname">entry_to_ldif</code><span class="sig-paren">(</span><em>all_base64=False</em>, <em>line_separator=None</em>, <em>sort_order=None</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/entry.html#Entry.entry_to_ldif"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.entry.Entry.entry_to_ldif" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.abstract.html">ldap3.abstract package</a><ul>
+      <li>Previous: <a href="ldap3.abstract.attribute.html" title="上一章">ldap3.abstract.attribute module</a></li>
+      <li>Next: <a href="ldap3.abstract.objectDef.html" title="下一章">ldap3.abstract.objectDef module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.abstract.entry.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.abstract.entry.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

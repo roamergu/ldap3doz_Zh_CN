@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.strategy.base module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.strategy package" href="ldap3.strategy.html" />
+    <link rel="next" title="ldap3.strategy.ldifProducer module" href="ldap3.strategy.ldifProducer.html" />
+    <link rel="prev" title="ldap3.strategy.async module" href="ldap3.strategy.async.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.strategy.base">
+<span id="ldap3-strategy-base-module"></span><h1>ldap3.strategy.base module<a class="headerlink" href="#module-ldap3.strategy.base" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.strategy.base.BaseStrategy">
+<em class="property">class </em><code class="descclassname">ldap3.strategy.base.</code><code class="descname">BaseStrategy</code><span class="sig-paren">(</span><em>ldap_connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Base class for connection strategy</p>
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.close"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.close" title="永久链接至目标">¶</a></dt>
+<dd><p>Close connection</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ldap3.strategy.base.BaseStrategy.compute_ldap_message_size">
+<em class="property">static </em><code class="descname">compute_ldap_message_size</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.compute_ldap_message_size"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.compute_ldap_message_size" title="永久链接至目标">¶</a></dt>
+<dd><p>Compute LDAP Message size according to BER definite length rules
+Returns -1 if too few data to compute message length</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ldap3.strategy.base.BaseStrategy.decode_control">
+<em class="property">static </em><code class="descname">decode_control</code><span class="sig-paren">(</span><em>control</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.decode_control"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.decode_control" title="永久链接至目标">¶</a></dt>
+<dd><p>decode control, return a 2-element tuple where the first element is the control oid
+and the second element is a dictionary with description (from Oids), criticality and decoded control value</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ldap3.strategy.base.BaseStrategy.decode_control_fast">
+<em class="property">static </em><code class="descname">decode_control_fast</code><span class="sig-paren">(</span><em>control</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.decode_control_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.decode_control_fast" title="永久链接至目标">¶</a></dt>
+<dd><p>decode control, return a 2-element tuple where the first element is the control oid
+and the second element is a dictionary with description (from Oids), criticality and decoded control value</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ldap3.strategy.base.BaseStrategy.decode_request">
+<em class="property">static </em><code class="descname">decode_request</code><span class="sig-paren">(</span><em>ldap_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.decode_request"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.decode_request" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.decode_response">
+<code class="descname">decode_response</code><span class="sig-paren">(</span><em>ldap_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.decode_response"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.decode_response" title="永久链接至目标">¶</a></dt>
+<dd><p>Convert received LDAPMessage to a dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.decode_response_fast">
+<code class="descname">decode_response_fast</code><span class="sig-paren">(</span><em>ldap_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.decode_response_fast"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.decode_response_fast" title="永久链接至目标">¶</a></dt>
+<dd><p>Convert received LDAPMessage from fast ber decoder to a dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.do_next_range_search">
+<code class="descname">do_next_range_search</code><span class="sig-paren">(</span><em>request</em>, <em>response</em>, <em>attr_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.do_next_range_search"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.do_next_range_search" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.do_operation_on_referral">
+<code class="descname">do_operation_on_referral</code><span class="sig-paren">(</span><em>request</em>, <em>referrals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.do_operation_on_referral"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.do_operation_on_referral" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.do_search_on_auto_range">
+<code class="descname">do_search_on_auto_range</code><span class="sig-paren">(</span><em>request</em>, <em>response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.do_search_on_auto_range"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.do_search_on_auto_range" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.get_response">
+<code class="descname">get_response</code><span class="sig-paren">(</span><em>message_id</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.get_response"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.get_response" title="永久链接至目标">¶</a></dt>
+<dd><p>Get response LDAP messages
+Responses are returned by the underlying connection strategy
+Check if message_id LDAP message is still outstanding and wait for timeout to see if it appears in _get_response
+Result is stored in connection.result
+Responses without result is stored in connection.response
+A tuple (responses, result) is returned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.get_stream">
+<code class="descname">get_stream</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.get_stream"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.get_stream" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.open">
+<code class="descname">open</code><span class="sig-paren">(</span><em>reset_usage=True</em>, <em>read_server_info=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.open"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.open" title="永久链接至目标">¶</a></dt>
+<dd><p>Open a socket to a server. Choose a server from the server pool if available</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.post_send_search">
+<code class="descname">post_send_search</code><span class="sig-paren">(</span><em>message_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.post_send_search"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.post_send_search" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.post_send_single_response">
+<code class="descname">post_send_single_response</code><span class="sig-paren">(</span><em>message_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.post_send_single_response"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.post_send_single_response" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.receiving">
+<code class="descname">receiving</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.receiving"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.receiving" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>message_type</em>, <em>request</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.send"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.send" title="永久链接至目标">¶</a></dt>
+<dd><p>Send an LDAP message
+Returns the message_id</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.sending">
+<code class="descname">sending</code><span class="sig-paren">(</span><em>ldap_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.sending"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.sending" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.set_stream">
+<code class="descname">set_stream</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.set_stream"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.set_stream" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.strategy.base.BaseStrategy.valid_referral_list">
+<code class="descname">valid_referral_list</code><span class="sig-paren">(</span><em>referrals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/strategy/base.html#BaseStrategy.valid_referral_list"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.strategy.base.BaseStrategy.valid_referral_list" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.strategy.html">ldap3.strategy package</a><ul>
+      <li>Previous: <a href="ldap3.strategy.async.html" title="上一章">ldap3.strategy.async module</a></li>
+      <li>Next: <a href="ldap3.strategy.ldifProducer.html" title="下一章">ldap3.strategy.ldifProducer module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.strategy.base.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.strategy.base.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

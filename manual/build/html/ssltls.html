@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>SSL and TLS &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="Connection metrics" href="metrics.html" />
+    <link rel="prev" title="Connections" href="connections.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ssl-and-tls">
+<h1>SSL and TLS<a class="headerlink" href="#ssl-and-tls" title="永久链接至标题">¶</a></h1>
+<p>You can use SSL basic authentication with the use_ssl parameter of the Server object, you can also specify a port (636 is the default for secure ldap):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;servername&#39;</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="mi">636</span><span class="p">,</span> <span class="n">use_ssl</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>  <span class="c1"># define a secure LDAP server</span>
+</pre></div>
+</div>
+<p>To start a TLS connection on an already created clear connection:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">.</span><span class="n">start_tls</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Some older versions (up to 2.7.9) of the Python interpreter lack the capability to check the server certificate against
+the DNS name of the server. This is a potential breach of security because a server could present a certificate issued
+for another host name. ldap3 includes a backport of this capability ported from the 3.4.3 version of the Python interpreter.
+If you want to keep your application up to date with the hostname checking capability of the latest Python version
+you can install the backports.ssl_match_hostname package from pypi. The ldap3 library will detect and use it instead of
+the included static backport.</p>
+<div class="section" id="the-tls-object">
+<h2>The Tls object<a class="headerlink" href="#the-tls-object" title="永久链接至标题">¶</a></h2>
+<p>You can customize the server Tls object with references to keys, certificates and CAs. It includes all attributes needed to securely connect over an ssl socket:</p>
+<ul class="simple">
+<li>local_private_key_file: the file with the private key of the client</li>
+<li>local_certificate_file: the certificate of the server</li>
+<li>validate: specifies if the server certificate must be validated, values can be: CERT_NONE (certificates are ignored), CERT_OPTIONAL (not required, but validated if provided) and CERT_REQUIRED (required and validated)</li>
+<li>version: SSL or TLS version to use, can be one of the following: SSLv2, SSLv3, SSLv23, TLSv1 (as per Python 3.3. The version list can be different in other Python versions)</li>
+<li>ca_certs_file: the file containing the certificates of the certification authorities</li>
+</ul>
+<p>Tls object uses the ssl module of the Python standard library with additional checking functions that are missing from the Python 2 standard library.</p>
+<p>The needed constants are defined in the ssl package.</p>
+<p>IF you don&#8217;t use a specific Tls object and set use_tls=True in the Server definition, a default Tls object will be used, it has no certificate
+files, uses the ssl.PROTOCOL_SSLv23 (if available in your Python interpreter) and performs no validation of the server certificate.
+It&#8217;s recommended to set validate=ssl.CERT_REQUIRED to verify the certificate server. Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">tls</span> <span class="o">=</span> <span class="n">Tls</span><span class="p">(</span><span class="n">local_private_key_file</span><span class="o">=</span><span class="s1">&#39;client_private_key.pem&#39;</span><span class="p">,</span> <span class="n">local_certificate_file</span><span class="o">=</span><span class="s1">&#39;client_cert.pem&#39;</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">ssl</span><span class="o">.</span><span class="n">CERT_REQUIRED</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ssl</span><span class="o">.</span><span class="n">PROTOCOL_TLSv1</span><span class="p">,</span> <span class="n">ca_certs_file</span><span class="o">=</span><span class="s1">&#39;ca_certs.b64&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="sslcontext">
+<h3>SSLContext<a class="headerlink" href="#sslcontext" title="永久链接至标题">¶</a></h3>
+<p>You can use SSLContext if running in Python 3.4 or newer.</p>
+<p>The use of ssl.SSLContext make TLS operation more flexible, It integrates with the system wide Certification Authorities and also ensure that there are &#8220;reasonable&#8221; security defaults when using the TLS
+layer. It&#8217;s also possible to specify a file system path containing
+the CA file or even pass certificate data &#8220;on the fly&#8221;.</p>
+<p>When defining the Tls object you have the following additional parameters available:</p>
+<ul class="simple">
+<li>ca_cert_file: the usual link to the certification authority chain of certificates</li>
+<li>ca_cert_path: a link to a path containing the certification  authorities certificates (reashed, as expected by OpenSSL)</li>
+<li>ca_cert_data: CA certificate data stored in memory</li>
+</ul>
+<p>if you leave all these parameter to None the SSLContext will use the
+system wide certificate store (ssl path on linux, CA stores on
+Windows)</p>
+<p>If the SSLContext is not available the library will fall back to the
+ssl wrapped socket mechanism.</p>
+</div>
+<div class="section" id="sasl">
+<h3>SASL<a class="headerlink" href="#sasl" title="永久链接至标题">¶</a></h3>
+<p>Three SASL mechanisms are currently implemented in the ldap3 library: EXTERNAL, DIGEST-MD5 and GSSAPI (Kerberos, via the gssapi package). Even if DIGEST-MD5 is <strong>deprecated</strong> and moved to historic (RFC6331, July 2011)
+because it is <strong>insecure and unsuitable for use in protocols</strong> (as stated by the RFC) I&#8217;ve developed the authentication phase of the protocol because it is still used in LDAP servers.</p>
+<div class="section" id="external">
+<h4>External<a class="headerlink" href="#external" title="永久链接至标题">¶</a></h4>
+<p>You can use the EXTERNAL mechanism when you&#8217;re on a secure (TLS) channel. You can provide an authorization identity string in sasl_credentials or let the
+server trust the credential provided when establishing the secure channel:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">tls</span> <span class="o">=</span> <span class="n">Tls</span><span class="p">(</span><span class="n">local_private_key_file</span> <span class="o">=</span> <span class="s1">&#39;key.pem&#39;</span><span class="p">,</span> <span class="n">local_certificate_file</span> <span class="o">=</span> <span class="s1">&#39;cert.pem&#39;</span><span class="p">,</span> <span class="n">validate</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_REQUIRED</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">PROTOCOL_TLSv1</span><span class="p">,</span>
+          <span class="n">ca_certs_file</span> <span class="o">=</span> <span class="s1">&#39;cacert.b64&#39;</span><span class="p">)</span>
+<span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="n">host</span> <span class="o">=</span> <span class="n">test_server</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="n">test_port_ssl</span><span class="p">,</span> <span class="n">use_ssl</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">tls</span> <span class="o">=</span> <span class="n">tls</span><span class="p">)</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">auto_bind</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">client_strategy</span> <span class="o">=</span> <span class="n">test_strategy</span><span class="p">,</span> <span class="n">authentication</span> <span class="o">=</span> <span class="n">SASL</span><span class="p">,</span>
+                        <span class="n">sasl_mechanism</span> <span class="o">=</span> <span class="s1">&#39;EXTERNAL&#39;</span><span class="p">,</span> <span class="n">sasl_credentials</span> <span class="o">=</span> <span class="s1">&#39;username&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="digest-md5">
+<h4>Digest-MD5<a class="headerlink" href="#digest-md5" title="永久链接至标题">¶</a></h4>
+<p>To use the DIGEST-MD5 you must pass a 4-value tuple as sasl_credentials: (realm, user, password, authz_id). You can pass None for &#8216;realm&#8217; and &#8216;authz_id&#8217; if not used. Quality of Protection is always &#8216;auth&#8217;:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="n">host</span> <span class="o">=</span> <span class="n">test_server</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="n">test_port</span><span class="p">)</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">auto_bind</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">client_strategy</span> <span class="o">=</span> <span class="n">test_strategy</span><span class="p">,</span> <span class="n">authentication</span> <span class="o">=</span> <span class="n">SASL</span><span class="p">,</span>
+                        <span class="n">sasl_mechanism</span> <span class="o">=</span> <span class="s1">&#39;DIGEST-MD5&#39;</span><span class="p">,</span> <span class="n">sasl_credentials</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Username is not required to be an LDAP entry, but it can be any identifier recognized by the server (i.e. email, principal, ...). If
+you pass None as &#8216;realm&#8217; the default realm of the LDAP server will be used.</p>
+<p><strong>Again, remember that DIGEST-MD5 is deprecated and should not be used.</strong></p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">SSL and TLS</a><ul>
+<li><a class="reference internal" href="#the-tls-object">The Tls object</a><ul>
+<li><a class="reference internal" href="#sslcontext">SSLContext</a></li>
+<li><a class="reference internal" href="#sasl">SASL</a><ul>
+<li><a class="reference internal" href="#external">External</a></li>
+<li><a class="reference internal" href="#digest-md5">Digest-MD5</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="connections.html" title="上一章">Connections</a></li>
+      <li>Next: <a href="metrics.html" title="下一章">Connection metrics</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ssltls.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ssltls.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

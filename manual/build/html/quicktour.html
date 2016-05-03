@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Quick tour &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="Servers" href="servers.html" />
+    <link rel="prev" title="Installation and configuration" href="installation.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="quick-tour">
+<h1>Quick tour<a class="headerlink" href="#quick-tour" title="永久链接至标题">¶</a></h1>
+<div class="section" id="searching">
+<h2>Searching<a class="headerlink" href="#searching" title="永久链接至标题">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">For more comprehensive information about searching, see the <a class="reference internal" href="searches.html"><span class="doc">SEARCH</span></a> documentation.</p>
+</div>
+<p>Search operation is enhanced with a few parameters:</p>
+<ul class="simple">
+<li>get_operational_attributes: when True retrieves the operational (system generated) attributes for each of the result
+entries.</li>
+<li>paged_size: if greater than 0 the server returns a simple paged search response with the number of entries specified
+(LDAP server must conform to RFC2696).</li>
+<li>paged_cookie: used for subsequent retrieval of additional entries in a simple paged search.</li>
+<li>paged_criticality: if True the search should fail if simple paged search is not available on the server else a full
+search is performed.</li>
+</ul>
+<p>To search for a binary value you must use the RFC4515 escape ASCII sequence for each byte in the search assertion. You
+can use the function <em>escape_bytes()</em> in ldap3.utils.conv for properly escape a bytes object:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ldap3.utils.conv</span> <span class="k">import</span> <span class="n">escape_bytes</span>
+<span class="n">guid</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;</span><span class="se">\xca</span><span class="s1">@</span><span class="se">\xf2</span><span class="s1">k</span><span class="se">\x1d\x86\xca</span><span class="s1">L</span><span class="se">\xb7\xa2\xca</span><span class="s1">@</span><span class="se">\xf2</span><span class="s1">k</span><span class="se">\x1d\x86</span><span class="s1">&#39;</span>
+<span class="n">search_filter</span> <span class="o">=</span> <span class="s1">&#39;(guid=&#39;</span> <span class="o">+</span> <span class="n">escape_bytes</span><span class="p">(</span><span class="n">guid</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+<span class="n">c</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;o=test&#39;</span><span class="p">,</span> <span class="n">search_filter</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>search_filter will contain <em>&#8216;(guid=\ca\40\f2\6b\1d\86\ca\4c\b7\a2\ca\40\f2\6b\1d\86)&#8217;</em>.</p>
+<p>Raw values for the attributes retrieved are stored in the <em>raw_attributes</em> dictonary of the search result entries
+in c.response. If the schema is read (with get_info=SCHEMA or get_info=ALL in the Server object) and the check_names
+parameter of the Connection object is set to True, the <em>attributes</em> attribute is populated with the formatted values as
+specified by the RFCs according to the schema syntaxes.</p>
+<p>Custom formatters can be used to specify how an attribute value must be returned in the &#8216;attributes&#8217; attribute of the
+search entry object. A formatter must be a callable that receives a bytes value and returns an object. If the attribute
+is defined in the schema as &#8216;multi_value&#8217; the attribute value is returned as a list (even if only a single value is
+present) else it&#8217;s returned as a single value.</p>
+<p>Formatted (following the schema and RFC indications) attributes are stored in the <em>attributes</em> dictionary of the search
+result entries in c.response. This is performed only if the schema is read in the server object and the check_names
+parameter is set to True else the undecoded value is returned.</p>
+<p>Attributes key are case insensitive, this means that you can access c.response[0][&#8216;attributes&#8217;][&#8216;postalAddress&#8217;] or
+c.response[0][&#8216;attributes&#8217;][&#8216;postaladdress&#8217;] and get the same values back.</p>
+</div>
+<div class="section" id="simple-paged-search">
+<h2>Simple Paged search<a class="headerlink" href="#simple-paged-search" title="永久链接至标题">¶</a></h2>
+<p>The search operation can perform a <em>simple paged search</em> as per RFC2696. You must specify the required number of entries
+in each response set. After the first search you must send back the cookie you got with each response in each subsequent
+search. If you send 0 as paged_size and a valid cookie the search operation referred by that cookie is abandoned.
+The Cookie should be stored in connection.result[&#8216;controls&#8217;][&#8216;1.2.840.113556.1.4.319&#8217;][&#8216;value&#8217;][&#8216;cookie&#8217;]; the server
+may return an estimated total number of entries in
+connection.result[&#8216;controls&#8217;][&#8216;1.2.840.113556.1.4.319&#8217;][&#8216;value&#8217;][&#8216;size&#8217;]. You can change the paged_size in any
+subsequent search request.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">SUBTREE</span>
+<span class="n">total_entries</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;test-server&#39;</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">search_base</span> <span class="o">=</span> <span class="s1">&#39;o=test&#39;</span><span class="p">,</span>
+         <span class="n">search_filter</span> <span class="o">=</span> <span class="s1">&#39;(objectClass=inetOrgPerson)&#39;</span><span class="p">,</span>
+         <span class="n">search_scope</span> <span class="o">=</span> <span class="n">SUBTREE</span><span class="p">,</span>
+         <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cn&#39;</span><span class="p">,</span> <span class="s1">&#39;givenName&#39;</span><span class="p">],</span>
+         <span class="n">paged_size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">total_entries</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">response</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">response</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dn&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;attributes])</span>
+<span class="n">cookie</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;controls&#39;</span><span class="p">][</span><span class="s1">&#39;1.2.840.113556.1.4.319&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="s1">&#39;cookie&#39;</span><span class="p">]</span>
+<span class="k">while</span> <span class="n">cookie</span><span class="p">:</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">search_base</span> <span class="o">=</span> <span class="s1">&#39;o=test&#39;</span><span class="p">,</span>
+             <span class="n">search_filter</span> <span class="o">=</span> <span class="s1">&#39;(object_class=inetOrgPerson)&#39;</span><span class="p">,</span>
+             <span class="n">search_scope</span> <span class="o">=</span> <span class="n">SUBTREE</span><span class="p">,</span>
+             <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cn&#39;</span><span class="p">,</span> <span class="s1">&#39;givenName&#39;</span><span class="p">],</span>
+             <span class="n">paged_size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+             <span class="n">paged_cookie</span> <span class="o">=</span> <span class="n">cookie</span><span class="p">)</span>
+    <span class="n">total_entries</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">response</span><span class="p">)</span>
+    <span class="n">cookie</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;controls&#39;</span><span class="p">][</span><span class="s1">&#39;1.2.840.113556.1.4.319&#39;</span><span class="p">][</span><span class="s1">&#39;value&#39;</span><span class="p">][</span><span class="s1">&#39;cookie&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">response</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dn&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;attributes])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total entries retrieved:&#39;</span><span class="p">,</span> <span class="n">total_entries</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you don&#8217;t want to deal directly with the cookie you can use the much simpler extended operations package that wraps
+all the cookie machinery and hides implementation details, you can choose to get back a generator or the whole list of
+entries found.</p>
+<p>Working with a generator is better when you deal with very long list of entries or have memory issues:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># generator</span>
+<span class="n">total_entries</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">entry_generator</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">paged_search</span><span class="p">(</span><span class="n">search_base</span> <span class="o">=</span> <span class="s1">&#39;o=test&#39;</span><span class="p">,</span>
+                                                 <span class="n">search_filter</span> <span class="o">=</span> <span class="s1">&#39;(objectClass=inetOrgPerson)&#39;</span><span class="p">,</span>
+                                                 <span class="n">search_scope</span> <span class="o">=</span> <span class="n">SUBTREE</span><span class="p">,</span>
+                                                 <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cn&#39;</span><span class="p">,</span> <span class="s1">&#39;givenName&#39;</span><span class="p">],</span>
+                                                 <span class="n">paged_size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                                 <span class="n">generator</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entry_generator</span><span class="p">:</span>
+    <span class="n">total_entries</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;dn&#39;</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;attributes])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total entries retrieved:&#39;</span><span class="p">,</span> <span class="n">total_entries</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Remember that a generator can be consumed only one time, so you must elaborate the results in a sequential way.</p>
+<p>Working with a list keeps all the found entries in a list and you can elaborate them in a random way:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># whole result list</span>
+<span class="n">entry_list</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">paged_search</span><span class="p">(</span><span class="n">search_base</span> <span class="o">=</span> <span class="s1">&#39;o=test&#39;</span><span class="p">,</span>
+                                            <span class="n">search_filter</span> <span class="o">=</span> <span class="s1">&#39;(objectClass=inetOrgPerson)&#39;</span><span class="p">,</span>
+                                            <span class="n">search_scope</span> <span class="o">=</span> <span class="n">SUBTREE</span><span class="p">,</span>
+                                            <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cn&#39;</span><span class="p">,</span> <span class="s1">&#39;givenName&#39;</span><span class="p">],</span>
+                                            <span class="n">paged_size</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                            <span class="n">generator</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entry_list</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="n">entry</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">]</span>
+<span class="n">total_entries</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry_list</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total entries retrieved:&#39;</span><span class="p">,</span> <span class="n">total_entries</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Quick tour</a><ul>
+<li><a class="reference internal" href="#searching">Searching</a></li>
+<li><a class="reference internal" href="#simple-paged-search">Simple Paged search</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="installation.html" title="上一章">Installation and configuration</a></li>
+      <li>Next: <a href="servers.html" title="下一章">Servers</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/quicktour.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/quicktour.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.formatters.formatters &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../../index.html" />
+    <link rel="up" title="ldap3" href="../../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.protocol.formatters.formatters 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2014.10.28</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">binascii</span> <span class="kn">import</span> <span class="n">hexlify</span>
+<span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">UUID</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">...core.timezone</span> <span class="kn">import</span> <span class="n">OffsetTzInfo</span>
+
+
+<div class="viewcode-block" id="format_unicode"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_unicode">[文档]</a><span class="k">def</span> <span class="nf">format_unicode</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">str</span> <span class="o">!=</span> <span class="nb">bytes</span><span class="p">:</span>  <span class="c1"># python3</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_value</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">raw_value</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">raw_value</span></div>
+
+
+<div class="viewcode-block" id="format_integer"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_integer">[文档]</a><span class="k">def</span> <span class="nf">format_integer</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">raw_value</span></div>
+
+
+<div class="viewcode-block" id="format_binary"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_binary">[文档]</a><span class="k">def</span> <span class="nf">format_binary</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">raw_value</span></div>
+
+
+<div class="viewcode-block" id="format_uuid"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_uuid">[文档]</a><span class="k">def</span> <span class="nf">format_uuid</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">UUID</span><span class="p">(</span><span class="nb">bytes</span><span class="o">=</span><span class="n">raw_value</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">format_unicode</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">raw_value</span></div>
+
+
+<div class="viewcode-block" id="format_uuid_le"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_uuid_le">[文档]</a><span class="k">def</span> <span class="nf">format_uuid_le</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">UUID</span><span class="p">(</span><span class="n">bytes_le</span><span class="o">=</span><span class="n">raw_value</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">format_unicode</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">raw_value</span></div>
+
+
+<div class="viewcode-block" id="format_boolean"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_boolean">[文档]</a><span class="k">def</span> <span class="nf">format_boolean</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="p">[</span><span class="n">b</span><span class="s1">&#39;TRUE&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;True&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="n">raw_value</span> <span class="ow">in</span> <span class="p">[</span><span class="n">b</span><span class="s1">&#39;FALSE&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;false&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;False&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="n">raw_value</span></div>
+
+
+<div class="viewcode-block" id="format_ad_timestamp"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_ad_timestamp">[文档]</a><span class="k">def</span> <span class="nf">format_ad_timestamp</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Active Directory stores date/time values as the number of 100-nanosecond intervals</span>
+<span class="sd">    that have elapsed since the 0 hour on January 1, 1601 till the date/time that is being stored.</span>
+<span class="sd">    The time is always stored in Greenwich Mean Time (GMT) in the Active Directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span> <span class="o">/</span> <span class="mf">10000000.0</span> <span class="o">-</span> <span class="mi">11644473600</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="n">OffsetTzInfo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;UTC&#39;</span><span class="p">))</span>  <span class="c1"># forces true division in python 2</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">raw_value</span> <span class="o">==</span> <span class="n">b</span><span class="s1">&#39;9223372036854775807&#39;</span><span class="p">:</span>  <span class="c1"># max value to be stored in a 64 bit signed int</span>
+            <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">max</span>  <span class="c1"># returns datetime.datetime(9999, 12, 31, 23, 59, 59, 999999)</span>
+        <span class="k">return</span> <span class="n">raw_value</span></div>
+
+
+<div class="viewcode-block" id="format_time"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_time">[文档]</a><span class="k">def</span> <span class="nf">format_time</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    From RFC4517:</span>
+<span class="sd">    A value of the Generalized Time syntax is a character string</span>
+<span class="sd">    representing a date and time.  The LDAP-specific encoding of a value</span>
+<span class="sd">    of this syntax is a restriction of the format defined in [ISO8601],</span>
+<span class="sd">    and is described by the following ABNF:</span>
+
+<span class="sd">    GeneralizedTime = century year month day hour</span>
+<span class="sd">                       [ minute [ second / leap-second ] ]</span>
+<span class="sd">                       [ fraction ]</span>
+<span class="sd">                       g-time-zone</span>
+
+<span class="sd">    century = 2(%x30-39) ; &quot;00&quot; to &quot;99&quot;</span>
+<span class="sd">    year    = 2(%x30-39) ; &quot;00&quot; to &quot;99&quot;</span>
+<span class="sd">    month   =   ( %x30 %x31-39 ) ; &quot;01&quot; (January) to &quot;09&quot;</span>
+<span class="sd">            / ( %x31 %x30-32 ) ; &quot;10&quot; to &quot;12&quot;</span>
+<span class="sd">    day     =   ( %x30 %x31-39 )    ; &quot;01&quot; to &quot;09&quot;</span>
+<span class="sd">            / ( %x31-32 %x30-39 ) ; &quot;10&quot; to &quot;29&quot;</span>
+<span class="sd">            / ( %x33 %x30-31 )    ; &quot;30&quot; to &quot;31&quot;</span>
+<span class="sd">    hour    = ( %x30-31 %x30-39 ) / ( %x32 %x30-33 ) ; &quot;00&quot; to &quot;23&quot;</span>
+<span class="sd">    minute  = %x30-35 %x30-39                        ; &quot;00&quot; to &quot;59&quot;</span>
+<span class="sd">    second      = ( %x30-35 %x30-39 ) ; &quot;00&quot; to &quot;59&quot;</span>
+<span class="sd">    leap-second = ( %x36 %x30 )       ; &quot;60&quot;</span>
+<span class="sd">    fraction        = ( DOT / COMMA ) 1*(%x30-39)</span>
+<span class="sd">    g-time-zone     = %x5A  ; &quot;Z&quot;</span>
+<span class="sd">                    / g-differential</span>
+<span class="sd">    g-differential  = ( MINUS / PLUS ) hour [ minute ]</span>
+<span class="sd">        MINUS           = %x2D  ; minus sign (&quot;-&quot;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">((</span><span class="n">c</span> <span class="ow">in</span> <span class="n">b</span><span class="s1">&#39;0123456789+-,.Z&#39;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">raw_value</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">b</span><span class="s1">&#39;Z&#39;</span> <span class="ow">in</span> <span class="n">raw_value</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">raw_value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">b</span><span class="s1">&#39;Z&#39;</span><span class="p">)):</span>  <span class="c1"># first ten characters are mandatory and must be numeric or timezone or fraction</span>
+        <span class="k">return</span> <span class="n">raw_value</span>
+
+    <span class="c1"># sets position for fixed values</span>
+
+    <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span> <span class="mi">4</span><span class="p">])</span>
+    <span class="n">month</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span> <span class="mi">6</span><span class="p">])</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span> <span class="mi">8</span><span class="p">])</span>
+    <span class="n">hour</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span> <span class="mi">10</span><span class="p">])</span>
+    <span class="n">minute</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">second</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">microsecond</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">remain</span> <span class="o">=</span> <span class="n">raw_value</span><span class="p">[</span><span class="mi">10</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">remain</span> <span class="ow">and</span> <span class="n">remain</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">b</span><span class="s1">&#39;Z&#39;</span><span class="p">):</span>  <span class="c1"># uppercase &#39;Z&#39;</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;Z&#39;</span>
+    <span class="k">elif</span> <span class="n">b</span><span class="s1">&#39;+&#39;</span> <span class="ow">in</span> <span class="n">remain</span><span class="p">:</span>  <span class="c1"># timezone can be specified with +hh[mm] or -hh[mm]</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;+&#39;</span>
+    <span class="k">elif</span> <span class="n">b</span><span class="s1">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">remain</span><span class="p">:</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;-&#39;</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># timezone not specified</span>
+        <span class="k">return</span> <span class="n">raw_value</span>
+
+    <span class="n">time</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">remain</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">time</span> <span class="ow">and</span> <span class="p">(</span><span class="n">b</span><span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">time</span> <span class="ow">or</span> <span class="n">b</span><span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">time</span><span class="p">):</span>
+        <span class="c1"># fraction time</span>
+        <span class="k">if</span> <span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">b</span><span class="s1">&#39;,.&#39;</span><span class="p">:</span>
+            <span class="n">minute</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">str</span> <span class="o">==</span> <span class="nb">bytes</span> <span class="k">else</span> <span class="nb">chr</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="n">time</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">b</span><span class="s1">&#39;,.&#39;</span><span class="p">:</span>
+            <span class="n">minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span> <span class="mi">12</span><span class="p">])</span>
+            <span class="n">second</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="nb">str</span> <span class="o">==</span> <span class="nb">bytes</span> <span class="k">else</span> <span class="nb">chr</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+        <span class="k">elif</span> <span class="n">time</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="n">b</span><span class="s1">&#39;,.&#39;</span><span class="p">:</span>
+            <span class="n">minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span> <span class="mi">12</span><span class="p">])</span>
+            <span class="n">second</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span> <span class="mi">14</span><span class="p">])</span>
+            <span class="n">microsecond</span> <span class="o">=</span> <span class="mi">100000</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="k">if</span> <span class="nb">str</span> <span class="o">==</span> <span class="nb">bytes</span> <span class="k">else</span> <span class="nb">chr</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># mmZ format</span>
+        <span class="n">minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span> <span class="mi">12</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">remain</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Z format</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># mmssZ</span>
+        <span class="n">minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span> <span class="mi">12</span><span class="p">])</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span> <span class="mi">14</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">raw_value</span>
+
+    <span class="k">if</span> <span class="n">sep</span> <span class="o">==</span> <span class="n">b</span><span class="s1">&#39;Z&#39;</span><span class="p">:</span>  <span class="c1"># UTC</span>
+        <span class="n">timezone</span> <span class="o">=</span> <span class="n">OffsetTzInfo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;UTC&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># build timezone</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">timezone_hour</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offset</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">timezone_minute</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">timezone_hour</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offset</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">timezone_minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offset</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># malformed timezone</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">raw_value</span>
+        <span class="k">if</span> <span class="nb">str</span> <span class="o">!=</span> <span class="nb">bytes</span><span class="p">:</span>  <span class="c1"># python3</span>
+            <span class="n">timezone</span> <span class="o">=</span> <span class="n">OffsetTzInfo</span><span class="p">((</span><span class="n">timezone_hour</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="n">timezone_minute</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">sep</span> <span class="o">==</span> <span class="n">b</span><span class="s1">&#39;+&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="s1">&#39;UTC&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sep</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timezone</span> <span class="o">=</span> <span class="n">OffsetTzInfo</span><span class="p">((</span><span class="n">timezone_hour</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="n">timezone_minute</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">sep</span> <span class="o">==</span> <span class="n">b</span><span class="s1">&#39;+&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nb">unicode</span><span class="p">(</span><span class="s1">&#39;UTC&#39;</span> <span class="o">+</span> <span class="n">sep</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="n">year</span><span class="p">,</span>
+                        <span class="n">month</span><span class="o">=</span><span class="n">month</span><span class="p">,</span>
+                        <span class="n">day</span><span class="o">=</span><span class="n">day</span><span class="p">,</span>
+                        <span class="n">hour</span><span class="o">=</span><span class="n">hour</span><span class="p">,</span>
+                        <span class="n">minute</span><span class="o">=</span><span class="n">minute</span><span class="p">,</span>
+                        <span class="n">second</span><span class="o">=</span><span class="n">second</span><span class="p">,</span>
+                        <span class="n">microsecond</span><span class="o">=</span><span class="n">microsecond</span><span class="p">,</span>
+                        <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">raw_value</span></div>
+
+
+<div class="viewcode-block" id="format_sid"><a class="viewcode-back" href="../../../../ldap3.protocol.formatters.formatters.html#ldap3.protocol.formatters.formatters.format_sid">[文档]</a><span class="k">def</span> <span class="nf">format_sid</span><span class="p">(</span><span class="n">raw_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    SID= &quot;S-1-&quot; IdentifierAuthority 1*SubAuthority</span>
+<span class="sd">           IdentifierAuthority= IdentifierAuthorityDec / IdentifierAuthorityHex</span>
+<span class="sd">              ; If the identifier authority is &lt; 2^32, the</span>
+<span class="sd">              ; identifier authority is represented as a decimal</span>
+<span class="sd">              ; number</span>
+<span class="sd">              ; If the identifier authority is &gt;= 2^32,</span>
+<span class="sd">              ; the identifier authority is represented in</span>
+<span class="sd">              ; hexadecimal</span>
+<span class="sd">            IdentifierAuthorityDec =  1*10DIGIT</span>
+<span class="sd">              ; IdentifierAuthorityDec, top level authority of a</span>
+<span class="sd">              ; security identifier is represented as a decimal number</span>
+<span class="sd">            IdentifierAuthorityHex = &quot;0x&quot; 12HEXDIG</span>
+<span class="sd">              ; IdentifierAuthorityHex, the top-level authority of a</span>
+<span class="sd">              ; security identifier is represented as a hexadecimal number</span>
+<span class="sd">            SubAuthority= &quot;-&quot; 1*10DIGIT</span>
+<span class="sd">              ; Sub-Authority is always represented as a decimal number</span>
+<span class="sd">              ; No leading &quot;0&quot; characters are allowed when IdentifierAuthority</span>
+<span class="sd">              ; or SubAuthority is represented as a decimal number</span>
+<span class="sd">              ; All hexadecimal digits must be output in string format,</span>
+<span class="sd">              ; pre-pended by &quot;0x&quot;</span>
+
+<span class="sd">    Revision (1 byte): An 8-bit unsigned integer that specifies the revision level of the SID. This value MUST be set to 0x01.</span>
+<span class="sd">    SubAuthorityCount (1 byte): An 8-bit unsigned integer that specifies the number of elements in the SubAuthority array. The maximum number of elements allowed is 15.</span>
+<span class="sd">    IdentifierAuthority (6 bytes): A SID_IDENTIFIER_AUTHORITY structure that indicates the authority under which the SID was created. It describes the entity that created the SID. The Identifier Authority value {0,0,0,0,0,5} denotes SIDs created by the NT SID authority.</span>
+<span class="sd">    SubAuthority (variable): A variable length array of unsigned 32-bit integers that uniquely identifies a principal relative to the IdentifierAuthority. Its length is determined by SubAuthorityCount.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">str</span> <span class="o">!=</span> <span class="nb">bytes</span><span class="p">:</span>  <span class="c1"># python 3</span>
+        <span class="n">revision</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">sub_authority_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">identifier_authority</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;big&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">identifier_authority</span> <span class="o">&gt;=</span> <span class="mi">4294967296</span><span class="p">:</span>  <span class="c1"># 2 ^ 32</span>
+            <span class="n">identifier_authority</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="n">identifier_authority</span><span class="p">)</span>
+
+        <span class="n">sub_authority</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">sub_authority_count</span><span class="p">:</span>
+            <span class="n">sub_authority</span> <span class="o">+=</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">8</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">4</span><span class="p">):</span> <span class="mi">12</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)],</span> <span class="n">byteorder</span><span class="o">=</span><span class="s1">&#39;little&#39;</span><span class="p">))</span>  <span class="c1"># little endian</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># python 2</span>
+        <span class="n">revision</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">sub_authority_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">identifier_authority</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hexlify</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">8</span><span class="p">]),</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">identifier_authority</span> <span class="o">&gt;=</span> <span class="mi">4294967296</span><span class="p">:</span>  <span class="c1"># 2 ^ 32</span>
+            <span class="n">identifier_authority</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="n">identifier_authority</span><span class="p">)</span>
+
+        <span class="n">sub_authority</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">sub_authority_count</span><span class="p">:</span>
+            <span class="n">sub_authority</span> <span class="o">+=</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">hexlify</span><span class="p">(</span><span class="n">raw_value</span><span class="p">[</span><span class="mi">11</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">4</span><span class="p">):</span> <span class="mi">7</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">4</span><span class="p">):</span> <span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">16</span><span class="p">))</span>  <span class="c1"># little endian</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="s1">&#39;S-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">revision</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">identifier_authority</span><span class="p">)</span> <span class="o">+</span> <span class="n">sub_authority</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">模块代码</a><ul>
+  <li><a href="../../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

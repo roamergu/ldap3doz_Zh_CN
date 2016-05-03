@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Connection metrics &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="LDAP Operations" href="operations.html" />
+    <link rel="prev" title="SSL and TLS" href="ssltls.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="connection-metrics">
+<h1>Connection metrics<a class="headerlink" href="#connection-metrics" title="永久链接至标题">¶</a></h1>
+<p>If you set the collect_usage parameter to True in a Connection object the metrics feature is activated.
+You get the &#8216;usage&#8217; attribute in the connection object populated with an instance of the ConnectionUsage class.</p>
+<p>ConnectionUsage stores counters for each operation performed in the Connection, you get metrics for the following fields:</p>
+<ul class="simple">
+<li>initial_connection_start_time</li>
+<li>open_socket_start_time:</li>
+<li>connection_stop_time:</li>
+<li>servers_from_pool:</li>
+<li>open_sockets:</li>
+<li>closed_sockets:</li>
+<li>wrapped_sockets:</li>
+<li>bytes_transmitted:</li>
+<li>bytes_received:</li>
+<li>messages_transmitted:</li>
+<li>messages_received:</li>
+<li>operations:</li>
+<li>abandon_operations:</li>
+<li>bind_operations:</li>
+<li>add_operations:</li>
+<li>compare_operations:</li>
+<li>delete_operations:</li>
+<li>extended_operations:</li>
+<li>modify_operations:</li>
+<li>modify_dn_operations:</li>
+<li>search_operations:</li>
+<li>unbind_operations:</li>
+<li>referrals_received:</li>
+<li>referrals_followed:</li>
+<li>restartable_failures:</li>
+<li>restartable_successes:</li>
+</ul>
+<p>Metrics are properly collected while the connection is open,kept while it&#8217;s closed and reset if the connection is used again.
+While using a ServerPool or a restartable strategy the metrics are not reset when the server is changed.</p>
+<p>You can reset the usage metrics with the connection.usage.reset() method.</p>
+<p>You can print out the metrics at any time of execution of your code with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">usage</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and get the properly formatted metrics:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Connection</span> <span class="n">Usage</span><span class="p">:</span>
+  <span class="n">Time</span><span class="p">:</span> <span class="p">[</span><span class="n">elapsed</span><span class="p">:</span>        <span class="mi">0</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">00.028885</span><span class="p">]</span>
+    <span class="n">Initial</span> <span class="n">start</span> <span class="n">time</span><span class="p">:</span>  <span class="mi">2015</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">29</span><span class="n">T01</span><span class="p">:</span><span class="mi">44</span><span class="p">:</span><span class="mf">17.772645</span>
+    <span class="n">Open</span> <span class="n">socket</span> <span class="n">time</span><span class="p">:</span>    <span class="mi">2015</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">29</span><span class="n">T01</span><span class="p">:</span><span class="mi">44</span><span class="p">:</span><span class="mf">17.772645</span>
+    <span class="n">Close</span> <span class="n">socket</span> <span class="n">time</span><span class="p">:</span>   <span class="mi">2015</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">29</span><span class="n">T01</span><span class="p">:</span><span class="mi">44</span><span class="p">:</span><span class="mf">17.801530</span>
+  <span class="n">Server</span><span class="p">:</span>
+    <span class="n">Servers</span> <span class="kn">from</span> <span class="nn">pool</span><span class="p">:</span>   <span class="mi">0</span>
+    <span class="n">Sockets</span> <span class="nb">open</span><span class="p">:</span>        <span class="mi">1</span>
+    <span class="n">Sockets</span> <span class="n">closed</span><span class="p">:</span>      <span class="mi">1</span>
+    <span class="n">Sockets</span> <span class="n">wrapped</span><span class="p">:</span>     <span class="mi">0</span>
+  <span class="n">Bytes</span><span class="p">:</span>                 <span class="mi">62</span>
+    <span class="n">Transmitted</span><span class="p">:</span>         <span class="mi">48</span>
+    <span class="n">Received</span><span class="p">:</span>            <span class="mi">14</span>
+  <span class="n">Messages</span><span class="p">:</span>              <span class="mi">3</span>
+    <span class="n">Transmitted</span><span class="p">:</span>         <span class="mi">2</span>
+    <span class="n">Received</span><span class="p">:</span>            <span class="mi">1</span>
+  <span class="n">Operations</span><span class="p">:</span>            <span class="mi">2</span>
+    <span class="n">Abandon</span><span class="p">:</span>             <span class="mi">0</span>
+    <span class="n">Bind</span><span class="p">:</span>                <span class="mi">1</span>
+    <span class="n">Add</span><span class="p">:</span>                 <span class="mi">0</span>
+    <span class="n">Compare</span><span class="p">:</span>             <span class="mi">0</span>
+    <span class="n">Delete</span><span class="p">:</span>              <span class="mi">0</span>
+    <span class="n">Extended</span><span class="p">:</span>            <span class="mi">0</span>
+    <span class="n">Modify</span><span class="p">:</span>              <span class="mi">0</span>
+    <span class="n">ModifyDn</span><span class="p">:</span>            <span class="mi">0</span>
+    <span class="n">Search</span><span class="p">:</span>              <span class="mi">0</span>
+    <span class="n">Unbind</span><span class="p">:</span>              <span class="mi">1</span>
+  <span class="n">Referrals</span><span class="p">:</span>
+    <span class="n">Received</span><span class="p">:</span>            <span class="mi">0</span>
+    <span class="n">Followed</span><span class="p">:</span>            <span class="mi">0</span>
+  <span class="n">Restartable</span> <span class="n">tries</span><span class="p">:</span>     <span class="mi">0</span>
+    <span class="n">Failed</span> <span class="n">restarts</span><span class="p">:</span>     <span class="mi">0</span>
+    <span class="n">Successful</span> <span class="n">restarts</span><span class="p">:</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ssltls.html" title="上一章">SSL and TLS</a></li>
+      <li>Next: <a href="operations.html" title="下一章">LDAP Operations</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/metrics.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/metrics.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

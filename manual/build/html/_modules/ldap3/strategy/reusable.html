@@ -1,0 +1,512 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.strategy.reusable &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.strategy.reusable 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2014.03.23</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">linesep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Lock</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">RESTARTABLE</span><span class="p">,</span> <span class="n">TERMINATE_REUSABLE</span><span class="p">,</span> <span class="n">LDAP_MAX_INT</span><span class="p">,</span> <span class="n">get_config_parameter</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">BaseStrategy</span>
+<span class="kn">from</span> <span class="nn">..core.usage</span> <span class="kn">import</span> <span class="n">ConnectionUsage</span>
+<span class="kn">from</span> <span class="nn">..core.exceptions</span> <span class="kn">import</span> <span class="n">LDAPConnectionPoolNameIsMandatoryError</span><span class="p">,</span> <span class="n">LDAPConnectionPoolNotStartedError</span><span class="p">,</span> <span class="n">LDAPOperationResult</span><span class="p">,</span> <span class="n">LDAPExceptionError</span><span class="p">,</span> <span class="n">LDAPResponseTimeoutError</span>
+<span class="kn">from</span> <span class="nn">..utils.log</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">log_enabled</span><span class="p">,</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">BASIC</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># Python 2</span>
+    <span class="c1"># noinspection PyUnresolvedReferences</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+
+
+<span class="c1"># noinspection PyProtectedMember</span>
+<div class="viewcode-block" id="ReusableStrategy"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy">[文档]</a><span class="k">class</span> <span class="nc">ReusableStrategy</span><span class="p">(</span><span class="n">BaseStrategy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A pool of reusable SyncWaitRestartable connections with lazy behaviour and limited lifetime.</span>
+<span class="sd">    The connection using this strategy presents itself as a normal connection, but internally the strategy has a pool of</span>
+<span class="sd">    connections that can be used as needed. Each connection lives in its own thread and has a busy/available status.</span>
+<span class="sd">    The strategy performs the requested operation on the first available connection.</span>
+<span class="sd">    The pool of connections is instantiated at strategy initialization.</span>
+<span class="sd">    Strategy has two customizable properties, the total number of connections in the pool and the lifetime of each connection.</span>
+<span class="sd">    When lifetime is expired the connection is closed and will be open again when needed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ReusableStrategy.receiving"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.receiving">[文档]</a>    <span class="k">def</span> <span class="nf">receiving</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">def</span> <span class="nf">_start_listen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">_get_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_id</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="ReusableStrategy.get_stream"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.get_stream">[文档]</a>    <span class="k">def</span> <span class="nf">get_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.set_stream"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.set_stream">[文档]</a>    <span class="k">def</span> <span class="nf">set_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="n">pools</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="c1"># noinspection PyProtectedMember</span>
+<div class="viewcode-block" id="ReusableStrategy.ConnectionPool"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.ConnectionPool">[文档]</a>    <span class="k">class</span> <span class="nc">ConnectionPool</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Container for the Connection Threads</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_name</span> <span class="ow">in</span> <span class="n">ReusableStrategy</span><span class="o">.</span><span class="n">pools</span><span class="p">:</span>  <span class="c1"># returns existing connection pool</span>
+                <span class="n">pool</span> <span class="o">=</span> <span class="n">ReusableStrategy</span><span class="o">.</span><span class="n">pools</span><span class="p">[</span><span class="n">connection</span><span class="o">.</span><span class="n">pool_name</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">pool</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>  <span class="c1"># if pool is not started remove it from the pools singleton and create a new onw</span>
+                    <span class="k">del</span> <span class="n">ReusableStrategy</span><span class="o">.</span><span class="n">pools</span><span class="p">[</span><span class="n">connection</span><span class="o">.</span><span class="n">pool_name</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_lifetime</span> <span class="ow">and</span> <span class="n">pool</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">!=</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_lifetime</span><span class="p">:</span>  <span class="c1"># change lifetime</span>
+                    <span class="n">pool</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_lifetime</span>
+                <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_size</span> <span class="ow">and</span> <span class="n">pool</span><span class="o">.</span><span class="n">pool_size</span> <span class="o">!=</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_size</span><span class="p">:</span>  <span class="c1"># if pool size has changed terminate and recreate the connections</span>
+                    <span class="n">pool</span><span class="o">.</span><span class="n">terminate_pool</span><span class="p">()</span>
+                    <span class="n">pool</span><span class="o">.</span><span class="n">pool_size</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_size</span>
+                <span class="k">return</span> <span class="n">pool</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;connections&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_name</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span> <span class="o">=</span> <span class="n">connection</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">master_schema</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">master_info</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_size</span> <span class="ow">or</span> <span class="n">get_config_parameter</span><span class="p">(</span><span class="s1">&#39;REUSABLE_THREADED_POOL_SIZE&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">pool_lifetime</span> <span class="ow">or</span> <span class="n">get_config_parameter</span><span class="p">(</span><span class="s1">&#39;REUSABLE_THREADED_LIFETIME&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">request_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">open_pool</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bind_pool</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tls_pool</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_incoming</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">terminated_usage</span> <span class="o">=</span> <span class="n">ConnectionUsage</span><span class="p">()</span> <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">_usage</span> <span class="k">else</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+                <span class="n">ReusableStrategy</span><span class="o">.</span><span class="n">pools</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;instantiated ConnectionPool: &lt;</span><span class="si">%r</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;POOL: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; - status: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;started&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="k">else</span> <span class="s1">&#39;terminated&#39;</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - responses in queue: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_incoming</span><span class="p">))</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - pool size: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - lifetime: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lifetime</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - open: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_pool</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - bind: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bind_pool</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - tls: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tls_pool</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;MASTER CONN: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;CONNECTIONS:&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">connection</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">):</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="n">linesep</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="n">linesep</span> <span class="o">+</span> <span class="s1">&#39;    no active connections in pool&#39;</span>
+
+            <span class="k">return</span> <span class="n">s</span>
+
+        <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ReusableStrategy.ConnectionPool.get_info_from_server"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.ConnectionPool.get_info_from_server">[文档]</a>        <span class="k">def</span> <span class="nf">get_info_from_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">pooled_connection_worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">pooled_connection_worker</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+                    <span class="n">pooled_connection_worker</span><span class="o">.</span><span class="n">get_info_from_server</span> <span class="o">=</span> <span class="bp">True</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.ConnectionPool.rebind_pool"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.ConnectionPool.rebind_pool">[文档]</a>        <span class="k">def</span> <span class="nf">rebind_pool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">pooled_connection_worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">pooled_connection_worker</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+                    <span class="n">pooled_connection_worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rebind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+                                                               <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+                                                               <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">authentication</span><span class="p">,</span>
+                                                               <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">sasl_mechanism</span><span class="p">,</span>
+                                                               <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.ConnectionPool.start_pool"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.ConnectionPool.start_pool">[文档]</a>        <span class="k">def</span> <span class="nf">start_pool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">create_pool</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">pooled_connection_worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">pooled_connection_worker</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+                        <span class="n">pooled_connection_worker</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;connection worker started for pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="bp">False</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.ConnectionPool.create_pool"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.ConnectionPool.create_pool">[文档]</a>        <span class="k">def</span> <span class="nf">create_pool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;created pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="o">=</span> <span class="p">[</span><span class="n">ReusableStrategy</span><span class="o">.</span><span class="n">PooledConnectionWorker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_queue</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pool_size</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.ConnectionPool.terminate_pool"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.ConnectionPool.terminate_pool">[文档]</a>        <span class="k">def</span> <span class="nf">terminate_pool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">terminated</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;terminating pool &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">master_schema</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">master_info</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">request_queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># waits for all queue pending operations</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">([</span><span class="n">connection</span> <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">connections</span> <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()])):</span>  <span class="c1"># put a TERMINATE signal on the queue for each active thread</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">request_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">TERMINATE_REUSABLE</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">request_queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># waits for all queue terminate operations</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;pool terminated for &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="ReusableStrategy.PooledConnectionThread"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.PooledConnectionThread">[文档]</a>    <span class="k">class</span> <span class="nc">PooledConnectionThread</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The thread that holds the Reusable connection and receive operation request via the queue</span>
+<span class="sd">        Result are sent back in the pool._incoming list when ready</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pooled_connection_worker</span><span class="p">,</span> <span class="n">master_connection</span><span class="p">):</span>
+            <span class="n">Thread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker</span> <span class="o">=</span> <span class="n">pooled_connection_worker</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span> <span class="o">=</span> <span class="n">master_connection</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;instantiated PooledConnectionThread: &lt;</span><span class="si">%r</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># noinspection PyProtectedMember</span>
+<div class="viewcode-block" id="ReusableStrategy.PooledConnectionThread.run"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.PooledConnectionThread.run">[文档]</a>        <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">terminate</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">pool</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">terminate</span><span class="p">:</span>
+                <span class="n">counter</span><span class="p">,</span> <span class="n">message_type</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">controls</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">request_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">busy</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="n">TERMINATE_REUSABLE</span><span class="p">:</span>
+                        <span class="n">terminate</span> <span class="o">=</span> <span class="bp">True</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">bound</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+                                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                                    <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;thread terminated&#39;</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="n">LDAPExceptionError</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">creation_time</span><span class="p">)</span><span class="o">.</span><span class="n">seconds</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">lifetime</span><span class="p">:</span>  <span class="c1"># destroy and create a new connection</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+                            <span class="k">except</span> <span class="n">LDAPExceptionError</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">new_connection</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                                <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;thread respawn&#39;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">message_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;bindRequest&#39;</span><span class="p">,</span> <span class="s1">&#39;unbindRequest&#39;</span><span class="p">]:</span>
+                            <span class="k">if</span> <span class="n">pool</span><span class="o">.</span><span class="n">open_pool</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">read_server_info</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">pool</span><span class="o">.</span><span class="n">tls_pool</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">tls_started</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">start_tls</span><span class="p">(</span><span class="n">read_server_info</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">pool</span><span class="o">.</span><span class="n">bind_pool</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">bound</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">read_server_info</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                            <span class="k">elif</span> <span class="n">pool</span><span class="o">.</span><span class="n">open_pool</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>  <span class="c1"># connection already open, issues a start_tls</span>
+                                <span class="k">if</span> <span class="n">pool</span><span class="o">.</span><span class="n">tls_pool</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">tls_started</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">start_tls</span><span class="p">(</span><span class="n">read_server_info</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">get_info_from_server</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">_fire_deferred</span><span class="p">()</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">get_info_from_server</span> <span class="o">=</span> <span class="bp">False</span>
+
+                            <span class="n">exc</span> <span class="o">=</span> <span class="bp">None</span>
+                            <span class="n">response</span> <span class="o">=</span> <span class="bp">None</span>
+                            <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">message_type</span> <span class="o">==</span> <span class="s1">&#39;searchRequest&#39;</span><span class="p">:</span>
+                                    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">post_send_search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">message_type</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">controls</span><span class="p">))</span>
+                                <span class="k">elif</span> <span class="n">message_type</span> <span class="o">!=</span> <span class="s1">&#39;bindRequest&#39;</span><span class="p">:</span>
+                                    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">post_send_single_response</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">message_type</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">controls</span><span class="p">))</span>
+                                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">result</span>
+                            <span class="k">except</span> <span class="n">LDAPOperationResult</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># raise_exceptions has raised an exception. It must be redirected to the original connection thread</span>
+                                <span class="n">exc</span> <span class="o">=</span> <span class="n">e</span>
+
+                            <span class="k">with</span> <span class="n">pool</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">exc</span><span class="p">:</span>
+                                    <span class="n">pool</span><span class="o">.</span><span class="n">_incoming</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">pool</span><span class="o">.</span><span class="n">_incoming</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">busy</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="n">pool</span><span class="o">.</span><span class="n">request_queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">task_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;thread terminated&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">usage</span><span class="p">:</span>
+                <span class="n">pool</span><span class="o">.</span><span class="n">terminated_usage</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">usage</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">worker</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span></div></div>
+
+<div class="viewcode-block" id="ReusableStrategy.PooledConnectionWorker"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.PooledConnectionWorker">[文档]</a>    <span class="k">class</span> <span class="nc">PooledConnectionWorker</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Container for the restartable connection. it includes a thread and a lock to execute the connection in the pool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="n">request_queue</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span> <span class="o">=</span> <span class="n">connection</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">request_queue</span> <span class="o">=</span> <span class="n">request_queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">busy</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_info_from_server</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">creation_time</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_connection</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">task_counter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">thread</span> <span class="o">=</span> <span class="n">ReusableStrategy</span><span class="o">.</span><span class="n">PooledConnectionThread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;instantiated PooledConnectionWorker: &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;CONN: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span> <span class="o">+</span> <span class="s1">&#39;       THREAD: &#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;running&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="k">else</span> <span class="s1">&#39;halted&#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;busy&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">busy</span> <span class="k">else</span> <span class="s1">&#39;available&#39;</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;created at: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">creation_time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">())</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - time to live: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">-</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">creation_time</span><span class="p">)</span><span class="o">.</span><span class="n">seconds</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39; - requests served: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task_counter</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">s</span>
+
+<div class="viewcode-block" id="ReusableStrategy.PooledConnectionWorker.new_connection"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.PooledConnectionWorker.new_connection">[文档]</a>        <span class="k">def</span> <span class="nf">new_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">..core.connection</span> <span class="kn">import</span> <span class="n">Connection</span>
+            <span class="c1"># noinspection PyProtectedMember</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">server_pool</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">server_pool</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">server</span><span class="p">,</span>
+                                         <span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+                                         <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+                                         <span class="n">auto_bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">auto_bind</span><span class="p">,</span>
+                                         <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                                         <span class="n">authentication</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">authentication</span><span class="p">,</span>
+                                         <span class="n">client_strategy</span><span class="o">=</span><span class="n">RESTARTABLE</span><span class="p">,</span>
+                                         <span class="n">auto_referrals</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">auto_referrals</span><span class="p">,</span>
+                                         <span class="n">auto_range</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">auto_range</span><span class="p">,</span>
+                                         <span class="n">sasl_mechanism</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">sasl_mechanism</span><span class="p">,</span>
+                                         <span class="n">sasl_credentials</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">sasl_credentials</span><span class="p">,</span>
+                                         <span class="n">check_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">check_names</span><span class="p">,</span>
+                                         <span class="n">collect_usage</span><span class="o">=</span><span class="bp">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">_usage</span> <span class="k">else</span> <span class="bp">False</span><span class="p">,</span>
+                                         <span class="n">read_only</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">read_only</span><span class="p">,</span>
+                                         <span class="n">raise_exceptions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">raise_exceptions</span><span class="p">,</span>
+                                         <span class="n">lazy</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                         <span class="n">fast_decoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">fast_decoder</span><span class="p">,</span>
+                                         <span class="n">receive_timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">receive_timeout</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">server_pool</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">server_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">master_connection</span><span class="o">.</span><span class="n">server_pool</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">server_pool</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">creation_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span></div></div>
+
+    <span class="c1"># ReusableStrategy methods</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldap_connection</span><span class="p">):</span>
+        <span class="n">BaseStrategy</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ldap_connection</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sync</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_real_dsa</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pooled</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">can_stream</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ldap_connection</span><span class="p">,</span> <span class="s1">&#39;pool_name&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ldap_connection</span><span class="o">.</span><span class="n">pool_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">ReusableStrategy</span><span class="o">.</span><span class="n">ConnectionPool</span><span class="p">(</span><span class="n">ldap_connection</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;reusable connection must have a pool_name&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">LDAPConnectionPoolNameIsMandatoryError</span><span class="p">(</span><span class="s1">&#39;reusable connection must have a pool_name&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ReusableStrategy.open"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.open">[文档]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_usage</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">read_server_info</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">open_pool</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">start_pool</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">usage</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reset_usage</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">_usage</span><span class="o">.</span><span class="n">initial_connection_start_time</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">_usage</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.terminate"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.terminate">[文档]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">terminate_pool</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">open_pool</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">bound</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">bind_pool</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">tls_pool</span> <span class="o">=</span> <span class="bp">False</span></div>
+
+    <span class="k">def</span> <span class="nf">_close_socket</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Doesn&#39;t really close the socket</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">usage</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">_usage</span><span class="o">.</span><span class="n">closed_sockets</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="ReusableStrategy.send"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.send">[文档]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message_type</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">controls</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">message_type</span> <span class="o">==</span> <span class="s1">&#39;bindRequest&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">bind_pool</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># -1 stands for bind operation request</span>
+            <span class="k">elif</span> <span class="n">message_type</span> <span class="o">==</span> <span class="s1">&#39;unbindRequest&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">bind_pool</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>  <span class="c1"># -2 stands for unbind operation request</span>
+            <span class="k">elif</span> <span class="n">message_type</span> <span class="o">==</span> <span class="s1">&#39;extendedReq&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">starting_tls</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">tls_pool</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span>  <span class="c1"># -3 stands for start_tls extended operation request</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">counter</span> <span class="o">&gt;</span> <span class="n">LDAP_MAX_INT</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">counter</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">request_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">counter</span><span class="p">,</span> <span class="n">message_type</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">controls</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">counter</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;reusable connection pool not started&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">LDAPConnectionPoolNotStartedError</span><span class="p">(</span><span class="s1">&#39;reusable connection pool not started&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.get_response"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.get_response">[文档]</a>    <span class="k">def</span> <span class="nf">get_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counter</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">timeout</span> <span class="o">=</span> <span class="n">get_config_parameter</span><span class="p">(</span><span class="s1">&#39;RESPONSE_WAITING_TIMEOUT&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># send a bogus bindResponse</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="s1">&#39;referrals&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;bindResponse&#39;</span><span class="p">,</span> <span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;dn&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;bogus Bind response&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;saslCreds&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">counter</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>  <span class="c1"># bogus unbind response</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="n">counter</span> <span class="o">==</span> <span class="o">-</span><span class="mi">3</span><span class="p">:</span>  <span class="c1"># bogus startTls extended response</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;referrals&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;responseName&#39;</span><span class="p">:</span> <span class="s1">&#39;1.3.6.1.4.1.1466.20037&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;extendedResp&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="s1">&#39;responseValue&#39;</span><span class="p">:</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;dn&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;bogus StartTls response&gt;&#39;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">starting_tls</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">while</span> <span class="n">timeout</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># waiting for completed message to appear in _incoming</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+                        <span class="n">response</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">strategy</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">_incoming</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="n">get_config_parameter</span><span class="p">(</span><span class="s1">&#39;RESPONSE_SLEEPTIME&#39;</span><span class="p">))</span>
+                    <span class="n">timeout</span> <span class="o">-=</span> <span class="n">get_config_parameter</span><span class="p">(</span><span class="s1">&#39;RESPONSE_SLEEPTIME&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">timeout</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                    <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;no response from worker threads in Reusable connection&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">LDAPResponseTimeoutError</span><span class="p">(</span><span class="s1">&#39;no response from worker threads in Reusable connection&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">LDAPOperationResult</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">response</span>  <span class="c1"># an exception has been raised with raise_connections</span>
+
+        <span class="k">return</span> <span class="n">response</span><span class="p">,</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.post_send_single_response"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.post_send_single_response">[文档]</a>    <span class="k">def</span> <span class="nf">post_send_single_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counter</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">counter</span></div>
+
+<div class="viewcode-block" id="ReusableStrategy.post_send_search"><a class="viewcode-back" href="../../../ldap3.strategy.reusable.html#ldap3.strategy.reusable.ReusableStrategy.post_send_search">[文档]</a>    <span class="k">def</span> <span class="nf">post_send_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counter</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">counter</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

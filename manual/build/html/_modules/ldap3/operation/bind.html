@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.operation.bind &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.operation.bind 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2013.05.31</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">SIMPLE</span><span class="p">,</span> <span class="n">ANONYMOUS</span><span class="p">,</span> <span class="n">SASL</span><span class="p">,</span> <span class="n">RESULT_CODES</span>
+<span class="kn">from</span> <span class="nn">..core.exceptions</span> <span class="kn">import</span> <span class="n">LDAPPasswordIsMandatoryError</span><span class="p">,</span> <span class="n">LDAPUnknownAuthenticationMethodError</span><span class="p">,</span> <span class="n">LDAPUserNameNotAllowedError</span><span class="p">,</span> \
+    <span class="n">LDAPUserNameIsMandatoryError</span>
+<span class="kn">from</span> <span class="nn">..protocol.sasl.sasl</span> <span class="kn">import</span> <span class="n">validate_simple_password</span>
+<span class="kn">from</span> <span class="nn">..protocol.rfc4511</span> <span class="kn">import</span> <span class="n">Version</span><span class="p">,</span> <span class="n">AuthenticationChoice</span><span class="p">,</span> <span class="n">Simple</span><span class="p">,</span> <span class="n">BindRequest</span><span class="p">,</span> <span class="n">ResultCode</span><span class="p">,</span> <span class="n">SaslCredentials</span><span class="p">,</span> <span class="n">BindResponse</span><span class="p">,</span> \
+    <span class="n">LDAPDN</span><span class="p">,</span> <span class="n">LDAPString</span><span class="p">,</span> <span class="n">Referral</span><span class="p">,</span> <span class="n">ServerSaslCreds</span><span class="p">,</span> <span class="n">SicilyPackageDiscovery</span><span class="p">,</span> <span class="n">SicilyNegotiate</span><span class="p">,</span> <span class="n">SicilyResponse</span>
+<span class="kn">from</span> <span class="nn">..protocol.convert</span> <span class="kn">import</span> <span class="n">authentication_choice_to_dict</span><span class="p">,</span> <span class="n">referrals_to_list</span>
+
+<span class="c1"># BindRequest ::= [APPLICATION 0] SEQUENCE {</span>
+<span class="c1">#                                           version        INTEGER (1 ..  127),</span>
+<span class="c1">#                                           name           LDAPDN,</span>
+<span class="c1">#                                           authentication AuthenticationChoice }</span>
+
+
+<div class="viewcode-block" id="bind_operation"><a class="viewcode-back" href="../../../ldap3.operation.bind.html#ldap3.operation.bind.bind_operation">[文档]</a><span class="k">def</span> <span class="nf">bind_operation</span><span class="p">(</span><span class="n">version</span><span class="p">,</span>
+                   <span class="n">authentication</span><span class="p">,</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                   <span class="n">password</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">sasl_mechanism</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">sasl_credentials</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">BindRequest</span><span class="p">()</span>
+    <span class="n">request</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">request</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="k">if</span> <span class="n">authentication</span> <span class="o">==</span> <span class="n">SIMPLE</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPUserNameIsMandatoryError</span><span class="p">(</span><span class="s1">&#39;user name is mandatory in simple bind&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">password</span><span class="p">:</span>
+            <span class="n">request</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AuthenticationChoice</span><span class="p">()</span><span class="o">.</span><span class="n">setComponentByName</span><span class="p">(</span><span class="s1">&#39;simple&#39;</span><span class="p">,</span> <span class="n">Simple</span><span class="p">(</span><span class="n">validate_simple_password</span><span class="p">(</span><span class="n">password</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPPasswordIsMandatoryError</span><span class="p">(</span><span class="s1">&#39;password is mandatory in simple bind&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">authentication</span> <span class="o">==</span> <span class="n">SASL</span><span class="p">:</span>
+        <span class="n">sasl_creds</span> <span class="o">=</span> <span class="n">SaslCredentials</span><span class="p">()</span>
+        <span class="n">sasl_creds</span><span class="p">[</span><span class="s1">&#39;mechanism&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sasl_mechanism</span>
+        <span class="k">if</span> <span class="n">sasl_credentials</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">sasl_creds</span><span class="p">[</span><span class="s1">&#39;credentials&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sasl_credentials</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AuthenticationChoice</span><span class="p">()</span><span class="o">.</span><span class="n">setComponentByName</span><span class="p">(</span><span class="s1">&#39;sasl&#39;</span><span class="p">,</span> <span class="n">sasl_creds</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">authentication</span> <span class="o">==</span> <span class="n">ANONYMOUS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPUserNameNotAllowedError</span><span class="p">(</span><span class="s1">&#39;user name not allowed in anonymous bind&#39;</span><span class="p">)</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AuthenticationChoice</span><span class="p">()</span><span class="o">.</span><span class="n">setComponentByName</span><span class="p">(</span><span class="s1">&#39;simple&#39;</span><span class="p">,</span> <span class="n">Simple</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">authentication</span> <span class="o">==</span> <span class="s1">&#39;SICILY_PACKAGE_DISCOVERY&#39;</span><span class="p">:</span>  <span class="c1"># https://msdn.microsoft.com/en-us/library/cc223501.aspx</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AuthenticationChoice</span><span class="p">()</span><span class="o">.</span><span class="n">setComponentByName</span><span class="p">(</span><span class="s1">&#39;sicilyPackageDiscovery&#39;</span><span class="p">,</span> <span class="n">SicilyPackageDiscovery</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">authentication</span> <span class="o">==</span> <span class="s1">&#39;SICILY_NEGOTIATE_NTLM&#39;</span><span class="p">:</span>  <span class="c1"># https://msdn.microsoft.com/en-us/library/cc223501.aspx</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NTLM&#39;</span>
+        <span class="n">request</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AuthenticationChoice</span><span class="p">()</span><span class="o">.</span><span class="n">setComponentByName</span><span class="p">(</span><span class="s1">&#39;sicilyNegotiate&#39;</span><span class="p">,</span> <span class="n">SicilyNegotiate</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">create_negotiate_message</span><span class="p">()))</span>  <span class="c1"># ntlm client in self.name</span>
+    <span class="k">elif</span> <span class="n">authentication</span> <span class="o">==</span> <span class="s1">&#39;SICILY_RESPONSE_NTLM&#39;</span><span class="p">:</span>  <span class="c1"># https://msdn.microsoft.com/en-us/library/cc223501.aspx</span>
+        <span class="n">name</span><span class="o">.</span><span class="n">parse_challenge_message</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>  <span class="c1"># server_creds returned by server in password</span>
+        <span class="n">server_creds</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">create_authenticate_message</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">server_creds</span><span class="p">:</span>
+            <span class="n">request</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">request</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AuthenticationChoice</span><span class="p">()</span><span class="o">.</span><span class="n">setComponentByName</span><span class="p">(</span><span class="s1">&#39;sicilyResponse&#39;</span><span class="p">,</span> <span class="n">SicilyResponse</span><span class="p">(</span><span class="n">server_creds</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">LDAPUnknownAuthenticationMethodError</span><span class="p">(</span><span class="s1">&#39;unknown authentication method&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">request</span></div>
+
+
+<div class="viewcode-block" id="bind_request_to_dict"><a class="viewcode-back" href="../../../ldap3.operation.bind.html#ldap3.operation.bind.bind_request_to_dict">[文档]</a><span class="k">def</span> <span class="nf">bind_request_to_dict</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;authentication&#39;</span><span class="p">:</span> <span class="n">authentication_choice_to_dict</span><span class="p">(</span><span class="n">request</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">])}</span></div>
+
+<span class="c1"># BindResponse ::= [APPLICATION 1] SEQUENCE {</span>
+<span class="c1">#                                            COMPONENTS OF LDAPResult,</span>
+<span class="c1">#                                            serverSaslCreds    [7] OCTET STRING OPTIONAL }</span>
+
+
+<div class="viewcode-block" id="bind_response_operation"><a class="viewcode-back" href="../../../ldap3.operation.bind.html#ldap3.operation.bind.bind_response_operation">[文档]</a><span class="k">def</span> <span class="nf">bind_response_operation</span><span class="p">(</span><span class="n">result_code</span><span class="p">,</span>
+                            <span class="n">matched_dn</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                            <span class="n">diagnostic_message</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                            <span class="n">referral</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">server_sasl_credentials</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">BindResponse</span><span class="p">()</span>
+    <span class="n">response</span><span class="p">[</span><span class="s1">&#39;resultCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultCode</span><span class="p">(</span><span class="n">result_code</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">[</span><span class="s1">&#39;matchedDN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LDAPDN</span><span class="p">(</span><span class="n">matched_dn</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">[</span><span class="s1">&#39;diagnosticMessage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LDAPString</span><span class="p">(</span><span class="n">diagnostic_message</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">referral</span><span class="p">:</span>
+        <span class="n">response</span><span class="p">[</span><span class="s1">&#39;referral&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Referral</span><span class="p">(</span><span class="n">referral</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">server_sasl_credentials</span><span class="p">:</span>
+        <span class="n">response</span><span class="p">[</span><span class="s1">&#39;serverSaslCreds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ServerSaslCreds</span><span class="p">(</span><span class="n">server_sasl_credentials</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="bind_response_to_dict"><a class="viewcode-back" href="../../../ldap3.operation.bind.html#ldap3.operation.bind.bind_response_to_dict">[文档]</a><span class="k">def</span> <span class="nf">bind_response_to_dict</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;resultCode&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">ResultCode</span><span class="p">()</span><span class="o">.</span><span class="n">getNamedValues</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;resultCode&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;dn&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;matchedDN&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;diagnosticMessage&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;referrals&#39;</span><span class="p">:</span> <span class="n">referrals_to_list</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;referral&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;saslCreds&#39;</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;serverSaslCreds&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;serverSaslCreds&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">None</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="sicily_bind_response_to_dict"><a class="viewcode-back" href="../../../ldap3.operation.bind.html#ldap3.operation.bind.sicily_bind_response_to_dict">[文档]</a><span class="k">def</span> <span class="nf">sicily_bind_response_to_dict</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;result&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;resultCode&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="n">ResultCode</span><span class="p">()</span><span class="o">.</span><span class="n">getNamedValues</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;resultCode&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;server_creds&#39;</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;matchedDN&#39;</span><span class="p">]),</span>
+            <span class="s1">&#39;error_message&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;diagnosticMessage&#39;</span><span class="p">])}</span></div>
+
+
+<div class="viewcode-block" id="bind_response_to_dict_fast"><a class="viewcode-back" href="../../../ldap3.operation.bind.html#ldap3.operation.bind.bind_response_to_dict_fast">[文档]</a><span class="k">def</span> <span class="nf">bind_response_to_dict_fast</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="n">response_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># resultCode</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RESULT_CODES</span><span class="p">[</span><span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]]</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;dn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>  <span class="c1"># matchedDN</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>  <span class="c1"># diagnosticMessage</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;referrals&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># referrals</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;saslCreds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># saslCreds</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="mi">3</span><span class="p">:]:</span>
+        <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># referrals</span>
+            <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;referrals&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">referrals_to_list</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># referrals</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;saslCreds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># saslCreds</span>
+
+    <span class="k">return</span> <span class="n">response_dict</span></div>
+
+
+<div class="viewcode-block" id="sicily_bind_response_to_dict_fast"><a class="viewcode-back" href="../../../ldap3.operation.bind.html#ldap3.operation.bind.sicily_bind_response_to_dict_fast">[文档]</a><span class="k">def</span> <span class="nf">sicily_bind_response_to_dict_fast</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="n">response_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># resultCode</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RESULT_CODES</span><span class="p">[</span><span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]]</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;server_creds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># server_creds</span>
+    <span class="n">response_dict</span><span class="p">[</span><span class="s1">&#39;error_message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>  <span class="c1"># error_message</span>
+
+    <span class="k">return</span> <span class="n">response_dict</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

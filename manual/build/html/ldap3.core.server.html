@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.core.server module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.core package" href="ldap3.core.html" />
+    <link rel="next" title="ldap3.core.timezone module" href="ldap3.core.timezone.html" />
+    <link rel="prev" title="ldap3.core.pooling module" href="ldap3.core.pooling.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.core.server">
+<span id="ldap3-core-server-module"></span><h1>ldap3.core.server module<a class="headerlink" href="#module-ldap3.core.server" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.core.server.Server">
+<em class="property">class </em><code class="descclassname">ldap3.core.server.</code><code class="descname">Server</code><span class="sig-paren">(</span><em>host</em>, <em>port=None</em>, <em>use_ssl=False</em>, <em>allowed_referral_hosts=None</em>, <em>get_info='NO_INFO'</em>, <em>tls=None</em>, <em>formatter=None</em>, <em>connect_timeout=None</em>, <em>mode='IP_V6_PREFERRED'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>LDAP Server definition class</p>
+<p>Allowed_referral_hosts can be None (default), or a list of tuples of
+allowed servers ip address or names to contact while redirecting
+search to referrals.</p>
+<p>The second element of the tuple is a boolean to indicate if
+authentication to that server is allowed; if False only anonymous
+bind will be used.</p>
+<p>Per RFC 4516. Use [(&#8216;*&#8217;, False)] to allow any host with anonymous
+bind, use [(&#8216;*&#8217;, True)] to allow any host with same authentication of
+Server.</p>
+<dl class="attribute">
+<dt id="ldap3.core.server.Server.address_info">
+<code class="descname">address_info</code><a class="headerlink" href="#ldap3.core.server.Server.address_info" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.server.Server.attach_dsa_info">
+<code class="descname">attach_dsa_info</code><span class="sig-paren">(</span><em>dsa_info=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.attach_dsa_info"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.attach_dsa_info" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.server.Server.attach_schema_info">
+<code class="descname">attach_schema_info</code><span class="sig-paren">(</span><em>dsa_schema=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.attach_schema_info"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.attach_schema_info" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.server.Server.candidate_addresses">
+<code class="descname">candidate_addresses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.candidate_addresses"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.candidate_addresses" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.server.Server.check_availability">
+<code class="descname">check_availability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.check_availability"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.check_availability" title="永久链接至目标">¶</a></dt>
+<dd><p>Tries to open, connect and close a socket to specified address
+and port to check availability. Timeout in seconds is specified in CHECK_AVAILABITY_TIMEOUT if not specified in
+the Server object</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ldap3.core.server.Server.from_definition">
+<em class="property">static </em><code class="descname">from_definition</code><span class="sig-paren">(</span><em>host</em>, <em>dsa_info</em>, <em>dsa_schema</em>, <em>port=None</em>, <em>use_ssl=False</em>, <em>formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.from_definition"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.from_definition" title="永久链接至目标">¶</a></dt>
+<dd><p>Define a dummy server with preloaded schema and info
+:param host: host name
+:param dsa_info: DsaInfo preloaded object
+:param dsa_schema: SchemaInfo preloaded object
+:param port: dummy port
+:param use_ssl: use_ssl
+:param formatter: custom formatter
+:return: Server object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.server.Server.get_info_from_server">
+<code class="descname">get_info_from_server</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.get_info_from_server"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.get_info_from_server" title="永久链接至目标">¶</a></dt>
+<dd><p>reads info from DSE and from subschema</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.core.server.Server.info">
+<code class="descname">info</code><a class="headerlink" href="#ldap3.core.server.Server.info" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="ldap3.core.server.Server.next_message_id">
+<em class="property">static </em><code class="descname">next_message_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.next_message_id"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.next_message_id" title="永久链接至目标">¶</a></dt>
+<dd><p>LDAP messageId is unique for all connections to same server</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.server.Server.reset_availability">
+<code class="descname">reset_availability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.reset_availability"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.reset_availability" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.core.server.Server.schema">
+<code class="descname">schema</code><a class="headerlink" href="#ldap3.core.server.Server.schema" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.server.Server.update_availability">
+<code class="descname">update_availability</code><span class="sig-paren">(</span><em>address</em>, <em>available</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/server.html#Server.update_availability"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.server.Server.update_availability" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.core.html">ldap3.core package</a><ul>
+      <li>Previous: <a href="ldap3.core.pooling.html" title="上一章">ldap3.core.pooling module</a></li>
+      <li>Next: <a href="ldap3.core.timezone.html" title="下一章">ldap3.core.timezone module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.core.server.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.core.server.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

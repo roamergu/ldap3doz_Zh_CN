@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Servers &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="Connections" href="connections.html" />
+    <link rel="prev" title="Quick tour" href="quicktour.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="servers">
+<h1>Servers<a class="headerlink" href="#servers" title="永久链接至标题">¶</a></h1>
+<div class="section" id="server-object">
+<h2>Server object<a class="headerlink" href="#server-object" title="永久链接至标题">¶</a></h2>
+<p>The Server object specifies the DSA (Directory Server Agent) LDAP server that will be used by the connection. To create a new Server object the following parameters are available:</p>
+<ul>
+<li><p class="first">host: name or ip or the complete url in the scheme://hostname:hostport format of the server (required) - port and scheme (ldap or ldaps) defined here have precedence over the parameters port and use_tls</p>
+</li>
+<li><p class="first">port: the port where the DSA server is listening (defaults to 389, for a cleartext connection, 636 for a secured connection)</p>
+</li>
+<li><p class="first">use_ssl: specifies if the connection is on a secure port (defaults to False). When True the secure port is usually set to 636.</p>
+</li>
+<li><p class="first">allowed_referral_hosts: specifies which servers are considered reliable as referrals (defaults to None)</p>
+<blockquote>
+<div><ul class="simple">
+<li>Format is a list of tuples; [(server, allow_auth), (server, allow_auth), ...]</li>
+<li>server is an IP address or DNS name. Specify an asterisk (*) to accept any server.</li>
+<li>allow_auth is a boolean to indicate if authentication to that server is allowed; if False only anonymous bind will be used.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">get_info: specifies if the server schema and server specific info must be read (defaults to NO_INFO). Possible values are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>NONE: no information is gathered from the server</li>
+<li>DSA: server information is stored in server.info</li>
+<li>SCHEMA: schema information is stored in server.schema</li>
+<li>ALL: server and schema information are gathered and stored in server.info and server.schema</li>
+<li>OFFLINE_EDIR_8_8_8: pre-built schema and info for NetIQ eDirectory 8.8.8</li>
+<li>OFFLINE_AD_2012_R2: pre-built schema and info for Microsoft Active Directory from Windows Server 2012 R2</li>
+<li>OFFLINE_SLAPD_2_4: pre-built schema and info for Openldap 2.4</li>
+<li>OFFLINE_DS389_1_3_3: pre-built schema and info for DS389 1.3.3</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">mode: specifies dual IP stack behaviour for resolving LDAP server names in DNS: Possible values are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>IP_SYSTEM_DEFAULT: disable dual stack feature. Use system default</li>
+<li>IP_V4_ONLY: use only IPV4 names</li>
+<li>IP_V6_ONLY: use only IPV6 names</li>
+<li>IP_V4_PREFERRED: tries IPV4 names and if connection fails tries IPV6</li>
+<li>IP_V6_PREFERRED: tries IPV6 names and if connection fails tries IPV4</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">tls: Tls object that contains information about the certificates and the trusted roots needed to establish a secure connection (defaults to None). If None any server certificate will be accepted.</p>
+</li>
+<li><p class="first">formatter: a dictionary of custom formatter for attributes returned in search</p>
+</li>
+<li><p class="first">connect_timeout: timeout in seconds for the connect operation</p>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;server1&#39;</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="mi">636</span><span class="p">,</span> <span class="n">use_ssl</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">allowed_referral_hosts</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;server2&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;server3&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>A server can be implicitly defined with default directly in the Connection definition:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">connection</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;server1&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;cn=user1,o=test&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;password&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="server-pool">
+<h2>Server Pool<a class="headerlink" href="#server-pool" title="永久链接至标题">¶</a></h2>
+<div class="sidebar">
+<p class="first sidebar-title">Active strategies</p>
+<p class="last">Active strategies check if the server is listening on the specified port. When the &#8216;active&#8217; attribute is set to True the strategy tries to open and close a socket on the port. If your LDAP server has problems with the opening and closing of sockets you can set &#8216;active&#8217; to False..</p>
+</div>
+<p>Different Server objects can be grouped in a ServerPool object. A ServerPool object can be specified in the Connection object
+to obtain an high availability (HA) connection. This is useful for long standing connections (for example an LDAP authenticator
+module in an application server) or when you have a multi replica LDAP server infrastructure. The <code class="docutils literal"><span class="pre">active</span></code> and <code class="docutils literal"><span class="pre">exhaust</span></code>
+parameter accept either a boolean or a number: if you set <code class="docutils literal"><span class="pre">active=True</span></code> while defining the ServerPool the strategy will check
+for server availability, you can also set this attribute to the maximum number of cycles to try before giving up with an
+LDAPServerPoolExhaustedError exception. With <code class="docutils literal"><span class="pre">exhaust=True</span></code> if a server is not active it will be removed by the pool, if you set it
+to a number this will be the number of seconds an unreachable server is considered offline. WHen this timout expires the server
+is reinserted in the pool and checked again for availability.</p>
+<p>When all servers in a pool are not available the strategy will wait for the number of seconds specified in <code class="docutils literal"><span class="pre">ldap.POOLING_LOOP_TIMEOUT</span></code>
+before starting a new cycle. This defaults to 10 seconds.</p>
+<p>The pool can have different HA strategies:</p>
+<ul class="simple">
+<li>FIRST: gets the first server in the pool, if &#8216;active&#8217; is set to True gets the first available server</li>
+<li>ROUND_ROBIN: each time the connection is open the subsequent server in the pool is used. If active is set to True unavailable servers will be discarded</li>
+<li>RANDOM: each time the connection is open a random server is chosen in the pool. If active is set to True unavailable servers will be discarded</li>
+</ul>
+<p>A server pool can be defined in different ways:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">server1</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;server1&#39;</span><span class="p">)</span>
+<span class="n">server2</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;server2&#39;</span><span class="p">)</span>
+<span class="n">server3</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;server1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">636</span><span class="p">,</span> <span class="n">use_ssl</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul>
+<li><p class="first">explicitly with Server objects in the init:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">server_pool</span> <span class="o">=</span> <span class="n">ServerPool</span><span class="p">([</span><span class="n">server1</span><span class="p">,</span> <span class="n">server2</span><span class="p">,</span> <span class="n">server3</span><span class="p">],</span> <span class="n">POOLING_STRATEGY_ROUND_ROBIN</span><span class="p">,</span> <span class="n">active</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exhaust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">explicitly with an add operation in the pool object:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">server_pool</span> <span class="o">=</span> <span class="n">ServerPool</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">POOLING_STRATEGY_ROUND_ROBIN_ACTIVE</span><span class="p">)</span>
+<span class="n">server_pool</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">server1</span><span class="p">)</span>
+<span class="n">server_pool</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">server2</span><span class="p">)</span>
+<span class="n">server_pool</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">server3</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">implicitly directly in the Connection object init (passing a list of servers):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">([</span><span class="n">server1</span><span class="p">,</span> <span class="n">server2</span><span class="p">,</span> <span class="n">server3</span><span class="p">])</span>  <span class="c1"># the ServerPool object is defined with the default pooling strategy</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Pools can be dynamically changed. You can add and remove Server objects from pools even if they are already used in Connection:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">server4</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;server2&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">636</span><span class="p">,</span> <span class="n">use_ssl</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">server_pool</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">server2</span><span class="p">)</span>
+<span class="n">server_pool</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">server4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Connections are notified of the change and can reopen the socket to the new server at next open() operation.</p>
+<p>Custom formatters can be used to specify how an attribute value must be returned in the &#8216;attributes&#8217; attribute of the search entry object.
+A formatter must be a callable that receives a bytes value and return an object. The object will be returned in the &#8216;attributes&#8217; if the schema is read and check_names connection parameter is True.
+If the attribute is defined in the schema as &#8216;multi_value&#8217; the attribute value is returned as a list (even if only a single value is present) else it&#8217;s returned as a single value.</p>
+</div>
+<div class="section" id="offline-schema">
+<h2>Offline Schema<a class="headerlink" href="#offline-schema" title="永久链接至标题">¶</a></h2>
+<p>If your LDAP server doesn&#8217;t return the DSA info or the Schema you can load pre-built schemas and infos with the get_info parameter. Schemas are available for eDirectory, Active Directory and Openldap.</p>
+<p>You can also save the schema and info in a json string:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">json_info</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+<span class="n">json_schema</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or can have them saved on file:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">server</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s1">&#39;server-info.json)</span>
+<span class="n">server</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s1">&#39;server-schema.json&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to build a new server object with the saved json files you can retrieve them with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">DsaInfo</span><span class="p">,</span> <span class="n">SchemaInfo</span>
+<span class="n">dsa_info</span> <span class="o">=</span> <span class="n">DsaInfo</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s1">&#39;server-info.json&#39;</span><span class="p">)</span>
+<span class="n">schema_info</span> <span class="o">=</span> <span class="n">SchemaInfo</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s1">&#39;server-schema.json&#39;</span><span class="p">)</span>
+<span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;hostname&#39;</span><span class="p">,</span> <span class="n">dsa_info</span><span class="p">,</span> <span class="n">schema_info</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and then you can use the server as usual. Hostname must resolve to a real server.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Servers</a><ul>
+<li><a class="reference internal" href="#server-object">Server object</a></li>
+<li><a class="reference internal" href="#server-pool">Server Pool</a></li>
+<li><a class="reference internal" href="#offline-schema">Offline Schema</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="quicktour.html" title="上一章">Quick tour</a></li>
+      <li>Next: <a href="connections.html" title="下一章">Connections</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/servers.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/servers.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

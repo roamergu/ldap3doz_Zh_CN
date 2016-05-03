@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.abstract.entry &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.abstract.entry 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2014.01.06</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">linesep</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">STRING_TYPES</span>
+<span class="kn">from</span> <span class="nn">..core.exceptions</span> <span class="kn">import</span> <span class="n">LDAPKeyError</span><span class="p">,</span> <span class="n">LDAPAttributeError</span><span class="p">,</span> <span class="n">LDAPEntryError</span>
+<span class="kn">from</span> <span class="nn">..utils.conv</span> <span class="kn">import</span> <span class="n">check_json_dict</span><span class="p">,</span> <span class="n">format_json</span><span class="p">,</span> <span class="n">prepare_for_stream</span>
+<span class="kn">from</span> <span class="nn">..protocol.rfc2849</span> <span class="kn">import</span> <span class="n">operation_to_ldif</span><span class="p">,</span> <span class="n">add_ldif_header</span>
+<span class="kn">from</span> <span class="nn">..utils.repr</span> <span class="kn">import</span> <span class="n">to_stdout_encoding</span>
+
+
+<div class="viewcode-block" id="Entry"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry">[文档]</a><span class="k">class</span> <span class="nc">Entry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The Entry object contains a single entry from the result of an LDAP</span>
+<span class="sd">    search.  Attributes can be accessed either by sequence, by assignment</span>
+<span class="sd">    or as dictionary keys. Keys are not case sensitive.</span>
+
+<span class="sd">    The Entry object is read only</span>
+
+<span class="sd">    - The DN is retrieved by get_entry_dn()</span>
+<span class="sd">    - The Reader reference is in get_entry_reader()</span>
+<span class="sd">    - Raw attributes values are retrieved by the get_raw_attributes() and</span>
+<span class="sd">      get_raw_attribute() methods</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dn</span><span class="p">,</span> <span class="n">reader</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_dn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_raw_attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_response&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_reader&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reader</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;DN: &#39;</span> <span class="o">+</span> <span class="n">to_stdout_encoding</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dn</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">):</span>
+                    <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">attr</span><span class="p">])</span> <span class="o">+</span> <span class="n">linesep</span>
+            <span class="k">return</span> <span class="n">r</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="n">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="n">LDAPKeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">STRING_TYPES</span><span class="p">):</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="n">attr</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">LDAPAttributeError</span><span class="p">(</span><span class="s1">&#39;attribute not found&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+        <span class="k">raise</span> <span class="n">LDAPAttributeError</span><span class="p">(</span><span class="s1">&#39;attribute must be a string&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPAttributeError</span><span class="p">(</span><span class="s1">&#39;attribute is read only&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LDAPEntryError</span><span class="p">(</span><span class="s1">&#39;entry is read only&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">STRING_TYPES</span><span class="p">):</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="n">attr</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">LDAPKeyError</span><span class="p">(</span><span class="s1">&#39;key not found&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+        <span class="k">raise</span> <span class="n">LDAPKeyError</span><span class="p">(</span><span class="s1">&#39;key must be a string&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Entry</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dn</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">entry_get_dn</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Entry</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dn</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">entry_get_dn</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+
+<div class="viewcode-block" id="Entry.entry_get_dn"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_get_dn">[文档]</a>    <span class="k">def</span> <span class="nf">entry_get_dn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The distinguished name of the Entry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dn</span></div>
+
+<div class="viewcode-block" id="Entry.entry_get_response"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_get_response">[文档]</a>    <span class="k">def</span> <span class="nf">entry_get_response</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The origininal search response for the Entry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dn</span></div>
+
+<div class="viewcode-block" id="Entry.entry_get_reader"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_get_reader">[文档]</a>    <span class="k">def</span> <span class="nf">entry_get_reader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: the Reader object of the Entry</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span></div>
+
+<div class="viewcode-block" id="Entry.entry_get_raw_attributes"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_get_raw_attributes">[文档]</a>    <span class="k">def</span> <span class="nf">entry_get_raw_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The raw (unencoded) attributes of the Entry as bytes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_attributes</span></div>
+
+<div class="viewcode-block" id="Entry.entry_get_raw_attribute"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_get_raw_attribute">[文档]</a>    <span class="k">def</span> <span class="nf">entry_get_raw_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name: name of the attribute</span>
+<span class="sd">        :return: raw (unencoded) value of the attribute, None if attribute is not found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_attributes</span> <span class="k">else</span> <span class="bp">None</span></div>
+
+<div class="viewcode-block" id="Entry.entry_get_attribute_names"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_get_attribute_names">[文档]</a>    <span class="k">def</span> <span class="nf">entry_get_attribute_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw_attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Entry.entry_get_attributes_dict"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_get_attributes_dict">[文档]</a>    <span class="k">def</span> <span class="nf">entry_get_attributes_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">attribute_key</span><span class="p">,</span> <span class="n">attribute_value</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">attribute_key</span><span class="p">,</span> <span class="n">attribute_value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attributes</span><span class="o">.</span><span class="n">items</span><span class="p">())</span></div>
+
+    <span class="c1"># noinspection PyProtectedMember</span>
+<div class="viewcode-block" id="Entry.entry_refresh_from_reader"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_refresh_from_reader">[文档]</a>    <span class="k">def</span> <span class="nf">entry_refresh_from_reader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Re-read the entry from the LDAP Server</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_get_reader</span><span class="p">():</span>
+            <span class="n">temp_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_get_reader</span><span class="p">()</span><span class="o">.</span><span class="n">search_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entry_get_dn</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_entry</span><span class="o">.</span><span class="n">_attributes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;_raw_attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_entry</span><span class="o">.</span><span class="n">_raw_attributes</span>
+            <span class="k">del</span> <span class="n">temp_entry</span></div>
+
+<div class="viewcode-block" id="Entry.entry_to_json"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_to_json">[文档]</a>    <span class="k">def</span> <span class="nf">entry_to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">raw</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                      <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                      <span class="n">sort</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                      <span class="n">stream</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="n">json_entry</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">json_entry</span><span class="p">[</span><span class="s1">&#39;dn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_get_dn</span><span class="p">()</span>
+        <span class="n">json_entry</span><span class="p">[</span><span class="s1">&#39;attributes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry_get_attributes_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">raw</span><span class="p">:</span>
+            <span class="n">json_entry</span><span class="p">[</span><span class="s1">&#39;raw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entry_get_raw_attributes</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="nb">str</span> <span class="o">==</span> <span class="nb">bytes</span><span class="p">:</span>
+            <span class="n">check_json_dict</span><span class="p">(</span><span class="n">json_entry</span><span class="p">)</span>
+
+        <span class="n">json_output</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_entry</span><span class="p">,</span>
+                                 <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                 <span class="n">sort_keys</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
+                                 <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">,</span>
+                                 <span class="n">check_circular</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                 <span class="n">default</span><span class="o">=</span><span class="n">format_json</span><span class="p">,</span>
+                                 <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;: &#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json_output</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">json_output</span></div>
+
+<div class="viewcode-block" id="Entry.entry_to_ldif"><a class="viewcode-back" href="../../../ldap3.abstract.entry.html#ldap3.abstract.entry.Entry.entry_to_ldif">[文档]</a>    <span class="k">def</span> <span class="nf">entry_to_ldif</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">all_base64</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                      <span class="n">line_separator</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">sort_order</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">stream</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="n">ldif_lines</span> <span class="o">=</span> <span class="n">operation_to_ldif</span><span class="p">(</span><span class="s1">&#39;searchResponse&#39;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_response</span><span class="p">],</span> <span class="n">all_base64</span><span class="p">,</span> <span class="n">sort_order</span><span class="o">=</span><span class="n">sort_order</span><span class="p">)</span>
+        <span class="n">ldif_lines</span> <span class="o">=</span> <span class="n">add_ldif_header</span><span class="p">(</span><span class="n">ldif_lines</span><span class="p">)</span>
+        <span class="n">line_separator</span> <span class="o">=</span> <span class="n">line_separator</span> <span class="ow">or</span> <span class="n">linesep</span>
+        <span class="n">ldif_output</span> <span class="o">=</span> <span class="n">line_separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ldif_lines</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">stream</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="n">add_ldif_header</span><span class="p">([</span><span class="s1">&#39;-&#39;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prepare_for_stream</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="n">line_separator</span> <span class="o">+</span> <span class="n">line_separator</span><span class="p">))</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prepare_for_stream</span><span class="p">(</span><span class="n">ldif_output</span> <span class="o">+</span> <span class="n">line_separator</span> <span class="o">+</span> <span class="n">line_separator</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ldif_output</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

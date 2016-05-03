@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Extend namespace &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="Extended standard RFCs operations" href="standard.html" />
+    <link rel="prev" title="The EXTENDED operation" href="extended.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="extend-namespace">
+<h1>Extend namespace<a class="headerlink" href="#extend-namespace" title="永久链接至标题">¶</a></h1>
+<p>Extended operations are defined in the Connection object in the &#8216;extend&#8217; attribute.</p>
+<p>You can call the requested operation and get the extended result back as specified in the relevant RFC or documentation
+The result dictionary is augmented with the specific keys of the extended response.</p>
+<p>Extended operations are logically grouped by their use and vendor. Ask for other extended operation
+implementations on the support site of ldap3.</p>
+<p>To use an extended operation just call it in the usual way, the payload is properly encoded and decoded. for example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="o">....</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="n">i_am</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>When available you should get the response value as the return value of the function and as an additional field of
+the <code class="docutils literal"><span class="pre">result</span></code> dictionary.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="standard.html">Extended standard RFCs operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="novell.html">Extended Novell operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="microsoft.html">Extended Microsoft operations</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="extended.html" title="上一章">The EXTENDED operation</a></li>
+      <li>Next: <a href="standard.html" title="下一章">Extended standard RFCs operations</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/extend.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/extend.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

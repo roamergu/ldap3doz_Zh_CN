@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.core.tls module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.core package" href="ldap3.core.html" />
+    <link rel="next" title="ldap3.core.usage module" href="ldap3.core.usage.html" />
+    <link rel="prev" title="ldap3.core.timezone module" href="ldap3.core.timezone.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.core.tls">
+<span id="ldap3-core-tls-module"></span><h1>ldap3.core.tls module<a class="headerlink" href="#module-ldap3.core.tls" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.core.tls.Tls">
+<em class="property">class </em><code class="descclassname">ldap3.core.tls.</code><code class="descname">Tls</code><span class="sig-paren">(</span><em>local_private_key_file=None</em>, <em>local_certificate_file=None</em>, <em>validate=0</em>, <em>version=None</em>, <em>ca_certs_file=None</em>, <em>valid_names=None</em>, <em>ca_certs_path=None</em>, <em>ca_certs_data=None</em>, <em>local_private_key_password=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/tls.html#Tls"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.tls.Tls" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>tls/ssl configuration for Server object
+Starting from python 2.7.9 and python 3.4 uses the SSLContext object
+that tries to read the CAs defined at system level
+ca_certs_path and ca_certs_data are valid only when using SSLContext
+local_private_key_password is valid only when using SSLContext</p>
+<dl class="method">
+<dt id="ldap3.core.tls.Tls.start_tls">
+<code class="descname">start_tls</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/tls.html#Tls.start_tls"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.tls.Tls.start_tls" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.core.tls.Tls.wrap_socket">
+<code class="descname">wrap_socket</code><span class="sig-paren">(</span><em>connection</em>, <em>do_handshake=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/tls.html#Tls.wrap_socket"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.tls.Tls.wrap_socket" title="永久链接至目标">¶</a></dt>
+<dd><p>Adds TLS to the connection socket</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ldap3.core.tls.check_hostname">
+<code class="descclassname">ldap3.core.tls.</code><code class="descname">check_hostname</code><span class="sig-paren">(</span><em>sock</em>, <em>server_name</em>, <em>additional_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/core/tls.html#check_hostname"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.core.tls.check_hostname" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.core.html">ldap3.core package</a><ul>
+      <li>Previous: <a href="ldap3.core.timezone.html" title="上一章">ldap3.core.timezone module</a></li>
+      <li>Next: <a href="ldap3.core.usage.html" title="下一章">ldap3.core.usage module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.core.tls.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.core.tls.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

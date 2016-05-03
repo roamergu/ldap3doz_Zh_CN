@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.abstract.attrDef module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.abstract package" href="ldap3.abstract.html" />
+    <link rel="next" title="ldap3.abstract.attribute module" href="ldap3.abstract.attribute.html" />
+    <link rel="prev" title="ldap3.abstract package" href="ldap3.abstract.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.abstract.attrDef">
+<span id="ldap3-abstract-attrdef-module"></span><h1>ldap3.abstract.attrDef module<a class="headerlink" href="#module-ldap3.abstract.attrDef" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.abstract.attrDef.AttrDef">
+<em class="property">class </em><code class="descclassname">ldap3.abstract.attrDef.</code><code class="descname">AttrDef</code><span class="sig-paren">(</span><em>name</em>, <em>key=None</em>, <em>validate=None</em>, <em>pre_query=None</em>, <em>post_query=None</em>, <em>default=NotImplemented</em>, <em>dereference_dn=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/attrDef.html#AttrDef"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.attrDef.AttrDef" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Hold the definition of an attribute</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(在 Python v2.7)"><em>string</em></a>) &#8211; the real attribute name</li>
+<li><strong>key</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(在 Python v2.7)"><em>string</em></a>) &#8211; the friendly name to use in queries and when accessing the attribute, default to the real attribute name</li>
+<li><strong>validate</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#callable" title="(在 Python v2.7)"><em>callable</em></a>) &#8211; called to check if the value in the query is valid, the callable is called with the value parameter</li>
+<li><strong>pre_query</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#callable" title="(在 Python v2.7)"><em>callable</em></a>) &#8211; called to transform values returned by search</li>
+<li><strong>post_query</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#callable" title="(在 Python v2.7)"><em>callable</em></a>) &#8211; called to transform values returned by search</li>
+<li><strong>default</strong> (<em>string, integer</em>) &#8211; value returned when the attribute is absent (defaults to NotImplemented to allow use of None as default)</li>
+<li><strong>dereference_dn</strong> (<a class="reference external" href="https://docs.python.org/library/string.html#module-string" title="(在 Python v2.7)"><em>string</em></a>) &#8211; reference to an ObjectDef instance. When the attribute value contains a dn it will be searched and substituted in the entry</li>
+<li><strong>description</strong> &#8211; custom attribute description</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.abstract.html">ldap3.abstract package</a><ul>
+      <li>Previous: <a href="ldap3.abstract.html" title="上一章">ldap3.abstract package</a></li>
+      <li>Next: <a href="ldap3.abstract.attribute.html" title="下一章">ldap3.abstract.attribute module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.abstract.attrDef.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.abstract.attrDef.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

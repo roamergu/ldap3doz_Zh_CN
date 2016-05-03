@@ -1,0 +1,282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.abstract.reader module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.abstract package" href="ldap3.abstract.html" />
+    <link rel="next" title="ldap3.core package" href="ldap3.core.html" />
+    <link rel="prev" title="ldap3.abstract.operationalAttribute module" href="ldap3.abstract.operationalAttribute.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.abstract.reader">
+<span id="ldap3-abstract-reader-module"></span><h1>ldap3.abstract.reader module<a class="headerlink" href="#module-ldap3.abstract.reader" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.abstract.reader.Reader">
+<em class="property">class </em><code class="descclassname">ldap3.abstract.reader.</code><code class="descname">Reader</code><span class="sig-paren">(</span><em>connection</em>, <em>object_def</em>, <em>query</em>, <em>base</em>, <em>components_in_and=True</em>, <em>sub_tree=True</em>, <em>get_operational_attributes=False</em>, <em>controls=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Reader object to perform searches:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first last simple">
+<li><strong>connection</strong> (<em>LDAPConnection</em>) &#8211; the LDAP connection object to use</li>
+<li><strong>object_def</strong> (<a class="reference internal" href="ldap3.abstract.objectDef.html#ldap3.abstract.objectDef.ObjectDef" title="ldap3.abstract.objectDef.ObjectDef"><em>ObjectDef</em></a>) &#8211; the ObjectDef of the LDAP object returned</li>
+<li><strong>query</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(在 Python v2.7)"><em>str</em></a>) &#8211; the simplified query (will be transformed in an LDAP filter)</li>
+<li><strong>base</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(在 Python v2.7)"><em>str</em></a>) &#8211; starting base of the search</li>
+<li><strong>components_in_and</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; specify if assertions in the query mus be all satisfied or not (AND/OR)</li>
+<li><strong>sub_tree</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; specify if the search must be performed ad Single Level (False) or Whole SubTree (True)</li>
+<li><strong>get_operational_attributes</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; specify if operational attributes are returned or not</li>
+<li><strong>controls</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#tuple" title="(在 Python v2.7)"><em>tuple</em></a>) &#8211; controls to be used in search</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.clear"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.clear" title="永久链接至目标">¶</a></dt>
+<dd><p>Clear the Reader search parameters</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.abstract.reader.Reader.components_in_and">
+<code class="descname">components_in_and</code><a class="headerlink" href="#ldap3.abstract.reader.Reader.components_in_and" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.abstract.reader.Reader.definition">
+<code class="descname">definition</code><a class="headerlink" href="#ldap3.abstract.reader.Reader.definition" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.abstract.reader.Reader.query">
+<code class="descname">query</code><a class="headerlink" href="#ldap3.abstract.reader.Reader.query" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.reset"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.reset" title="永久链接至目标">¶</a></dt>
+<dd><p>Clear all the Reader parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.search">
+<code class="descname">search</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.search"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.search" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform the LDAP search</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">Entries found in search</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.search_level">
+<code class="descname">search_level</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.search_level"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.search_level" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform the LDAP search operation with SINGLE_LEVEL scope</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">Entries found in search</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.search_object">
+<code class="descname">search_object</code><span class="sig-paren">(</span><em>entry_dn=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.search_object"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.search_object" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform the LDAP search operation SINGLE_OBJECT scope</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">Entry found in search</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.search_paged">
+<code class="descname">search_paged</code><span class="sig-paren">(</span><em>paged_size</em>, <em>paged_criticality=True</em>, <em>generator=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.search_paged"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.search_paged" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform a paged search, can be called as an Iterator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><ul class="first simple">
+<li><strong>paged_size</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(在 Python v2.7)"><em>int</em></a>) &#8211; number of entries returned in each search</li>
+<li><strong>paged_criticality</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; specify if server must not execute the search if it is not capable of paging searches</li>
+<li><strong>generator</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#bool" title="(在 Python v2.7)"><em>bool</em></a>) &#8211; if True the paged searches are executed while generating the entries,
+if False all the paged searches are execute before returning the generator</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body"><p class="first last">Entries found in search</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.search_size_limit">
+<code class="descname">search_size_limit</code><span class="sig-paren">(</span><em>size_limit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.search_size_limit"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.search_size_limit" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform the LDAP search with limit of entries found</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>size_limit</strong> &#8211; maximum number of entries returned</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">Entries found in search</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.search_subtree">
+<code class="descname">search_subtree</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.search_subtree"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.search_subtree" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform the LDAP search operation WHOLE_SUBTREE scope</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">Entries found in search</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.search_time_limit">
+<code class="descname">search_time_limit</code><span class="sig-paren">(</span><em>time_limit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.search_time_limit"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.search_time_limit" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform the LDAP search with limit of time spent in searching by the server</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">参数:</th><td class="field-body"><strong>time_limit</strong> &#8211; maximum number of seconds to wait for a search</td>
+</tr>
+<tr class="field-even field"><th class="field-name">返回:</th><td class="field-body">Entries found in search</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ldap3.abstract.reader.Reader.search_types_only">
+<code class="descname">search_types_only</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/abstract/reader.html#Reader.search_types_only"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.abstract.reader.Reader.search_types_only" title="永久链接至目标">¶</a></dt>
+<dd><p>Perform the search returning attribute names only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">返回:</th><td class="field-body">Entries found in search</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.abstract.html">ldap3.abstract package</a><ul>
+      <li>Previous: <a href="ldap3.abstract.operationalAttribute.html" title="上一章">ldap3.abstract.operationalAttribute module</a></li>
+      <li>Next: <a href="ldap3.core.html" title="下一章">ldap3.core package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.abstract.reader.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.abstract.reader.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

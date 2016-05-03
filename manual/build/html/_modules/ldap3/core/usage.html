@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.core.usage &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="ldap3" href="../../ldap3.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>ldap3.core.usage 源代码</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Created on 2014.03.15</span>
+<span class="c1">#</span>
+<span class="c1"># Author: Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2015 Giovanni Cannata</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of ldap3.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published</span>
+<span class="c1"># by the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># ldap3 is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with ldap3 in the COPYING and COPYING.LESSER files.</span>
+<span class="c1"># If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">linesep</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">LDAPMetricsError</span>
+<span class="kn">from</span> <span class="nn">..utils.log</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">log_enabled</span><span class="p">,</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">BASIC</span>
+
+
+<div class="viewcode-block" id="ConnectionUsage"><a class="viewcode-back" href="../../../ldap3.core.usage.html#ldap3.core.usage.ConnectionUsage">[文档]</a><span class="k">class</span> <span class="nc">ConnectionUsage</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Collect statistics on connection usage</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ConnectionUsage.reset"><a class="viewcode-back" href="../../../ldap3.core.usage.html#ldap3.core.usage.ConnectionUsage.reset">[文档]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_sockets</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closed_sockets</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrapped_sockets</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_transmitted</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_received</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages_transmitted</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages_received</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abandon_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extended_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modify_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modify_dn_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unbind_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">referrals_received</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">referrals_followed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restartable_failures</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restartable_successes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers_from_pool</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;reset usage metrics&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_connection_start_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection_stop_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_transmitted_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_received_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_sockets</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closed_sockets</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrapped_sockets</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_transmitted</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_received</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages_transmitted</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages_received</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abandon_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extended_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modify_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modify_dn_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unbind_operations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">referrals_received</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">referrals_followed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restartable_failures</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restartable_successes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers_from_pool</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;instantiated Usage object&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;Connection Usage:&#39;</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;  Time: [elapsed:          &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Initial start time:    &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_connection_start_time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_connection_start_time</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Open socket time:      &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Last transmitted time: &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_transmitted_time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_transmitted_time</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Last received time:    &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_received_time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_received_time</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Close socket time:     &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection_stop_time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_stop_time</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;  Server:&#39;</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Servers from pool:     &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">servers_from_pool</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Sockets open:          &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_sockets</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Sockets closed:        &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closed_sockets</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Sockets wrapped:       &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wrapped_sockets</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;  Bytes:                   &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bytes_transmitted</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes_received</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Transmitted:           &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bytes_transmitted</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Received:              &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bytes_received</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;  Messages:                &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_transmitted</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">messages_received</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Transmitted:           &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_transmitted</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Received:              &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">messages_received</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;  Operations:              &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Abandon:               &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abandon_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Bind:                  &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bind_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Add:                   &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">add_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Compare:               &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compare_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Delete:                &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delete_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Extended:              &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extended_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Modify:                &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modify_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    ModifyDn:              &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modify_dn_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Search:                &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Unbind:                &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unbind_operations</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;  Referrals:               &#39;</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Received:              &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">referrals_received</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Followed:              &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">referrals_followed</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;  Restartable tries:       &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restartable_failures</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">restartable_successes</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Failed restarts:       &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restartable_failures</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="s1">&#39;    Successful restarts:   &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restartable_successes</span><span class="p">)</span> <span class="o">+</span> <span class="n">linesep</span>
+        <span class="k">return</span> <span class="n">r</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ConnectionUsage</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">LDAPMetricsError</span><span class="p">(</span><span class="s1">&#39;unable to add to ConnectionUsage&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_sockets</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">open_sockets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closed_sockets</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">closed_sockets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrapped_sockets</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">wrapped_sockets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_transmitted</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">bytes_transmitted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_received</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">bytes_received</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages_transmitted</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">messages_transmitted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages_received</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">messages_received</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abandon_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">abandon_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">add_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">bind_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compare_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">compare_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">delete_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extended_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">extended_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modify_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">modify_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modify_dn_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">modify_dn_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">search_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">search_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unbind_operations</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">unbind_operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">referrals_received</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">referrals_received</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">referrals_followed</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">referrals_followed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restartable_failures</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">restartable_failures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restartable_successes</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">restartable_successes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers_from_pool</span> <span class="o">+=</span> <span class="n">other</span><span class="o">.</span><span class="n">servers_from_pool</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="ConnectionUsage.update_transmitted_message"><a class="viewcode-back" href="../../../ldap3.core.usage.html#ldap3.core.usage.ConnectionUsage.update_transmitted_message">[文档]</a>    <span class="k">def</span> <span class="nf">update_transmitted_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_transmitted_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_transmitted</span> <span class="o">+=</span> <span class="n">length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages_transmitted</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;abandonRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abandon_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;addRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;bindRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bind_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;compareRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compare_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;delRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delete_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;extendedReq&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extended_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;modifyRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modify_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;modDNRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modify_dn_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;searchRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">search_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;unbindRequest&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unbind_operations</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">ERROR</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;unable to collect usage for unknown message type &lt;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="n">LDAPMetricsError</span><span class="p">(</span><span class="s1">&#39;unable to collect usage for unknown message type&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConnectionUsage.update_received_message"><a class="viewcode-back" href="../../../ldap3.core.usage.html#ldap3.core.usage.ConnectionUsage.update_received_message">[文档]</a>    <span class="k">def</span> <span class="nf">update_received_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_received_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_received</span> <span class="o">+=</span> <span class="n">length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages_received</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="ConnectionUsage.start"><a class="viewcode-back" href="../../../ldap3.core.usage.html#ldap3.core.usage.ConnectionUsage.start">[文档]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">reset</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection_stop_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_connection_start_time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_connection_start_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span>
+
+        <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;start collecting usage metrics&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ConnectionUsage.stop"><a class="viewcode-back" href="../../../ldap3.core.usage.html#ldap3.core.usage.ConnectionUsage.stop">[文档]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection_stop_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">log_enabled</span><span class="p">(</span><span class="n">BASIC</span><span class="p">):</span>
+                <span class="n">log</span><span class="p">(</span><span class="n">BASIC</span><span class="p">,</span> <span class="s1">&#39;stop collecting usage metrics&#39;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">elapsed_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_stop_time</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_stop_time</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_socket_start_time</span> <span class="k">else</span> <span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  <li><a href="../../ldap3.html">ldap3</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

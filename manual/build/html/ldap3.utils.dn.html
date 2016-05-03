@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.utils.dn module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.utils package" href="ldap3.utils.html" />
+    <link rel="next" title="ldap3.utils.log module" href="ldap3.utils.log.html" />
+    <link rel="prev" title="ldap3.utils.conv module" href="ldap3.utils.conv.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.utils.dn">
+<span id="ldap3-utils-dn-module"></span><h1>ldap3.utils.dn module<a class="headerlink" href="#module-ldap3.utils.dn" title="永久链接至标题">¶</a></h1>
+<dl class="function">
+<dt id="ldap3.utils.dn.escape_attribute_value">
+<code class="descclassname">ldap3.utils.dn.</code><code class="descname">escape_attribute_value</code><span class="sig-paren">(</span><em>attribute_value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/utils/dn.html#escape_attribute_value"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.utils.dn.escape_attribute_value" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.utils.dn.get_next_ava">
+<code class="descclassname">ldap3.utils.dn.</code><code class="descname">get_next_ava</code><span class="sig-paren">(</span><em>dn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/utils/dn.html#get_next_ava"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.utils.dn.get_next_ava" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.utils.dn.parse_dn">
+<code class="descclassname">ldap3.utils.dn.</code><code class="descname">parse_dn</code><span class="sig-paren">(</span><em>dn</em>, <em>escape=False</em>, <em>strip=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/utils/dn.html#parse_dn"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.utils.dn.parse_dn" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.utils.dn.safe_dn">
+<code class="descclassname">ldap3.utils.dn.</code><code class="descname">safe_dn</code><span class="sig-paren">(</span><em>dn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/utils/dn.html#safe_dn"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.utils.dn.safe_dn" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.utils.dn.split_ava">
+<code class="descclassname">ldap3.utils.dn.</code><code class="descname">split_ava</code><span class="sig-paren">(</span><em>ava</em>, <em>escape=False</em>, <em>strip=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/utils/dn.html#split_ava"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.utils.dn.split_ava" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.utils.dn.to_dn">
+<code class="descclassname">ldap3.utils.dn.</code><code class="descname">to_dn</code><span class="sig-paren">(</span><em>iterator</em>, <em>decompose=False</em>, <em>remove_space=False</em>, <em>space_around_equal=False</em>, <em>separate_rdn=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/utils/dn.html#to_dn"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.utils.dn.to_dn" title="永久链接至目标">¶</a></dt>
+<dd><p>Convert an iterator to a list of dn parts
+if decompose=True return a list of tuple (one for each dn component) else return a list of strings
+if remove_space=True removes unneeded spaces
+if space_around_equal=True add spaces around equal in returned strings
+if separate_rdn=True consider multiple RDNs as different component of DN</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ldap3.utils.dn.validate_attribute_type">
+<code class="descclassname">ldap3.utils.dn.</code><code class="descname">validate_attribute_type</code><span class="sig-paren">(</span><em>attribute_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/utils/dn.html#validate_attribute_type"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.utils.dn.validate_attribute_type" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.utils.dn.validate_attribute_value">
+<code class="descclassname">ldap3.utils.dn.</code><code class="descname">validate_attribute_value</code><span class="sig-paren">(</span><em>attribute_value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/utils/dn.html#validate_attribute_value"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.utils.dn.validate_attribute_value" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.utils.html">ldap3.utils package</a><ul>
+      <li>Previous: <a href="ldap3.utils.conv.html" title="上一章">ldap3.utils.conv module</a></li>
+      <li>Next: <a href="ldap3.utils.log.html" title="下一章">ldap3.utils.log module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.utils.dn.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.utils.dn.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

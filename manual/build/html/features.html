@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3 Features &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="Installation and configuration" href="installation.html" />
+    <link rel="prev" title="ldap3 教程" href="tutorial.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ldap3-features">
+<h1>ldap3 Features<a class="headerlink" href="#ldap3-features" title="永久链接至标题">¶</a></h1>
+<ol class="arabic">
+<li><p class="first">ldap3 strictly conforms to the current RFCs for the version 3 of the LDAP protocol (from 4510 to 4519):</p>
+<blockquote>
+<div><ul class="simple">
+<li>RFC4510: Technical Specification Road Map</li>
+<li>RFC4511: The Protocol</li>
+<li>RFC4512: Directory Information Models</li>
+<li>RFC4513: Authentication Methods and Security Mechanisms</li>
+<li>RFC4514: String Representation of Distinguished Names</li>
+<li>RFC4515: String Representation of Search Filters</li>
+<li>RFC4516: Uniform Resource Locator</li>
+<li>RFC4517: Syntaxes and Matching Rules</li>
+<li>RFC4518: Internationalized String Preparation</li>
+<li>RFC4519: Schema for User Applications</li>
+</ul>
+<p>The following RFCs, describing additional functionalities of the LDAP3 protocol, are also followed:</p>
+<ul class="simple">
+<li>RFC2696: LDAP Control Extension for Simple Paged Results Manipulation</li>
+<li>RFC2849: The LDAP Data Interchange Format (LDIF) - Technical Specification</li>
+<li>RFC3045: Storing Vendor Information in the LDAP root DSE</li>
+<li>RFC3062: LDAP Password Modify Extended Operation</li>
+<li>RFC4525: Modify-Increment Extension</li>
+<li>RFC4530: entryUUID Operational Attribute</li>
+<li>RFC4532: &#8220;Who am I?&#8221; Operation</li>
+<li>RFC5020: entryDN Operational Attribute</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Platform independent (tested on Linux and Windows) architecture:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The library <strong>runs on Windows, Linux, FreeBSD, OpenBSD, and Mac OSX</strong> and (possibly) on other systems where it can
+gain access to the network via a Python interpreter and its Standard Library.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Based on <strong>pure Python code</strong>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>No need to install binaries or non Python code. The very same code works on Windows, Linux, Mac OS X, FreeBSD,
+OpenBSD and other systems, either in Python 2 or Python 3.</li>
+<li>ldap3 <strong>doesn&#8217;t need a C compiler neither the OpenLDAP library</strong>.</li>
+<li>The library is self-contained and its installation is the same on any platform.</li>
+<li>Socket and thread programming is appropriate for the platform used, with no changes needed in the configuration
+and in the exposed API.</li>
+<li>The ldap3 library depends on the standard Python library and the pyasn1 package only. If you need Kerberos support
+you must install the <em>gssapi</em> package. ldap3 includes a backport (from Python 3.4.3) of <code class="docutils literal"><span class="pre">`ssl.check_hostnames`</span></code> to be
+used on older (version &lt; 2.7.10) Python versions. If you want to use a more up to date version of the check_hostnames
+feature you can install the <em>backports.ssl_check_hostnames</em> package that should be kept updated with the Standard
+Library of the latest Python release by its maintainers.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Compatible with Python 2 and Python 3:</p>
+<blockquote>
+<div><ul class="simple">
+<li>A <strong>single codebase</strong> for Python 2 and Python 3</li>
+<li>Developed in <strong>Python 3 native code</strong> that works in Python 2 too.</li>
+<li>The library is <strong>compatible with Python 2</strong> (2.6 and 2.7) without the need of any code compatibility parser/converter.</li>
+<li>Testing is done in Python 3 (3.4, 3.5) Python 2 (2.6, 2.7), PyPy and PyPy3</li>
+<li>Unicode strings are properly managed in each Python version.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Multiple <em>connection strategies</em> to choose from, either synchronous or asynchronous:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The library has different ways to connect to the LDAP server (no-thread, single-threaded, multi-threaded).
+This is achieved with <strong>pluggable communication strategies</strong> that can be changed on a per-connection basis.</li>
+<li>SYNC, ASYNC, LDIF, RESTARTABLE (fault-tolerant), REUSABLE (fault-tolerant and pooled), are currently defined.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Simplified query construction language:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The library includes an  optional <strong>abstraction layer</strong> for performing LDAP queries.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Clear or secured access</p>
+<blockquote>
+<div><ul class="simple">
+<li>ldap3 allows plaintext (<strong>ldap:</strong>), secure (<strong>ldaps:</strong>) and UNIX socket (<strong>ldapi:</strong>) access to the LDAP server.</li>
+<li>The NTLM access method is available to connect to Active Directory servers</li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tutorial.html" title="上一章">ldap3 教程</a></li>
+      <li>Next: <a href="installation.html" title="下一章">Installation and configuration</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/features.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/features.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

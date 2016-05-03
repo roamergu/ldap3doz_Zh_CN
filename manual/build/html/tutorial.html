@@ -1,0 +1,825 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3 教程 &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="next" title="ldap3 Features" href="features.html" />
+    <link rel="prev" title="ldap3 简介" href="welcome.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ldap3">
+<h1>ldap3 教程<a class="headerlink" href="#ldap3" title="永久链接至标题">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">在这个教程里我们将要访问一个位于`FreeIPA`_, 的公共demo,可以在 <a class="reference external" href="https://ipa.demo1.freeipa.org">https://ipa.demo1.freeipa.org</a> 访问到这个demo，（第一次登录时你必须
+信任他的证书），FreeIPA是一个全功能的身份验证解决方案，不过在本教程中我们感兴趣的目标是LDAPserver。要注意的是这个demo会周期性地
+清空数据，就像在`FreeIPA demo wiki page`_.页面中描述的那样。</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">警告</p>
+<p class="last">如果你收到一个``LDAPSocketReceiveError: error receiving data`` 异常， 说明服务器中断了与你的连接。. 你可以使用 <code class="docutils literal"><span class="pre">conn.bind()</span></code> 方法来重新打开。</p>
+</div>
+<div class="section" id="ldap">
+<h2>LDAP 不是什么。。。<a class="headerlink" href="#ldap" title="永久链接至标题">¶</a></h2>
+<p>如果你正在阅读本教程，我假定你已经知道了什么是LDAP，或者至少对LDAP有一个粗略的了解。如果你真的对LDAP一无所知，，在阅读完本教程之后你应该能够访问一个LDAP兼容服务器，并且正确地使用LDAP协议。</p>
+<blockquote>
+<div>我希望你明确知道LDAP如下的 <strong>不是</strong>：</div></blockquote>
+<ul class="simple">
+<li>它不是一个服务</li>
+<li>它不是一个数据库</li>
+<li>它不是一个网络服务</li>
+<li>它不是一个身份验证过程</li>
+<li>它不是一个用户名、密码存储库</li>
+<li>它不是一个开源产品也不是一个闭源产品</li>
+</ul>
+<p>It&#8217;s important to know what LDAP is not because people usually call &#8220;LDAP&#8221; a peculiar part of what they use of the
+<em>Lightweight Directory Access Protocol</em>. LDAP is a <em>protocol</em> and as other &#8216;trailing-P&#8217; words in the Internet
+ecosystem (HTTP, FTP, TCP, IP, ...) it is a set of rules you must use to communicate with an external
+server/database/service/procedure/repository/product (all the things in the above list). Data managed via LDAP are
+key/value(s) pairs grouped in a hierarchical structure. This hierarchical structure is called the <em>DIT</em> (Directory
+Information Tree). LDAP doesn&#8217;t specify how the data is actually stored on the server neither how the user is authorized to
+read and modify them. There are only a few data types that every LDAP server must recognize (the standard <em>schema</em>
+we&#8217;ll meet later).</p>
+<p>That&#8217;s all, all the (sometime too complex) LDAP machinery you will interact with has this only purpose.</p>
+<p>Being a protocol, LDAP is not related to any specific product and it is described in a set of <em>RFC</em> (Request for
+comments, the official rules of the Internet ecosystem). Its latest version is 3 and is documented in the RFC4510 and subsequents RFCs
+released in June 2006.</p>
+</div>
+<div class="section" id="a-very-brief-history-of-ldap">
+<h2>A very brief history of LDAP<a class="headerlink" href="#a-very-brief-history-of-ldap" title="永久链接至标题">¶</a></h2>
+<p>You may wonder why the &#8220;L&#8221; in LDAP? Its ancestor, called DAP (Directory Access Protocol), was developed in the 1980s
+by the CCITT (now ITU-T), the <em>International Committee for Telephone and Telegraphy</em> (the venerable entity that gave us, among
+others, the fax and the modem protocols we used in the pre-Internet era). DAP was a very heavy and hard to implement protocol
+(either for the client and the server components) and was not accessible via TCP/IP. In 1993 a lighter access protocol
+was invented at the University of Michigan to act as a gateway to the DAP world. Afterwards followed server products that
+could understand LDAP directly and the gateway to DAP was soon cut off. LDAP v3 was first documented in 1997 and its
+specifications was revised in 2006. THis specifications are strictly followed by the ldap3 library.</p>
+</div>
+<div class="section" id="the-ldap3-package">
+<h2>The ldap3 package<a class="headerlink" href="#the-ldap3-package" title="永久链接至标题">¶</a></h2>
+<p>ldap3 is a fully compliant LDAP v3 client library and follows the latest standard RFCs. It&#8217;s written from scratch to be
+compatible with Python 2 and Python 3 and can be used on any machine where the Python interpreter can access the network via the Python
+standard library.</p>
+<p>Chances are that you find the ldap3 package already installed (or installable with the local package manager) on your machine, just try
+to <strong>import ldap3</strong> from your Python console.</p>
+<p>If you get an ImportError you need to install the package from PyPI via pip:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">ldap3</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">警告</p>
+<p>If pip complains about certificates you should specify the path to the PyPI CA certificate with the &#8211;cert parameter:</p>
+<p class="last">pip install ldap3 &#8211;cert /path/to/the/DigiCert_High_Assurance_EV_Root_CA.pem</p>
+</div>
+<p>or you can download the source from <a class="reference external" href="https://github.com/cannatag/ldap3">https://github.com/cannatag/ldap3</a> and install it with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>ldap3 installs the <strong>pyasn1</strong> package (if not already present). This package is used to communicate with the server over the network.</p>
+<p>ldap3 usage is straightforward: you define a Server object, a Connection object tied to the Server and then you issue commands to it.
+A server can have more than one connection and there are different <em>communication strategies</em> to choose from. All the imports
+are available in the ldap3 namespace. At least you need to import the Server and the Connection object, and any additional constant you
+will use in your LDAP conversation (constants are defined in upper case):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">ALL</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="accessing-an-ldap-server">
+<h2>Accessing an LDAP server<a class="headerlink" href="#accessing-an-ldap-server" title="永久链接至标题">¶</a></h2>
+<p>In the LDAP protocol the login operation is called <strong>bind</strong>. A bind can be performed in 3 different ways: anonymous bind,
+simple password bind, and SASL (<em>Simple Authentication and Security Layer</em>, allowing multiple authentication methods)
+bind. You can think of the anonymous bind as a of <em>public</em> access to the LDAP server where you don&#8217;t provide any credentials
+and the server applies some <em>default</em> access rules. With the simple password bind and the SASL bind you provide credentials
+that the LDAP server uses to determine your authorizazion level. Again, keep in mind that the LDAP v3 standard doesn&#8217;t define
+any specific access rules and that the authorization mechanism is not specified at all. So each LDAP server type can have a
+different method for authorizing the user to access data stored in the DIT.</p>
+<p>ldap3 let you choose the strategy that the client will use to connect to the server with the <code class="docutils literal"><span class="pre">client_strategy</span></code> parameter of the
+Connection object. There are 5 strategies that can be used for establishing a connection: SYNC, ASYNC, LDIF, RESTARTABLE and REUSABLE.</p>
+<p>With synchronous strategies (<strong>SYNC</strong>, <strong>RESTARTABLE</strong>) all LDAP operations return a boolean: <code class="docutils literal"><span class="pre">True</span></code> if they&#8217;re successful, <code class="docutils literal"><span class="pre">False</span></code>
+if they fail.</p>
+<p>With asynchronous strategies (<strong>ASYNC</strong>, <strong>REUSABLE</strong>) all LDAP operations (except Bind that always returns a boolean) return an
+integer, the <em>message_id</em> of the request. You can send multiple requests without waiting for responses and then get each
+response with the <code class="docutils literal"><span class="pre">get_response(message_id)</span></code> method of the Connection object as you need it. You will get an exception if
+the response has not yet arrived after a specified time. In the get_response method this timeout value can be set
+with the <code class="docutils literal"><span class="pre">timeout</span></code> attribute to the number of seconds to wait for the response to appear (defaults is 10 seconds).</p>
+<p>The <strong>LDIF</strong> strategy is used to create a stream of LDIF-CHANGEs.</p>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">In this tutorial we will use the default SYNC communication strategy.</p>
+</div>
+<p>Let&#8217;s start accessing the server with an anonymous bind:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;ipa.demo1.freeipa.org&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>or shorter:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="s1">&#39;ipa.demo1.freeipa.org&#39;</span><span class="p">,</span> <span class="n">auto_bind</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>It hardly could be simpler than that. The <code class="docutils literal"><span class="pre">auto_bind</span></code> parameter forces the bind() operation while creating the Connection object.
+We have now a full working anonymous connection open and bound to the server with a <em>synchronous</em> communication strategy (more on
+communication strategies later):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+<span class="go">ldap://ipa.demo1.freeipa.org:389 - cleartext - user: None - bound - open - &lt;local: 192.168.1.101:49813 - remote: 209.132.178.99:389&gt; -</span>
+<span class="go">tls not started - listening - SyncStrategy - internal decoder</span>
+</pre></div>
+</div>
+<p>With print(conn) we ask to the connection its status and get back a lot of information:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="45%" />
+<col width="55%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference external" href="ldap://ipa.demo1.freeipa.org:389">ldap://ipa.demo1.freeipa.org:389</a></td>
+<td>the server URL (scheme, name and port we are connected to)</td>
+</tr>
+<tr class="row-even"><td>cleartext</td>
+<td>the kind of connection the server is listening to</td>
+</tr>
+<tr class="row-odd"><td>user: None</td>
+<td>the credentials used, in this case None means an anonymous binding</td>
+</tr>
+<tr class="row-even"><td>bound</td>
+<td>the status of the LDAP session</td>
+</tr>
+<tr class="row-odd"><td>open</td>
+<td>the status of the underlying TCP/IP session</td>
+</tr>
+<tr class="row-even"><td>&lt;local: 192.168.1.101:51038 - remote: 23.20.46.132:389&gt;</td>
+<td>the local and remote communication endpoints</td>
+</tr>
+<tr class="row-odd"><td>tls not started</td>
+<td>the status of the TLS (Transport Layer Security) session</td>
+</tr>
+<tr class="row-even"><td>listening</td>
+<td>the status of the communication strategy</td>
+</tr>
+<tr class="row-odd"><td>SyncStrategy</td>
+<td>the communication strategy used</td>
+</tr>
+<tr class="row-even"><td>internal decoder</td>
+<td>which BER decoder are we using (internal or pyasn1)</td>
+</tr>
+</tbody>
+</table>
+<p>If you ask for the representation of the <code class="docutils literal"><span class="pre">conn</span></code> object you can get a view of all the object definition arguments:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span>
+<span class="go">Connection(server=Server(host=&#39;ipa.demo1.freeipa.org&#39;, port=389, use_ssl=False, get_info=&#39;NO_INFO&#39;), auto_bind=&#39;NONE&#39;,</span>
+<span class="go">version=3, authentication=&#39;ANONYMOUS&#39;, client_strategy=&#39;SYNC&#39;, auto_referrals=True, check_names=True, read_only=False,</span>
+<span class="go">lazy=False, raise_exceptions=False, fast_decoder=True)</span>
+</pre></div>
+</div>
+<p>If you just copy and paste the object representation you can instantiate a new one. This is very helpful when experimenting
+in the interactive console and works for most of the ldap3 library objects:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">server</span>
+<span class="go">Server(host=&#39;ipa.demo1.freeipa.org&#39;, port=389, use_ssl=False, get_info=&#39;NO_INFO&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-information-from-the-server">
+<h2>Getting information from the server<a class="headerlink" href="#getting-information-from-the-server" title="永久链接至标题">¶</a></h2>
+<p>The LDAP protocol specifies that an LDAP server must return some information about itself. We can requeste them with the <code class="docutils literal"><span class="pre">get_info=ALL</span></code>
+parameter and access them with the <code class="docutils literal"><span class="pre">.info</span></code> attribute of the Server object:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;ipa.demo1.freeipa.org&#39;</span><span class="p">,</span> <span class="n">get_info</span><span class="o">=</span><span class="n">ALL</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">auto_bind</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">server</span><span class="o">.</span><span class="n">info</span>
+<span class="go">DSA info (from DSE):</span>
+<span class="go">  Supported LDAP Versions: 2, 3</span>
+<span class="go">  Naming Contexts:</span>
+<span class="go">    cn=changelog</span>
+<span class="go">    dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">    o=ipaca</span>
+<span class="go">  Alternative Servers: None</span>
+<span class="go">  Supported Controls:</span>
+<span class="go">    1.2.840.113556.1.4.319 - LDAP Simple Paged Results - Control - RFC2696</span>
+<span class="go">    1.2.840.113556.1.4.473 - Sort Request - Control - RFC2891</span>
+<span class="go">    1.3.6.1.1.13.1 - LDAP Pre-read - Control - RFC4527</span>
+<span class="go">    1.3.6.1.1.13.2 - LDAP Post-read - Control - RFC4527</span>
+<span class="go">    1.3.6.1.4.1.1466.29539.12 - Chaining loop detect - Control - SUN microsystems</span>
+<span class="go">    1.3.6.1.4.1.42.2.27.8.5.1 - Password policy - Control - IETF DRAFT behera-ldap-password-policy</span>
+<span class="go">    1.3.6.1.4.1.42.2.27.9.5.2 - Get effective rights - Control - IETF DRAFT draft-ietf-ldapext-acl-model</span>
+<span class="go">    1.3.6.1.4.1.42.2.27.9.5.8 - Account usability - Control - SUN microsystems</span>
+<span class="go">    1.3.6.1.4.1.4203.1.9.1.1 - LDAP content synchronization - Control - RFC4533</span>
+<span class="go">    1.3.6.1.4.1.4203.666.5.16 - LDAP Dereference - Control - IETF DRAFT draft-masarati-ldap-deref</span>
+<span class="go">    2.16.840.1.113730.3.4.12 - Proxied Authorization (old) - Control - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.4.13 - iPlanet Directory Server Replication Update Information - Control - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.4.14 - Search on specific database - Control - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.4.15 - Authorization Identity Response Control - Control - RFC3829</span>
+<span class="go">    2.16.840.1.113730.3.4.16 - Authorization Identity Request Control - Control - RFC3829</span>
+<span class="go">    2.16.840.1.113730.3.4.17 - Real attribute only request - Control - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.4.18 - Proxy Authorization Control - Control - RFC6171</span>
+<span class="go">    2.16.840.1.113730.3.4.19 - Chaining loop detection - Control - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.4.2 - ManageDsaIT - Control - RFC3296</span>
+<span class="go">    2.16.840.1.113730.3.4.20 - Mapping Tree Node - Use one backend [extended] - Control - openLDAP</span>
+<span class="go">    2.16.840.1.113730.3.4.3 - Persistent Search - Control - IETF</span>
+<span class="go">    2.16.840.1.113730.3.4.4 - Netscape Password Expired - Control - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.4.5 - Netscape Password Expiring - Control - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.4.9 - Virtual List View Request - Control - IETF</span>
+<span class="go">    2.16.840.1.113730.3.8.10.6 - OTP Sync Request - Control - freeIPA</span>
+<span class="go">  Supported Extensions:</span>
+<span class="go">    1.3.6.1.4.1.1466.20037 - StartTLS - Extension - RFC4511-RFC4513</span>
+<span class="go">    1.3.6.1.4.1.4203.1.11.1 - Modify Password - Extension - RFC3062</span>
+<span class="go">    1.3.6.1.4.1.4203.1.11.3 - Who am I - Extension - RFC4532</span>
+<span class="go">    2.16.840.1.113730.3.5.10 - Distributed Numeric Assignment Extended Request - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.5.12 - Start replication request - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.5.3 - Transaction Response Extended Operation - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.5.4 - iPlanet Replication Response Extended Operation - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.5.5 - iPlanet End Replication Request Extended Operation - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.5.6 - iPlanet Replication Entry Request Extended Operation - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.5.7 - iPlanet Bulk Import Start Extended Operation - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.5.8 - iPlanet Bulk Import Finished Extended Operation - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.5.9 - iPlanet Digest Authentication Calculation Extended Operation - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.6.5 - Replication CleanAllRUV - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.6.6 - Replication Abort CleanAllRUV - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.6.7 - Replication CleanAllRUV Retrieve MaxCSN - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.6.8 - Replication CleanAllRUV Check Status - Extension - Netscape</span>
+<span class="go">    2.16.840.1.113730.3.8.10.1 - KeyTab set - Extension - FreeIPA</span>
+<span class="go">    2.16.840.1.113730.3.8.10.3 - Enrollment join - Extension - FreeIPA</span>
+<span class="go">    2.16.840.1.113730.3.8.10.5 - KeyTab get - Extension - FreeIPA</span>
+<span class="go">  Supported SASL Mechanisms:</span>
+<span class="go">    EXTERNAL, GSS-SPNEGO, GSSAPI, DIGEST-MD5, CRAM-MD5, PLAIN, LOGIN, ANONYMOUS</span>
+<span class="go">  Schema Entry:</span>
+<span class="go">    cn=schema</span>
+<span class="go">Vendor name: 389 Project</span>
+<span class="go">Vendor version: 389-Directory/1.3.3.8 B2015.036.047</span>
+<span class="go">Other:</span>
+<span class="go">  dataversion:</span>
+<span class="go">    020150912040104020150912040104020150912040104</span>
+<span class="go">  changeLog:</span>
+<span class="go">    cn=changelog</span>
+<span class="go">  lastchangenumber:</span>
+<span class="go">    3033</span>
+<span class="go">  firstchangenumber:</span>
+<span class="go">    1713</span>
+<span class="go">  lastusn:</span>
+<span class="go">    8284</span>
+<span class="go">  defaultnamingcontext:</span>
+<span class="go">    dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">  netscapemdsuffix:</span>
+<span class="go">    cn=ldap://dc=ipa,dc=demo1,dc=freeipa,dc=org:389</span>
+<span class="go">  objectClass:</span>
+<span class="go">    top</span>
+</pre></div>
+</div>
+<p>This server (like most LDAP servers) lets an anonymous user to know a lot about it:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="21%" />
+<col width="56%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Supported LDAP Versions</td>
+<td>2, 3</td>
+<td>The server supports LDAP 2 and 3</td>
+</tr>
+<tr class="row-even"><td>Naming contexts</td>
+<td>...</td>
+<td>The server stores information for 3 different DIT portions</td>
+</tr>
+<tr class="row-odd"><td>Alternative servers</td>
+<td>None</td>
+<td>This is the only replica of the database</td>
+</tr>
+<tr class="row-even"><td>Supported Controls</td>
+<td>...</td>
+<td>Optional controls that can be sent in a request operation</td>
+</tr>
+<tr class="row-odd"><td>Supported Extentions</td>
+<td>...</td>
+<td>Additional extended operations understood by the server</td>
+</tr>
+<tr class="row-even"><td>Supported SASL Mechanisms</td>
+<td>...</td>
+<td>Different additional SASL authentication mechanisms available</td>
+</tr>
+<tr class="row-odd"><td>Schema Entry</td>
+<td>cn=schema</td>
+<td>The location of the schema in the DIT</td>
+</tr>
+<tr class="row-even"><td>Vendor name</td>
+<td>389 Project</td>
+<td>The brand/mark/name of the LDAP server</td>
+</tr>
+<tr class="row-odd"><td>Vendor version</td>
+<td>389-Directory/1.3.3 ...</td>
+<td>The version of the LDAP server</td>
+</tr>
+<tr class="row-even"><td>Other</td>
+<td>...</td>
+<td>Additional information provided by the server</td>
+</tr>
+</tbody>
+</table>
+<p>Now we know that this server is a stand-alone LDAP server that can hold entries in the dc=demo1,dc=freeipa,dc=org context,
+that supports various SASL access mechanisms and that is based on the 389 Directory Service server. Furthermore in the
+Supported Controls we can see it supports &#8220;paged searches&#8221;, and the &#8220;who am i&#8221; and &#8220;StartTLS&#8221; extended operations in
+Supported Extensions.</p>
+<p>Let&#8217;s examine the LDAP server schema:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">server</span><span class="o">.</span><span class="n">schema</span>
+<span class="go">DSA Schema from: cn=schema</span>
+<span class="go">  Attribute types:{&#39;ipaNTTrustForestTrustInfo&#39;: Attribute type: 2.16.840.1.113730.3.8.11.17</span>
+<span class="go">  Short name: ipaNTTrustForestTrustInfo</span>
+<span class="go">  Description: Forest trust information for a trusted domain object</span>
+<span class="go">  Equality rule: octetStringMatch</span>
+<span class="go">  Syntax: 1.3.6.1.4.1.1466.115.121.1.40 [(&#39;1.3.6.1.4.1.1466.115.121.1.40&#39;, &#39;LDAP_SYNTAX&#39;, &#39;Octet String&#39;, &#39;RFC4517&#39;)]</span>
+<span class="go">  &#39;ntUserCreateNewAccount&#39;: Attribute type: 2.16.840.1.113730.3.1.42</span>
+<span class="go">  Short name: ntUserCreateNewAccount</span>
+<span class="go">  Description: Netscape defined attribute type</span>
+<span class="go">  Single Value: True</span>
+<span class="go">  Syntax: 1.3.6.1.4.1.1466.115.121.1.15 [(&#39;1.3.6.1.4.1.1466.115.121.1.15&#39;, &#39;LDAP_SYNTAX&#39;, &#39;Directory String&#39;, &#39;RFC4517&#39;)]</span>
+<span class="go">  Extensions:</span>
+<span class="go">    X-ORIGIN: Netscape NT Synchronization</span>
+<span class="go">  &#39;passwordGraceUserTime&#39;: Attribute type: 2.16.840.1.113730.3.1.998</span>
+<span class="go">  Short name: passwordGraceUserTime, pwdGraceUserTime</span>
+<span class="go">  Description: Netscape defined password policy attribute type</span>
+<span class="go">  Single Value: True</span>
+<span class="go">  Usage: Directory operation</span>
+<span class="go">  Syntax: 1.3.6.1.4.1.1466.115.121.1.15 [(&#39;1.3.6.1.4.1.1466.115.121.1.15&#39;, &#39;LDAP_SYNTAX&#39;, &#39;Directory String&#39;, &#39;RFC4517&#39;)]</span>
+<span class="go">  Extensions:</span>
+<span class="go">    X-ORIGIN: Netscape Directory Server</span>
+<span class="go">  &#39;nsslapd-ldapilisten&#39;: Attribute type: 2.16.840.1.113730.3.1.2229</span>
+<span class="go">  Short name: nsslapd-ldapilisten</span>
+<span class="go">  Description: Netscape defined attribute type</span>
+<span class="go">  Single Value: True</span>
+<span class="go">  Syntax: 1.3.6.1.4.1.1466.115.121.1.15 [(&#39;1.3.6.1.4.1.1466.115.121.1.15&#39;, &#39;LDAP_SYNTAX&#39;, &#39;Directory String&#39;, &#39;RFC4517&#39;)]</span>
+<span class="go">  Extensions:</span>
+<span class="go">    X-ORIGIN: Netscape Directory Server</span>
+<span class="go">  &#39;bootParameter&#39;: Attribute type: 1.3.6.1.1.1.1.23</span>
+<span class="go">  Short name: bootParameter</span>
+<span class="go">  Description: Standard LDAP attribute type</span>
+<span class="go">  Syntax: 1.3.6.1.4.1.1466.115.121.1.26 [(&#39;1.3.6.1.4.1.1466.115.121.1.26&#39;, &#39;LDAP_SYNTAX&#39;, &#39;IA5 String&#39;, &#39;RFC4517&#39;)]</span>
+<span class="go">  Extensions:</span>
+<span class="go">    X-ORIGIN: RFC 2307</span>
+
+<span class="go">  &lt;...list of descriptors...&gt;</span>
+</pre></div>
+</div>
+<p>The schema is a very long list that describes what kind of data types the LDAP server understands. It also specifies
+what attributes can be stored in each class. Some classes are containers for other entries (either containers or leaf)
+and are used to build the hierarchy of the DIT. Container entries can have attributes too.
+One important specification in the schema is if the attribute is <em>multi-valued</em>. A multi-valued attribute stores more than a value
+and all values are returned when the attribute is requested in a search. Every LDAP server must at least support
+the standard LDAP3 schema but can have additional custom classes and attributes. The schema defines also the <em>syntaxes</em> and the
+<em>matching rules</em> of the different kind of data types stored in the LDAP.</p>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">Object classes and attributes are independent objects. An attribute is not a &#8220;child&#8221; of a class neither a
+class is a &#8220;parent&#8221; of any attribute. Classes and attributes are linked in the schema with the <code class="docutils literal"><span class="pre">MAY</span></code> and <code class="docutils literal"><span class="pre">MUST</span></code> options
+of the object class definition that specify what attributes an entry can contain and which of them are mandatory.</p>
+</div>
+<p>While reading the schema the ldap3 library will try to automatically convert data to their representation. So an integer
+will be returned as an int, a generalizedDate as a datetime object and so on. If you don&#8217;t read the schema all the values
+are returned as bytes and unicode strings. You can control this behaviour with the <code class="docutils literal"><span class="pre">get_info</span></code> parameter of the Server object
+and the <code class="docutils literal"><span class="pre">check_names</span></code> parameter of the Connection object.</p>
+</div>
+<div class="section" id="logging-into-the-server">
+<h2>Logging into the server<a class="headerlink" href="#logging-into-the-server" title="永久链接至标题">¶</a></h2>
+<p>We have not provided any credentials to the server yet. LDAP allow users to perform operations anonymously without
+declaring their identity! Obviously what the server returns to an anonymous connection is someway limited. This makes sense because
+originally the DAP protocol was intended for reading phone directories, as in a printed book, so its content could be read by anyone.</p>
+<p>If you want to establish an authenticated connection you have two options: Simple and SASL. With Simple authentication you provide
+a Distinguished Name and a password. The server checks if your credentials are valid and will permit or deny access to the data.
+SASL provides additional methods to identify the user, as an external certificate or a Kerberos ticket.</p>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p>With ldap3 you can also connect to an Active Directory server with the NTLM v2 protocol:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># import class and constants</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">ALL</span><span class="p">,</span> <span class="n">NTLM</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># define the server and the connection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;servername&#39;</span><span class="p">,</span> <span class="n">get_info</span><span class="o">=</span><span class="n">ALL</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s2">&quot;Domain</span><span class="se">\\</span><span class="s2">User&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="n">authentication</span><span class="o">=</span><span class="n">NTLM</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="last">This kind of authentication is not part of the LDAP 3 RFCs but uses a proprietary Microsoft authentication mechanism (SICILY).</p>
+</div>
+<p>Let&#8217;s ask the server who we are:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We get an empty response. This means we have no authentication status on the server, so we are an <strong>anonymous</strong> user. This doesn&#8217;t mean
+that we are unknown to the server, actually we have a session open with the server and we can send additional operation requests. Even
+if we don&#8217;t send the anonymous bind operation the server will accept our operation requests as an anonymous user.</p>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">Opening vs Binding
+The LDAP protocol provides a Bind and an Unbind operation but, for historical reasons, they are not symmetric. In fact before binding
+to the server the connection must be <em>open</em>. This is implicitly done by the ldap3 package when you issue a Bind or another operation or
+can be esplicity done with the <code class="docutils literal"><span class="pre">open()</span></code> method of the Connection object. The Unbind operation is actually used to <em>terminate</em> the
+connection, both ending the session and closing the connection. so it cannot be used anymore. If you want to access as another user
+or change the current session to an anonymous one, just issue another Bind. You must Unbind the connection only when you wnat to
+close the network transport.</p>
+</div>
+<p>Let&#8217;s try to specify a valid user:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s1">&#39;uid=admin, cn=users, cn=accounts, dc=demo1, dc=freeipa, dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;Secret123&#39;</span><span class="p">,</span> <span class="n">auto_bind</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">extend</span><span class="o">.</span><span class="n">standard</span><span class="o">.</span><span class="n">who_am_i</span><span class="p">()</span>
+<span class="go">&#39;dn: uid=admin,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org&#39;</span>
+</pre></div>
+</div>
+<p>Now the server knows that we are a recognized user and the <code class="docutils literal"><span class="pre">who_am_i()</span></code> extended operation returns our identity.</p>
+</div>
+<div class="section" id="establishing-a-secure-connection">
+<h2>Establishing a secure connection<a class="headerlink" href="#establishing-a-secure-connection" title="永久链接至标题">¶</a></h2>
+<p>If we check the connection info we see that we are using a cleartext (insecure) channel:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+<span class="go">ldap://ipa.demo1.freeipa.org:389 - **cleartext** - user: uid=admin, cn=users, cn=accounts, dc=demo1, dc=freeipa, dc=org - bound - open - &lt;local: 192.168.1.101:50164 - remote: 209.132.178.99:**389**&gt; - **tls not started** - listening - SyncStrategy - internal decoder&#39;</span>
+</pre></div>
+</div>
+<p>Our credentials pass unencrypted over the wire, so that they can be easily captured by a network sniffer. The LDAP protocol provides two ways
+to secure a connection: <strong>LDAP over TLS</strong> (or over SSL) or the <strong>StartTLS</strong> extended operation. This two methods both establish a secure TLS
+connection but with the former the communication channel is secured with TLS as soon as the connection is open, while with the latter the
+connection is open as unsecure and then the channel is secured issuing the StartTLS operation. StartTLS be done once at any time after the
+connection is established, but once issued there is no way to revert the socket to a cleartext state.</p>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">LDAP URL scheme
+A cleartext connection to a server can be expressed in a URL with the <strong>ldap://</strong> scheme, while LDAP over TLS is indicated as <strong>ldaps://</strong> (even if
+this is not specified in any of the LDAP RFCs). If a scheme is included in the server name while creating the Server object, the ldap3 library
+opens the proper port, unencrypted or with the specified TLS options (or default options if none is specified).</p>
+</div>
+<p>Let&#8217;s try to use the StartTLS extended operation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">start_tls</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>if we check the conn status we see that the connection is on a secure channel now, even if started on a cleartext connection:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+<span class="go">ldap://ipa.demo1.freeipa.org:389 - cleartext - user: uid=admin, cn=users, cn=accounts, dc=demo1, dc=freeipa, dc=org - bound - open - &lt;local: 192.168.1.101:50910 - remote: 209.132.178.99:389&gt; - tls started - listening - SyncStrategy - internal decoder</span>
+</pre></div>
+</div>
+<p>To start the connection on a SSL socket:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;ipa.demo1.freeipa.org&#39;</span><span class="p">,</span> <span class="n">use_ssl</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">get_info</span><span class="o">=</span><span class="n">ALL</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s1">&#39;uid=admin, cn=users, cn=accounts, dc=demo1, dc=freeipa, dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;Secret123&#39;</span><span class="p">,</span> <span class="n">auto_bind</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+<span class="go">ldaps://ipa.demo1.freeipa.org:636 - ssl - user: uid=admin, cn=users, cn=accounts, dc=demo1, dc=freeipa, dc=org - bound - open - &lt;local: 192.168.1.101:51438 - remote: 209.132.178.99:636&gt; - tls not started - listening - SyncStrategy - internal decoder</span>
+</pre></div>
+</div>
+<p>Either with the former or the latter method the connection is now encrypted. We haven&#8217;t specified any TLS option, so there is no checking of
+certificate validity. You can customize the TLS behaviour providing a Tls object to the Server object using the security context configuration:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">Tls</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ssl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tls_configuration</span> <span class="o">=</span> <span class="n">Tls</span><span class="p">(</span><span class="n">validate</span><span class="o">=</span><span class="n">ssl</span><span class="o">.</span><span class="n">CERT_REQUIRED</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">ssl</span><span class="o">.</span><span class="n">PROTOCOL_TLSv1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;ipa.demo1.freeipa.org&#39;</span><span class="p">,</span> <span class="n">use_ssl</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tls</span><span class="o">=</span><span class="n">tls_configuration</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+<span class="gp">...</span>
+<span class="go">ldap3.core.exceptions.LDAPSocketOpenError: (LDAPSocketOpenError(&#39;socket ssl wrapping error: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:600)&#39;,),)</span>
+</pre></div>
+</div>
+<p>In this specific case, using the FreeIPA demo server we get a LDAPSocketOpenError exception because the certificate cannot be verified.
+You can configure the Tls object with a number of options. Look at <span class="xref std std-ref">the SSL and TLS documentation</span> for more information.</p>
+</div>
+<div class="section" id="database-operations">
+<h2>Database Operations<a class="headerlink" href="#database-operations" title="永久链接至标题">¶</a></h2>
+<p>As any system that stores data, LDAP lets you perform the standard CRUD (Create, Read, Update, Delete) operations, but their usage is someway rudimentary.
+Again, if you think of the intended use of the original DAP protocol (storing key-values pairs related to an entry in a phone directory)
+this makes sense: an entry is written once, seldom modified, and eventually deleted, so the create (<strong>Add</strong> in LDAP), update (<strong>Modify</strong> or <strong>ModifyDn</strong>)
+and delete (<strong>Delete</strong>) operations have a very basic usage while the Read (<strong>Search</strong>) operation is richer of options, but lacks many capabilities
+you would expect in a modern query language (as 1 to N relationship, joining views, or server data manipulation). Nonetheless almost everything you can do in a modern
+database can be equally done in LDAP. Furthermore consider that even if an LDAP server can be accessed by multiple clients simultaneously, the LDAP
+protocol itself has no notion of &#8220;transaction&#8221;, so if you want to issue multiple Add or Modify operations in an atomic way (to keep your data consistent),
+you must investigate the extended operations of the specific LDAP server you&#8217;re connecting to to check if it supports transactions for multiple operations.</p>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p>Synchronous vs Asynchronous
+You can submit operations to the server in two different ways: <strong>synchronous</strong> mode and <strong>asynchronous</strong> mode. While in the former mode you send the request and
+wait for the response, in the latter mode the ldap3 library constantly listens to the server (one independent thread for each connection). When you send a request you must
+store its <em>message id</em> (a unique number that ldap3 stamps on every message of your LDAP session) in your code so you can later query the Connection object for the
+relevant response when it&#8217;s ready. You&#8217;ll probably stick with the synchronous mode, because nowadays LDAP servers are fast to respond, but the asynchronous mode is
+still useful if your program is event-driven (maybe using an asynchronous event loop).</p>
+<p class="last">ldap3 supports both of this models with its different <em>communication strategies</em>.</p>
+</div>
+<p>LDAP also provides the <strong>Compare</strong> operation that returns True only if an attribute has the value you specify in the request. Even if this operation seems redundant
+(you could read the attribute and perform the comparison using more powerful tools in your code) you need it to check for the presence
+of a value (even in a multi-valued attribute) without having the permission to read it. This obviuosly relies upon some &#8220;access restriction&#8221; mechanism that must
+be present on the server. LDAP doesn&#8217;t specify how this mechanism works, so each LDAP server has its specific way of handle authorization. The Compare operation is also used to
+check the validity of a password (that you can&#8217;t read) without performing a Bind operation with the specific user.</p>
+<p>After any synchronous operation, you&#8217;ll find the following attributes populated in the Connection object:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">result</span></code>: the result of the last operation (as returned by the server)</li>
+<li><code class="docutils literal"><span class="pre">response</span></code>: the entries found (if the last operation is a Search)</li>
+<li><code class="docutils literal"><span class="pre">entries</span></code>: the entries found exposed via the abstraction layer (if the last operation is a Search)</li>
+<li><code class="docutils literal"><span class="pre">last_error</span></code>: the error occurred in the last operation, if any</li>
+<li><code class="docutils literal"><span class="pre">bound</span></code>: True if the connection is bound to the server</li>
+<li><code class="docutils literal"><span class="pre">listening</span></code>: True if the socket is listening to the server</li>
+<li><code class="docutils literal"><span class="pre">closed</span></code>: True if the socket is not open</li>
+</ul>
+</div>
+<div class="section" id="performing-searches">
+<h2>Performing searches<a class="headerlink" href="#performing-searches" title="永久链接至标题">¶</a></h2>
+<p>The Search operation in ldap3 has a number of parameters, but only two of them are mandatory:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">search_base</span></code>: the location in the DIT where the search will start</li>
+<li><code class="docutils literal"><span class="pre">search_filter</span></code>: what are you searching</li>
+</ul>
+<p>Search filters are based on assertions and look odd when you&#8217;re unfamiliar with their syntax. One <em>assertion</em> is a bracketed expression
+that affirms something about an attribute and its value, as <code class="docutils literal"><span class="pre">(givenName=John)</span></code> or <code class="docutils literal"><span class="pre">(maxRetries&gt;=10)</span></code>. Each assertion resolves
+to True, False or Undefined (that is treated as False) for one or more entries in the Tree. Assertions can be grouped in boolean groups
+where all assertions (<em>and</em> group, specified with <code class="docutils literal"><span class="pre">&amp;</span></code>) or just one assertion (<em>or</em> group, specified with <code class="docutils literal"><span class="pre">|</span></code>) must be True. A single
+assertion can be negated (<em>not</em> group, specified with <code class="docutils literal"><span class="pre">!</span></code>). Each group must be bracketed, allowing for recursive filters.
+Operators allowed in an assertion are <code class="docutils literal"><span class="pre">=</span></code> (<em>equal</em>), <code class="docutils literal"><span class="pre">&lt;=</span></code> (<em>less than or equal</em>), <code class="docutils literal"><span class="pre">&gt;=</span></code> (<em>greater than or equal</em>), <code class="docutils literal"><span class="pre">=*</span></code> (<em>present</em>), <code class="docutils literal"><span class="pre">~=</span></code>
+(<em>aproximate</em>) and <code class="docutils literal"><span class="pre">:=</span></code> (<em>extensible</em>). Surprisingly the <em>less than</em> and the <em>greater than</em> operators don&#8217;t exist in the filter syntax.
+The <em>aproximate</em> and the <em>extensible</em> are someway obscure and seldom used. In an equality filter you can use the <code class="docutils literal"><span class="pre">*</span></code> (asterisk) as a wildcard in the usual way.</p>
+<p>For example, to search for all users named John with an email ending with <a class="reference external" href="mailto:'&#37;&#52;&#48;example&#46;org">'<span>&#64;</span>example<span>&#46;</span>org</a>&#8216; the filter will be <code class="docutils literal"><span class="pre">(&amp;(givenName=John)(mail=*&#64;example.org))</span></code>,
+to search for all users named John or Fred with an email ending in <a class="reference external" href="mailto:'&#37;&#52;&#48;example&#46;org">'<span>&#64;</span>example<span>&#46;</span>org</a>&#8216; the filter will be
+<code class="docutils literal"><span class="pre">(&amp;(|(givenName=Fred)(givenName=John))(mail=*&#64;example.org))</span></code>, while to search for all users that have a givenName different from Smith the filter
+will be <code class="docutils literal"><span class="pre">(&amp;(givenName=*)(!(givenName=Smith)))</span></code> (The first assertion in the <em>and</em> set is needed to ensure the presence of the value). Longer
+search filters can easily become hard to understand so it may be useful to divide them on multple lines while writing/reading them:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="o">&amp;</span>
+    <span class="p">(</span><span class="o">|</span>
+        <span class="p">(</span><span class="n">givenName</span><span class="o">=</span><span class="n">Fred</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">givenName</span><span class="o">=</span><span class="n">John</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="p">(</span><span class="n">mail</span><span class="o">=*</span><span class="nd">@example</span><span class="o">.</span><span class="n">org</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Let&#8217;s try to search all the users in the FreeIPA demo LDAP server:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ldap3</span> <span class="k">import</span> <span class="n">Server</span><span class="p">,</span> <span class="n">Connection</span><span class="p">,</span> <span class="n">ALL</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="s1">&#39;ipa.demo1.freeipa.org&#39;</span><span class="p">,</span> <span class="n">get_info</span><span class="o">=</span><span class="n">ALL</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s1">&#39;uid=admin, cn=users, cn=accounts, dc=demo1, dc=freeipa, dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;Secret123&#39;</span><span class="p">,</span> <span class="n">auto_bind</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;dc=demo1, dc=freeipa, dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;(objectclass=person)&#39;</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">entries</span>
+<span class="go">[DN: uid=admin,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">, DN: uid=manager,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">, DN: uid=employee,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">, DN: uid=helpdesk,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>Here we are requesting all the entries of class <em>person</em>, starting from the <em>dc=demo1, dc=freeipa, dc=org</em> context with the default subtree scope.
+We have not requested any attribute, so in the response we get only the Distinguished Name of the entries found.</p>
+<p>Now let&#8217;s try to request some attributes for the admin user:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;dc=demo1, dc=freeipa, dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;(&amp;(objectclass=person)(uid=admin))&#39;</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;sn&#39;</span><span class="p">,</span><span class="s1">&#39;krbLastPwdChange&#39;</span><span class="p">,</span> <span class="s1">&#39;objectclass&#39;</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">DN: uid=admin,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">    krbLastPwdChange: 2015-09-30 04:06:59+00:00</span>
+<span class="go">    objectclass: top</span>
+<span class="go">                 person</span>
+<span class="go">                 posixaccount</span>
+<span class="go">                 krbprincipalaux</span>
+<span class="go">                 krbticketpolicyaux</span>
+<span class="go">                 inetuser</span>
+<span class="go">                 ipaobject</span>
+<span class="go">                 ipasshuser</span>
+<span class="go">                 ipaSshGroupOfPubKeys</span>
+<span class="go">    sn: Administrator</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">注解</p>
+<p class="last">When using attributes in a search filter it&#8217;s a good habit to always request for the class of the entries you expect to retrieve. You cannot be sure that the
+attribute you&#8217;re serching for is not used is some other object classes, and even if you were sure that no other object class uses the attribute this could always change
+in the future when someone creates in the schema a new object class that uses that same attribute and your program suddenly breaks with no apparent reason.</p>
+</div>
+<p>As you can see the <code class="docutils literal"><span class="pre">entries</span></code> attribute of the Connection object is specially crafted to be used in interactive mode. It gives a visual
+representation of the entry data structure where each value is, according to the schema, properly formatted (the date value in krbLastPwdChange is
+actually stored as <code class="docutils literal"><span class="pre">b'20150930040659Z'</span></code>). Attributes can be queried as if the entry were a class object or a dict, with some
+additional features as case-insensitivity and blank-insensitivity. You can get the formatted value and the raw value (the value actually
+returned by the server) in the <code class="docutils literal"><span class="pre">values</span></code> and <code class="docutils literal"><span class="pre">raw_values</span></code> attribute:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span> <span class="o">=</span> <span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span><span class="o">.</span><span class="n">krbLastPwdChange</span>
+<span class="go">krbLastPwdChange: 2015-09-30 04:06:59+00:00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span><span class="o">.</span><span class="n">KRBLastPwdCHANGE</span>
+<span class="go">krbLastPwdChange: 2015-09-30 04:06:59+00:00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;krbLastPwdChange&#39;</span><span class="p">]</span>
+<span class="go">krbLastPwdChange: 2015-09-30 04:06:59+00:00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span><span class="p">[</span><span class="s1">&#39;KRB LAST PWD CHANGE&#39;</span><span class="p">]</span>
+<span class="go">krbLastPwdChange: 2015-09-30 04:06:59+00:00</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span><span class="o">.</span><span class="n">krbLastPwdChange</span><span class="o">.</span><span class="n">values</span>
+<span class="go">[datetime.datetime(2015, 9, 30, 4, 6, 59, tzinfo=OffsetTzInfo(offset=0, name=&#39;UTC&#39;))]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span><span class="o">.</span><span class="n">krbLastPwdChange</span><span class="o">.</span><span class="n">raw_values</span>
+<span class="go">[b&#39;20150930040659Z&#39;]</span>
+</pre></div>
+</div>
+<p>In the previous search operations we specified <code class="docutils literal"><span class="pre">dc=demo1,</span> <span class="pre">dc=freeipa,</span> <span class="pre">dc=org</span></code> as the base of our search, but the entries we got back were in the <code class="docutils literal"><span class="pre">cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org</span></code>
+context of the DIT. So the server has, for some unapparent reason, walked down in every context under the base and applied the filter to each of the entries in the sub-contexts.
+It actually performed a <em>whole subtree</em> search. Other possible kinds of search are the <em>single level</em> (that searches only in the level specified in the base) and the <em>base object</em>
+(that search only in the attributes of the entry specified in the base). What changes in this different kinds of search is the breath of the portion of
+the LDAP database that is searched. This is called the <strong>scope</strong> of the search and can be specified with the <code class="docutils literal"><span class="pre">search_scope</span></code> attribute of the search
+operation. It can assume three different values <code class="docutils literal"><span class="pre">BASE</span></code>, <code class="docutils literal"><span class="pre">LEVEL</span></code> and <code class="docutils literal"><span class="pre">SUBTREE</span></code>. The latter value is the default for the search opertion, so this clarifies why we
+got back all the entries in the sub-contexts of the base in our previous searches.</p>
+<p>You can have a LDIF representation of the response of a search with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">conn</span><span class="o">.</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">entry_to_ldif</span><span class="p">())</span>
+<span class="go">version: 1</span>
+<span class="go">dn: uid=admin,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">objectclass: top</span>
+<span class="go">objectclass: person</span>
+<span class="go">objectclass: posixaccount</span>
+<span class="go">objectclass: krbprincipalaux</span>
+<span class="go">objectclass: krbticketpolicyaux</span>
+<span class="go">objectclass: inetuser</span>
+<span class="go">objectclass: ipaobject</span>
+<span class="go">objectclass: ipasshuser</span>
+<span class="go">objectclass: ipaSshGroupOfPubKeys</span>
+<span class="go">krbLastPwdChange: 20150930040659Z</span>
+<span class="go">sn: Administrator</span>
+<span class="go"># total number of entries: 1</span>
+</pre></div>
+</div>
+<div class="sidebar">
+<p class="first sidebar-title">LDIF
+LDIF stands for LDAP Data Interchange Format and is a textual standard used to describe two different aspects of LDAP: the content of an entry (<strong>LDIF-CONTENT</strong>)
+or the changes performed to an entry with an LDAP operation (<strong>LDIF-CHANGE</strong>). LDIF-CONTENT is used to describe LDAP entries in an ASCII stream (i.e. a file),
+while LDIF-CHANGE is used to describe the Add, Delete, Modify and ModifyDn operations.</p>
+<p class="last"><em>These two formats have different purposes and cannot be mixed in the same stream.</em></p>
+</div>
+<p>or you can save the response to a JSON string:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">entry_to_json</span><span class="p">())</span>
+<span class="go">{</span>
+<span class="go">    &quot;attributes&quot;: {</span>
+<span class="go">        &quot;krbLastPwdChange&quot;: [</span>
+<span class="go">            &quot;2015-09-30 04:06:59+00:00&quot;</span>
+<span class="go">        ],</span>
+<span class="go">        &quot;objectclass&quot;: [</span>
+<span class="go">            &quot;top&quot;,</span>
+<span class="go">            &quot;person&quot;,</span>
+<span class="go">            &quot;posixaccount&quot;,</span>
+<span class="go">            &quot;krbprincipalaux&quot;,</span>
+<span class="go">            &quot;krbticketpolicyaux&quot;,</span>
+<span class="go">            &quot;inetuser&quot;,</span>
+<span class="go">            &quot;ipaobject&quot;,</span>
+<span class="go">            &quot;ipasshuser&quot;,</span>
+<span class="go">            &quot;ipaSshGroupOfPubKeys&quot;</span>
+<span class="go">        ],</span>
+<span class="go">        &quot;sn&quot;: [</span>
+<span class="go">            &quot;Administrator&quot;</span>
+<span class="go">        ]</span>
+<span class="go">    },</span>
+<span class="go">    &quot;dn&quot;: &quot;uid=admin,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="searching-for-binary-values">
+<h2>Searching for binary values<a class="headerlink" href="#searching-for-binary-values" title="永久链接至标题">¶</a></h2>
+<p>To search for a binary value you must use the RFC4515 escape ASCII sequence for each byte in the search assertion. You
+can use the function <em>escape_bytes()</em> in ldap3.utils.conv for properly escape a byte sequence:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ldap3.utils.conv</span> <span class="k">import</span> <span class="n">escape_bytes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unique_id</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;</span><span class="se">\xca</span><span class="s1">@</span><span class="se">\xf2</span><span class="s1">k</span><span class="se">\x1d\x86\xca</span><span class="s1">L</span><span class="se">\xb7\xa2\xca</span><span class="s1">@</span><span class="se">\xf2</span><span class="s1">k</span><span class="se">\x1d\x86</span><span class="s1">&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">search_filter</span> <span class="o">=</span> <span class="s1">&#39;(nsUniqueID=&#39;</span> <span class="o">+</span> <span class="n">escape_bytes</span><span class="p">(</span><span class="n">unique_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;dc=demo1, dc=freeipa, dc=org&#39;</span><span class="p">,</span> <span class="n">search_filter</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;nsUniqueId&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>search_filter will contain <code class="docutils literal"><span class="pre">'(guid=\\ca\\40\\f2\\6b\\1d\\86\\ca\\4c\\b7\\a2\\ca\\40\\f2\\6b\\1d\\86)'</span></code>.</p>
+</div>
+<div class="section" id="connection-context-manager">
+<h2>Connection context manager<a class="headerlink" href="#connection-context-manager" title="永久链接至标题">¶</a></h2>
+<p>Connections respond to the context manager protocol, so you can have automatic open, bind and unbind with the following syntax:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">Connection</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="s1">&#39;uid=admin, cn=users, cn=accounts, dc=demo1, dc=freeipa, dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;Secret123&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+<span class="go">        conn.search(&#39;dc=demo1, dc=freeipa, dc=org&#39;, &#39;(&amp;(objectclass=person)(uid=admin))&#39;, attributes=[&#39;sn&#39;,&#39;krbLastPwdChange&#39;, &#39;objectclass&#39;])</span>
+<span class="go">        entry = conn.entries[0]</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">bound</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span>
+<span class="go">DN: uid=admin,cn=users,cn=accounts,dc=demo1,dc=freeipa,dc=org</span>
+<span class="go">krbLastPwdChange: 2015-09-30 04:06:59+00:00</span>
+<span class="go">objectclass: top</span>
+<span class="go">             person</span>
+<span class="go">             posixaccount</span>
+<span class="go">             krbprincipalaux</span>
+<span class="go">             krbticketpolicyaux</span>
+<span class="go">             inetuser</span>
+<span class="go">             ipaobject</span>
+<span class="go">             ipasshuser</span>
+<span class="go">             ipaSshGroupOfPubKeys</span>
+<span class="go">sn: Administrator</span>
+</pre></div>
+</div>
+<p>When using context managers the Connection object retains its previous state after exiting the context. The connection is open and bound while in context.
+If the connection was not bound to the server when entering the context the Unbind operation will be tried when you leave the context even if the operations
+in the context raise an exception.</p>
+</div>
+<div class="section" id="the-add-operation">
+<h2>The Add operation<a class="headerlink" href="#the-add-operation" title="永久链接至标题">¶</a></h2>
+<p>Let&#8217;s try to add some data to the LDAP server:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create a container for our new entries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;ou=ldap3-tutorial, dc=demo1, dc=freeipa, dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;organizationalUnit&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Add some users</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;cn=b.young,ou=ldap3-tutorial,dc=demo1,dc=freeipa,dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;inetorgperson&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;givenName&#39;</span><span class="p">:</span> <span class="s1">&#39;Beatrix&#39;</span><span class="p">,</span> <span class="s1">&#39;sn&#39;</span><span class="p">:</span> <span class="s1">&#39;Young&#39;</span><span class="p">,</span> <span class="s1">&#39;departmentNumber&#39;</span><span class="p">:</span><span class="s1">&#39;DEV&#39;</span><span class="p">,</span> <span class="s1">&#39;telephoneNumber&#39;</span><span class="p">:</span> <span class="mi">1111</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;cn=j.smith,ou=ldap3-tutorial,dc=demo1,dc=freeipa,dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;inetorgperson&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;givenName&#39;</span><span class="p">:</span> <span class="s1">&#39;John&#39;</span><span class="p">,</span> <span class="s1">&#39;sn&#39;</span><span class="p">:</span> <span class="s1">&#39;Smith&#39;</span><span class="p">,</span> <span class="s1">&#39;departmentNumber&#39;</span><span class="p">:</span><span class="s1">&#39;DEV&#39;</span><span class="p">,</span>  <span class="s1">&#39;telephoneNumber&#39;</span><span class="p">:</span> <span class="mi">2222</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;cn=m.smith,ou=ldap3-tutorial,dc=demo1,dc=freeipa,dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;inetorgperson&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;givenName&#39;</span><span class="p">:</span> <span class="s1">&#39;Marianne&#39;</span><span class="p">,</span> <span class="s1">&#39;sn&#39;</span><span class="p">:</span> <span class="s1">&#39;Smith&#39;</span><span class="p">,</span> <span class="s1">&#39;departmentNumber&#39;</span><span class="p">:</span><span class="s1">&#39;QA&#39;</span><span class="p">,</span>  <span class="s1">&#39;telephoneNumber&#39;</span><span class="p">:</span> <span class="mi">3333</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conn</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;cn=quentin.cat,ou=ldap3-tutorial,dc=demo1,dc=freeipa,dc=org&#39;</span><span class="p">,</span> <span class="s1">&#39;inetorgperson&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;givenName&#39;</span><span class="p">:</span> <span class="s1">&#39;Quentin&#39;</span><span class="p">,</span> <span class="s1">&#39;sn&#39;</span><span class="p">:</span> <span class="s1">&#39;Cat&#39;</span><span class="p">,</span> <span class="s1">&#39;departmentNumber&#39;</span><span class="p">:</span><span class="s1">&#39;CC&#39;</span><span class="p">,</span>  <span class="s1">&#39;telephoneNumber&#39;</span><span class="p">:</span> <span class="mi">4444</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>As you can see we have added some users
+... work in progress ...</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ldap3 教程</a><ul>
+<li><a class="reference internal" href="#ldap">LDAP 不是什么。。。</a></li>
+<li><a class="reference internal" href="#a-very-brief-history-of-ldap">A very brief history of LDAP</a></li>
+<li><a class="reference internal" href="#the-ldap3-package">The ldap3 package</a></li>
+<li><a class="reference internal" href="#accessing-an-ldap-server">Accessing an LDAP server</a></li>
+<li><a class="reference internal" href="#getting-information-from-the-server">Getting information from the server</a></li>
+<li><a class="reference internal" href="#logging-into-the-server">Logging into the server</a></li>
+<li><a class="reference internal" href="#establishing-a-secure-connection">Establishing a secure connection</a></li>
+<li><a class="reference internal" href="#database-operations">Database Operations</a></li>
+<li><a class="reference internal" href="#performing-searches">Performing searches</a></li>
+<li><a class="reference internal" href="#searching-for-binary-values">Searching for binary values</a></li>
+<li><a class="reference internal" href="#connection-context-manager">Connection context manager</a></li>
+<li><a class="reference internal" href="#the-add-operation">The Add operation</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="welcome.html" title="上一章">ldap3 简介</a></li>
+      <li>Next: <a href="features.html" title="下一章">ldap3 Features</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tutorial.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/tutorial.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

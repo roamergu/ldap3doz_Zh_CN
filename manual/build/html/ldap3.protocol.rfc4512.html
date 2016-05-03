@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ldap3.protocol.rfc4512 module &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="index.html" />
+    <link rel="up" title="ldap3.protocol package" href="ldap3.protocol.html" />
+    <link rel="next" title="ldap3.strategy package" href="ldap3.strategy.html" />
+    <link rel="prev" title="ldap3.protocol.rfc4511 module" href="ldap3.protocol.rfc4511.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ldap3.protocol.rfc4512">
+<span id="ldap3-protocol-rfc4512-module"></span><h1>ldap3.protocol.rfc4512 module<a class="headerlink" href="#module-ldap3.protocol.rfc4512" title="永久链接至标题">¶</a></h1>
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.AttributeTypeInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">AttributeTypeInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>name=None</em>, <em>description=None</em>, <em>obsolete=False</em>, <em>superior=None</em>, <em>equality=None</em>, <em>ordering=None</em>, <em>substring=None</em>, <em>syntax=None</em>, <em>min_length=None</em>, <em>single_value=False</em>, <em>collective=False</em>, <em>no_user_modification=False</em>, <em>usage=None</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#AttributeTypeInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.AttributeTypeInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="ldap3.protocol.rfc4512.BaseObjectInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseObjectInfo</span></code></a></p>
+<p>As per RFC 4512 (4.1.2)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.BaseObjectInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">BaseObjectInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>name=None</em>, <em>description=None</em>, <em>obsolete=False</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#BaseObjectInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Base class for objects defined in the schema as per RFC4512</p>
+<dl class="classmethod">
+<dt id="ldap3.protocol.rfc4512.BaseObjectInfo.from_definition">
+<em class="property">classmethod </em><code class="descname">from_definition</code><span class="sig-paren">(</span><em>definitions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#BaseObjectInfo.from_definition"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.BaseObjectInfo.from_definition" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ldap3.protocol.rfc4512.BaseObjectInfo.oid_info">
+<code class="descname">oid_info</code><a class="headerlink" href="#ldap3.protocol.rfc4512.BaseObjectInfo.oid_info" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.BaseServerInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">BaseServerInfo</code><span class="sig-paren">(</span><em>raw_attributes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#BaseServerInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.BaseServerInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(在 Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="classmethod">
+<dt id="ldap3.protocol.rfc4512.BaseServerInfo.from_file">
+<em class="property">classmethod </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>target</em>, <em>schema=None</em>, <em>custom_formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#BaseServerInfo.from_file"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.BaseServerInfo.from_file" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ldap3.protocol.rfc4512.BaseServerInfo.from_json">
+<em class="property">classmethod </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>json_definition</em>, <em>schema=None</em>, <em>custom_formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#BaseServerInfo.from_json"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.BaseServerInfo.from_json" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.protocol.rfc4512.BaseServerInfo.to_file">
+<code class="descname">to_file</code><span class="sig-paren">(</span><em>target</em>, <em>indent=4</em>, <em>sort=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#BaseServerInfo.to_file"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.BaseServerInfo.to_file" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ldap3.protocol.rfc4512.BaseServerInfo.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><em>indent=4</em>, <em>sort=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#BaseServerInfo.to_json"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.BaseServerInfo.to_json" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.DitContentRuleInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">DitContentRuleInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>name=None</em>, <em>description=None</em>, <em>obsolete=False</em>, <em>auxiliary_classes=None</em>, <em>must_contain=None</em>, <em>may_contain=None</em>, <em>not_contains=None</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#DitContentRuleInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.DitContentRuleInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="ldap3.protocol.rfc4512.BaseObjectInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseObjectInfo</span></code></a></p>
+<p>As per RFC 4512 (4.1.6)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.DitStructureRuleInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">DitStructureRuleInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>name=None</em>, <em>description=None</em>, <em>obsolete=False</em>, <em>name_form=None</em>, <em>superior=None</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#DitStructureRuleInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.DitStructureRuleInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="ldap3.protocol.rfc4512.BaseObjectInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseObjectInfo</span></code></a></p>
+<p>As per RFC 4512 (4.1.7.1)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.DsaInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">DsaInfo</code><span class="sig-paren">(</span><em>attributes</em>, <em>raw_attributes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#DsaInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.DsaInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseServerInfo" title="ldap3.protocol.rfc4512.BaseServerInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseServerInfo</span></code></a></p>
+<p>This class contains info about the ldap server (DSA) read from DSE
+as defined in RFC4512 and RFC3045. Unknown attributes are stored in the &#8220;other&#8221; dict</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.LdapSyntaxInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">LdapSyntaxInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>description=None</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#LdapSyntaxInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.LdapSyntaxInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="ldap3.protocol.rfc4512.BaseObjectInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseObjectInfo</span></code></a></p>
+<p>As per RFC 4512 (4.1.5)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.MatchingRuleInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">MatchingRuleInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>name=None</em>, <em>description=None</em>, <em>obsolete=False</em>, <em>syntax=None</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#MatchingRuleInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.MatchingRuleInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="ldap3.protocol.rfc4512.BaseObjectInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseObjectInfo</span></code></a></p>
+<p>As per RFC 4512 (4.1.3)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.MatchingRuleUseInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">MatchingRuleUseInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>name=None</em>, <em>description=None</em>, <em>obsolete=False</em>, <em>apply_to=None</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#MatchingRuleUseInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.MatchingRuleUseInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="ldap3.protocol.rfc4512.BaseObjectInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseObjectInfo</span></code></a></p>
+<p>As per RFC 4512 (4.1.4)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.NameFormInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">NameFormInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>name=None</em>, <em>description=None</em>, <em>obsolete=False</em>, <em>object_class=None</em>, <em>must_contain=None</em>, <em>may_contain=None</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#NameFormInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.NameFormInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="ldap3.protocol.rfc4512.BaseObjectInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseObjectInfo</span></code></a></p>
+<p>As per RFC 4512 (4.1.7.2)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.ObjectClassInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">ObjectClassInfo</code><span class="sig-paren">(</span><em>oid=None</em>, <em>name=None</em>, <em>description=None</em>, <em>obsolete=False</em>, <em>superior=None</em>, <em>kind=None</em>, <em>must_contain=None</em>, <em>may_contain=None</em>, <em>extensions=None</em>, <em>experimental=None</em>, <em>definition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#ObjectClassInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.ObjectClassInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseObjectInfo" title="ldap3.protocol.rfc4512.BaseObjectInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseObjectInfo</span></code></a></p>
+<p>As per RFC 4512 (4.1.1)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ldap3.protocol.rfc4512.SchemaInfo">
+<em class="property">class </em><code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">SchemaInfo</code><span class="sig-paren">(</span><em>schema_entry</em>, <em>attributes</em>, <em>raw_attributes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#SchemaInfo"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.SchemaInfo" title="永久链接至目标">¶</a></dt>
+<dd><p>基类：<a class="reference internal" href="#ldap3.protocol.rfc4512.BaseServerInfo" title="ldap3.protocol.rfc4512.BaseServerInfo"><code class="xref py py-class docutils literal"><span class="pre">ldap3.protocol.rfc4512.BaseServerInfo</span></code></a></p>
+<p>This class contains info about the ldap server schema read from an entry (default entry is DSE)
+as defined in RFC4512. Unknown attributes are stored in the &#8220;other&#8221; dict</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.rfc4512.attribute_usage_to_constant">
+<code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">attribute_usage_to_constant</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#attribute_usage_to_constant"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.attribute_usage_to_constant" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.rfc4512.constant_to_attribute_usage">
+<code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">constant_to_attribute_usage</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#constant_to_attribute_usage"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.constant_to_attribute_usage" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.rfc4512.constant_to_class_kind">
+<code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">constant_to_class_kind</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#constant_to_class_kind"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.constant_to_class_kind" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.rfc4512.extension_to_tuple">
+<code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">extension_to_tuple</code><span class="sig-paren">(</span><em>extension_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#extension_to_tuple"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.extension_to_tuple" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.rfc4512.list_to_string">
+<code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">list_to_string</code><span class="sig-paren">(</span><em>list_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#list_to_string"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.list_to_string" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.rfc4512.oids_string_to_list">
+<code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">oids_string_to_list</code><span class="sig-paren">(</span><em>oid_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#oids_string_to_list"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.oids_string_to_list" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ldap3.protocol.rfc4512.quoted_string_to_list">
+<code class="descclassname">ldap3.protocol.rfc4512.</code><code class="descname">quoted_string_to_list</code><span class="sig-paren">(</span><em>quoted_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ldap3/protocol/rfc4512.html#quoted_string_to_list"><span class="viewcode-link">[源代码]</span></a><a class="headerlink" href="#ldap3.protocol.rfc4512.quoted_string_to_list" title="永久链接至目标">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">ldap3</a><ul>
+  <li><a href="ldap3.html">ldap3 package</a><ul>
+  <li><a href="ldap3.protocol.html">ldap3.protocol package</a><ul>
+      <li>Previous: <a href="ldap3.protocol.rfc4511.html" title="上一章">ldap3.protocol.rfc4511 module</a></li>
+      <li>Next: <a href="ldap3.strategy.html" title="下一章">ldap3.strategy package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/ldap3.protocol.rfc4512.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/ldap3.protocol.rfc4512.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

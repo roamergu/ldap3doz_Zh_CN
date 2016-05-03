@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyasn1.type.tag &mdash; ldap3 doc zh 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ldap3 doc zh 0.0.1 文档" href="../../../index.html" />
+    <link rel="up" title="模块代码" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>pyasn1.type.tag 源代码</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ASN.1 types tags</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">getitem</span>
+<span class="kn">from</span> <span class="nn">pyasn1</span> <span class="kn">import</span> <span class="n">error</span>
+
+<span class="n">tagClassUniversal</span> <span class="o">=</span> <span class="mh">0x00</span>
+<span class="n">tagClassApplication</span> <span class="o">=</span> <span class="mh">0x40</span>
+<span class="n">tagClassContext</span> <span class="o">=</span> <span class="mh">0x80</span>
+<span class="n">tagClassPrivate</span> <span class="o">=</span> <span class="mh">0xC0</span>
+
+<span class="n">tagFormatSimple</span> <span class="o">=</span> <span class="mh">0x00</span>
+<span class="n">tagFormatConstructed</span> <span class="o">=</span> <span class="mh">0x20</span>
+
+<span class="n">tagCategoryImplicit</span> <span class="o">=</span> <span class="mh">0x01</span>
+<span class="n">tagCategoryExplicit</span> <span class="o">=</span> <span class="mh">0x02</span>
+<span class="n">tagCategoryUntagged</span> <span class="o">=</span> <span class="mh">0x04</span>
+
+<span class="k">class</span> <span class="nc">Tag</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tagClass</span><span class="p">,</span> <span class="n">tagFormat</span><span class="p">,</span> <span class="n">tagId</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tagId</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">PyAsn1Error</span><span class="p">(</span>
+                <span class="s1">&#39;Negative tag ID (</span><span class="si">%s</span><span class="s1">) not allowed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tagId</span><span class="p">,)</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span> <span class="o">=</span> <span class="p">(</span><span class="n">tagClass</span><span class="p">,</span> <span class="n">tagFormat</span><span class="p">,</span> <span class="n">tagId</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">=</span> <span class="p">(</span><span class="n">tagClass</span><span class="p">,</span> <span class="n">tagId</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hashedUniqTag</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uniq</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;[</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(tagClass=</span><span class="si">%s</span><span class="s1">, tagFormat=</span><span class="si">%s</span><span class="s1">, tagId=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span>
+            <span class="p">)</span>
+    <span class="c1"># These is really a hotspot -- expose public &quot;uniq&quot; attribute to save on</span>
+    <span class="c1"># function calls</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hashedUniqTag</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">otherTag</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">tagClass</span><span class="p">,</span> <span class="n">tagFormat</span><span class="p">,</span> <span class="n">tagId</span><span class="p">)</span> <span class="o">=</span> <span class="n">otherTag</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span><span class="o">&amp;</span><span class="n">tagClass</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span><span class="o">&amp;</span><span class="n">tagFormat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span><span class="o">&amp;</span><span class="n">tagId</span>
+            <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">otherTag</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">tagClass</span><span class="p">,</span> <span class="n">tagFormat</span><span class="p">,</span> <span class="n">tagId</span><span class="p">)</span> <span class="o">=</span> <span class="n">otherTag</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">|</span><span class="n">tagClass</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">|</span><span class="n">tagFormat</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">|</span><span class="n">tagId</span>
+            <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">asTuple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tag</span>  <span class="c1"># __getitem__() is slow</span>
+    
+<span class="k">class</span> <span class="nc">TagSet</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">baseTag</span><span class="o">=</span><span class="p">(),</span> <span class="o">*</span><span class="n">superTags</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__baseTag</span> <span class="o">=</span> <span class="n">baseTag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span> <span class="o">=</span> <span class="n">superTags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__hashedSuperTags</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">superTags</span><span class="p">)</span>
+        <span class="n">_uniq</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">superTags</span><span class="p">:</span>
+            <span class="n">_uniq</span> <span class="o">=</span> <span class="n">_uniq</span> <span class="o">+</span> <span class="n">t</span><span class="o">.</span><span class="n">uniq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">=</span> <span class="n">_uniq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lenOfSuperTags</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">superTags</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span> <span class="ow">and</span> <span class="s1">&#39;+&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span><span class="p">])</span> <span class="ow">or</span> <span class="s1">&#39;[untagged]&#39;</span>
+ 
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+            <span class="s1">&#39;(), &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span><span class="p">])</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">superTag</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__baseTag</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span> <span class="o">+</span> <span class="p">(</span><span class="n">superTag</span><span class="p">,)</span>
+            <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">superTag</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__baseTag</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">superTag</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">tagExplicitly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">superTag</span><span class="p">):</span>
+        <span class="n">tagClass</span><span class="p">,</span> <span class="n">tagFormat</span><span class="p">,</span> <span class="n">tagId</span> <span class="o">=</span> <span class="n">superTag</span>
+        <span class="k">if</span> <span class="n">tagClass</span> <span class="o">==</span> <span class="n">tagClassUniversal</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">error</span><span class="o">.</span><span class="n">PyAsn1Error</span><span class="p">(</span>
+                <span class="s1">&#39;Can</span><span class="se">\&#39;</span><span class="s1">t tag with UNIVERSAL-class tag&#39;</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">tagFormat</span> <span class="o">!=</span> <span class="n">tagFormatConstructed</span><span class="p">:</span>
+            <span class="n">superTag</span> <span class="o">=</span> <span class="n">Tag</span><span class="p">(</span><span class="n">tagClass</span><span class="p">,</span> <span class="n">tagFormatConstructed</span><span class="p">,</span> <span class="n">tagId</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">superTag</span>
+
+    <span class="k">def</span> <span class="nf">tagImplicitly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">superTag</span><span class="p">):</span>
+        <span class="n">tagClass</span><span class="p">,</span> <span class="n">tagFormat</span><span class="p">,</span> <span class="n">tagId</span> <span class="o">=</span> <span class="n">superTag</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span><span class="p">:</span>
+            <span class="n">superTag</span> <span class="o">=</span> <span class="n">Tag</span><span class="p">(</span><span class="n">tagClass</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">tagId</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">superTag</span>
+
+    <span class="k">def</span> <span class="nf">getBaseTag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__baseTag</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">__baseTag</span><span class="p">,</span> <span class="o">*</span><span class="n">getitem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniq</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">uniq</span>
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hashedSuperTags</span>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lenOfSuperTags</span>
+    <span class="k">def</span> <span class="nf">isSuperTagSetOf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tagSet</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tagSet</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lenOfSuperTags</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lenOfSuperTags</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__superTags</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">!=</span> <span class="n">tagSet</span><span class="p">[</span><span class="n">idx</span><span class="p">]:</span>
+                <span class="k">return</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    
+<span class="k">def</span> <span class="nf">initTagSet</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span> <span class="k">return</span> <span class="n">TagSet</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">模块代码</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, cantag&roamer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
