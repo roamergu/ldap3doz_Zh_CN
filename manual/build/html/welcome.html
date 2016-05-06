@@ -42,58 +42,41 @@
             
   <div class="section" id="ldap3">
 <h1>ldap3 简介<a class="headerlink" href="#ldap3" title="永久链接至标题">¶</a></h1>
-<p>ldap3 是一个严格遵守RFC4510 LDAPV3标准的，纯python实现的库。整个ldap3已经完全从头编写，无论是使用Python 2, Python 3, PyPy, PyPy3 还是 Nuikta ，只要他们运行的系统能够通过Python解释器和Python标准库访问网络，ldap3就能在这些系统上正常运行。</p>
-<p>ldap3 is a strictly RFC 4510 conforming LDAP v3 pure Python client library. The whole ldap3 library has been <strong>written from scratch</strong>
-and the <strong>same codebase works with Python 2, Python 3, PyPy, PyPy3 and Nuikta</strong> on any system where it can gain access to
-the network via a Python interpreter and the Python Standard Library.</p>
+<p>ladp3是一套严格遵从RFC 4510 LDAP V3规范的、完全使用python实现的库。ldap3 已经经过 <strong>彻底重写</strong> ，在 <strong>Python 2, Python 3, PyPy, PyPy3 与Nuikta</strong> 下均使用同样的基础代码，只要运行python的系统能够通过python解释器和python标准库访问网络，ldapv3就能正常运行。</p>
 <div class="section" id="id1">
 <h2>授权<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
-<p>ldap3库 是基于 <strong>LGPL v3 license</strong> (<a class="reference external" href="http://www.gnu.org/licenses/lgpl-3.0.html">http://www.gnu.org/licenses/lgpl-3.0.html</a>) 发布的开源软件，这意味着你可以使用ldap3开发任意应用，无论是私有软件还是开源软件，你也可以复制、分发和修改ldap3,修改后的ldap3的描述和授权要在LGPL协议下免费。基于ldap3的衍生库必须在LGPL下授权，但使用了ldap3的应用软件则不必如此
-The ldap3 library is open source software released under the <strong>LGPL v3 license</strong> (<a class="reference external" href="http://www.gnu.org/licenses/lgpl-3.0.html">http://www.gnu.org/licenses/lgpl-3.0.html</a>).
-This means that you can use the ldap3 library in any application (either open or proprietary). You can also copy, distribute and modify
-the ldap3 library provided that modifications are described and licensed for free under LGPL.
-Derivatives works of ldap3 can only be redistributed under LGPL, but applications that use the library don&#8217;t have to be.</p>
+<p>ldap3库 是基于 <strong>LGPL v3 授权</strong> (<a class="reference external" href="http://www.gnu.org/licenses/lgpl-3.0.html">http://www.gnu.org/licenses/lgpl-3.0.html</a>) 发布的开源软件，这意味着你可以使用ldap3开发任意应用，无论是私有软件还是开源软件，你也可以复制、分发和修改ldap3,修改后的ldap3的描述和授权要在LGPL协议下免费。基于ldap3的衍生库必须在LGPL下授权，但使用了ldap3的应用软件则不必如此。</p>
 </div>
-<div class="section" id="rfcs">
-<h2>RFCs<a class="headerlink" href="#rfcs" title="永久链接至标题">¶</a></h2>
-<p>The ldap3 library strictly follows the latest (as of 2015) RFCs describing the LDAP v3 protocol:</p>
+<div class="section" id="rfc">
+<h2>RFC规范性<a class="headerlink" href="#rfc" title="永久链接至标题">¶</a></h2>
+<p>ladp3 严格遵守最新的RFC（自2015年起）文档对于 LDAP3协议的描述：</p>
 <ul class="simple">
-<li>The <strong>latest RFCs for LDAP v3</strong> (dated 2006) obsolete the previous RFCs specified in RFC3377 (2251-2256, 2829, 2830, 3371) for LDAP v3 and amend and clarify the LDAP protocol.</li>
-<li>All the ASN1 definitions are written from scratch to be current with RFC 4511.</li>
+<li><strong>最新的 LDAP V3 RFC文档</strong> （2006） 淘汰了之前的RFC3377（2251-2256, 2829, 2830, 3371）并对LDAP 协议做了修改和整理。</li>
+<li>所有的ASN1定义重新写进了RFC 4511。</li>
 </ul>
-<p>To avoid unnecessary server and network load caused by poor formed searches The ldap3 library deliberately doesn&#8217;t
-follow the specification in RFC4511 (4.5.1.8.1) that states that in a Search operation &#8220;an empty list with no attributes requests
-the return of all user attributes.&#8221;. Instead you must explicitly request the attributes you need or use the ldap3.ALL_ATTRIBUTES
-value in the Search operation.</p>
-<p>The library allows to send an empty member list while creating a GroupOfNames object, even if this is not allowed in the
-official LDAP v3 schema.</p>
-<p>ldap3 allows communication over Unix sockets (ldapi:// scheme, LDAP over IPC) even if this is not required by any official LDAP RFCs.</p>
+<p>为了避免不必要的服务器和网络负载造成搜索性能下降，ladp3有意地避开了RFC4511(4.5.4.1.8.1)中对于搜索选项的规定：在响应一个没有指定属性的空列表搜索请求时，应该返回所有的用户属性。相反地，在使用ldap3时你必须明确指定要请求的属性或者使用ladp3.ALL_ATTRIBUTES搜索选项。</p>
+<p>ldap3允许在创建GroupOfNames object的时候给出一个空列表，即使LDAPV3的官方架构里不允许这么干。</p>
+<p>ldap3允许通过 Unix sockets（ (ldapi:// scheme, LDAP over IPC) ）通信，即使并没有任何官方RFC文档要求这一点。</p>
 </div>
-<div class="section" id="pep8-compliance">
-<h2>PEP8 Compliance<a class="headerlink" href="#pep8-compliance" title="永久链接至标题">¶</a></h2>
-<p>ldap3 is PEP8 compliant, except for line length. PEP8 (<a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">https://www.python.org/dev/peps/pep-0008/</a>) is the standard coding style
-guide for the Python Standard Library and for many other Python projects. It provides a consistent way of writing code for maintainability
-and readability following the principle that &#8220;software is more read then written&#8221;.</p>
+<div class="section" id="pep8">
+<h2>PEP8 规范性<a class="headerlink" href="#pep8" title="永久链接至标题">¶</a></h2>
+<p>除了对单行长度的规定以外，ldap3遵循PEP8规范。PEP8 (<a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">https://www.python.org/dev/peps/pep-0008/</a>) PEP8是一个被应用在Python标准库和其他很多项目上的代码风格指南。他在“代码首先使用来被阅读，其次才是被编写”的原则下为代码的可维护性和可读性提供了一个一致的实现方式。</p>
 </div>
-<div class="section" id="home-page">
-<h2>Home Page<a class="headerlink" href="#home-page" title="永久链接至标题">¶</a></h2>
-<p>The home page of the ldap3 project is <a class="reference external" href="https://github.com/cannatag/ldap3">https://github.com/cannatag/ldap3</a></p>
+<div class="section" id="id2">
+<h2>主页<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>ldap3的项目主页地址： <a class="reference external" href="https://github.com/cannatag/ldap3">https://github.com/cannatag/ldap3</a></p>
 </div>
-<div class="section" id="documentation">
-<h2>Documentation<a class="headerlink" href="#documentation" title="永久链接至标题">¶</a></h2>
-<p>Documentation is available at <a class="reference external" href="http://ldap3.readthedocs.org">http://ldap3.readthedocs.org</a>. You can download a PDF copy of the manual at <a class="reference external" href="https://media.readthedocs.org/pdf/ldap3/stable/ldap3.pdf">https://media.readthedocs.org/pdf/ldap3/stable/ldap3.pdf</a></p>
+<div class="section" id="id3">
+<h2>文档<a class="headerlink" href="#id3" title="永久链接至标题">¶</a></h2>
+<p>可用的文档地址： <a class="reference external" href="http://ldap3.readthedocs.org">http://ldap3.readthedocs.org</a>. 你也可以在 <a class="reference external" href="https://media.readthedocs.org/pdf/ldap3/stable/ldap3.pdf">https://media.readthedocs.org/pdf/ldap3/stable/ldap3.pdf</a> 下载文档的PDF版本。本翻译完成之后会替换成对应的中文版地址。</p>
 </div>
-<div class="section" id="download">
-<h2>Download<a class="headerlink" href="#download" title="永久链接至标题">¶</a></h2>
-<p>The ldap3 package can be downloaded at <a class="reference external" href="https://pypi.python.org/pypi/ldap3">https://pypi.python.org/pypi/ldap3</a>. If you use a package manager that support the <em>wheel</em> format
-you can get the universal wheel package, and install it on any supported Python environment.</p>
+<div class="section" id="id4">
+<h2>下载<a class="headerlink" href="#id4" title="永久链接至标题">¶</a></h2>
+<p>ldap3 可以在 <a class="reference external" href="https://pypi.python.org/pypi/ldap3">https://pypi.python.org/pypi/ldap3</a> 下载。 如果你使用支持 <em>wheel</em> 格式的包管理器，你可以获取一个通用格式的 <em>wheel</em> 包并且安装在任何被支持的python环境下。</p>
 </div>
-<div class="section" id="install">
-<h2>Install<a class="headerlink" href="#install" title="永久链接至标题">¶</a></h2>
-<p>Install with <strong>pip install ldap3</strong>. If needed the library installs the <code class="docutils literal"><span class="pre">pyasn1</span></code> package. If you need Kerberos support you must
-install the <code class="docutils literal"><span class="pre">gssapi</span></code> package. ldap3 includes a backport (from Python 3.4.3) of ssl.check_hostnames to use on older
-(&lt; 2.7.10) Python version. If you want to use a newer version of the check_hostnames feature you can
-install the <code class="docutils literal"><span class="pre">backports.ssl_check_hostnames</span></code> package that should be kept updated by its author with the latest Python release.</p>
+<div class="section" id="id5">
+<h2>安装<a class="headerlink" href="#id5" title="永久链接至标题">¶</a></h2>
+<p>运行 <strong>pip install ldap3</strong> 来安装ldap3。如果需要库文件的话，安装 <code class="docutils literal"><span class="pre">pyasn1</span></code> 这个包。 如果需要启用 Kerberos 支持，你需要安装 <code class="docutils literal"><span class="pre">gssapi</span></code></p>
 </div>
 <div class="section" id="git-repository">
 <h2>GIT repository<a class="headerlink" href="#git-repository" title="永久链接至标题">¶</a></h2>
@@ -102,7 +85,7 @@ install the <code class="docutils literal"><span class="pre">backports.ssl_check
 <div class="section" id="contribuiting-to-this-project">
 <h2>Contribuiting to this project<a class="headerlink" href="#contribuiting-to-this-project" title="永久链接至标题">¶</a></h2>
 <p>ldap3 source is hosted on github. You can contribute to the ldap3 project on <a class="reference external" href="https://github.com/cannatag/ldap3/dev">https://github.com/cannatag/ldap3/dev</a>
-forking the project and submitting a <a href="#id2"><span class="problematic" id="id3">*</span></a>pull request+ with your modifications.</p>
+forking the project and submitting a <a href="#id6"><span class="problematic" id="id7">*</span></a>pull request+ with your modifications.</p>
 </div>
 <div class="section" id="continuous-integration">
 <h2>Continuous integration<a class="headerlink" href="#continuous-integration" title="永久链接至标题">¶</a></h2>
@@ -141,12 +124,12 @@ These books are wonderful tools for learning Python and this project owes a lot 
   <ul>
 <li><a class="reference internal" href="#">ldap3 简介</a><ul>
 <li><a class="reference internal" href="#id1">授权</a></li>
-<li><a class="reference internal" href="#rfcs">RFCs</a></li>
-<li><a class="reference internal" href="#pep8-compliance">PEP8 Compliance</a></li>
-<li><a class="reference internal" href="#home-page">Home Page</a></li>
-<li><a class="reference internal" href="#documentation">Documentation</a></li>
-<li><a class="reference internal" href="#download">Download</a></li>
-<li><a class="reference internal" href="#install">Install</a></li>
+<li><a class="reference internal" href="#rfc">RFC规范性</a></li>
+<li><a class="reference internal" href="#pep8">PEP8 规范性</a></li>
+<li><a class="reference internal" href="#id2">主页</a></li>
+<li><a class="reference internal" href="#id3">文档</a></li>
+<li><a class="reference internal" href="#id4">下载</a></li>
+<li><a class="reference internal" href="#id5">安装</a></li>
 <li><a class="reference internal" href="#git-repository">GIT repository</a></li>
 <li><a class="reference internal" href="#contribuiting-to-this-project">Contribuiting to this project</a></li>
 <li><a class="reference internal" href="#continuous-integration">Continuous integration</a></li>

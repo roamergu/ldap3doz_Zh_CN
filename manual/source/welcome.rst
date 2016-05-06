@@ -16,90 +16,77 @@ ladp3 严格遵守最新的RFC（自2015年起）文档对于 LDAP3协议的描�
 为了避免不必要的服务器和网络负载造成搜索性能下降，ladp3有意地避开了RFC4511(4.5.4.1.8.1)中对于搜索选项的规定：在响应一个没有指定属性的空列表搜索请求时，应该返回所有的用户属性。相反地，在使用ldap3时你必须明确指定要请求的属性或者使用ladp3.ALL_ATTRIBUTES搜索选项。
 
 
-ldap3允许发送一个空列表来创建一个GroupOfNames object，即使LDAPV3的官方架构里不允许这么干。
+ldap3允许在创建GroupOfNames object的时候给出一个空列表，即使LDAPV3的官方架构里不允许这么干。
 
-ldap3 allows communication over Unix sockets (ldapi:// scheme, LDAP over IPC) even if this is not required by any official LDAP RFCs.
+ldap3允许通过 Unix sockets（ (ldapi:// scheme, LDAP over IPC) ）通信，即使并没有任何官方RFC文档要求这一点。
 
-
-PEP8 Compliance
+PEP8 规范性
 ---------------
+除了对单行长度的规定以外，ldap3遵循PEP8规范。PEP8 (https://www.python.org/dev/peps/pep-0008/) PEP8是一个被应用在Python标准库和其他很多项目上的代码风格指南。他在“代码首先使用来被阅读，其次才是被编写”的原则下为代码的可维护性和可读性提供了一个一致的实现方式。
 
-ldap3 is PEP8 compliant, except for line length. PEP8 (https://www.python.org/dev/peps/pep-0008/) is the standard coding style
-guide for the Python Standard Library and for many other Python projects. It provides a consistent way of writing code for maintainability
-and readability following the principle that "software is more read then written".
-
-
-Home Page
+主页
 ---------
+ldap3的项目主页地址： https://github.com/cannatag/ldap3
 
-The home page of the ldap3 project is https://github.com/cannatag/ldap3
 
-
-Documentation
+文档
 -------------
 
-Documentation is available at http://ldap3.readthedocs.org. You can download a PDF copy of the manual at https://media.readthedocs.org/pdf/ldap3/stable/ldap3.pdf
+可用的文档地址： http://ldap3.readthedocs.org. 你也可以在 https://media.readthedocs.org/pdf/ldap3/stable/ldap3.pdf 下载文档的PDF版本。本翻译完成之后会替换成对应的中文版地址。
 
 
-Download
+下载
 --------
 
-The ldap3 package can be downloaded at https://pypi.python.org/pypi/ldap3. If you use a package manager that support the *wheel* format
-you can get the universal wheel package, and install it on any supported Python environment.
+ldap3 可以在 https://pypi.python.org/pypi/ldap3 下载。 如果你使用支持 *wheel* 格式的包管理器，你可以获取一个通用格式的 *wheel* 包并且安装在任何被支持的python环境下。
 
-
-Install
+安装
 -------
 
-Install with **pip install ldap3**. If needed the library installs the ``pyasn1`` package. If you need Kerberos support you must
-install the ``gssapi`` package. ldap3 includes a backport (from Python 3.4.3) of ssl.check_hostnames to use on older
-(< 2.7.10) Python version. If you want to use a newer version of the check_hostnames feature you can
-install the ``backports.ssl_check_hostnames`` package that should be kept updated by its author with the latest Python release.
+运行 **pip install ldap3** 来安装ldap3。如果需要库文件的话，安装 ``pyasn1`` 这个包。 如果需要启用 Kerberos 支持，你需要安装 ``gssapi`` 。 ldap3包含了一个向后兼容的（从Python3.4.3开始）的 ``ssl.check_hosname`` 以用在旧版（<Python2.7.10）的Python上。如果你打算用到新版的 ``check_hostname`` 的一些特性的话，你需要安装backports.ssl_check_hostnames，这个包会随着Python的版本一直更新下去。
+ 
 
 
-GIT repository
+GIT 仓库
 --------------
 
-You can download the latest released source code at https://github.com/cannatag/ldap3/tree/master
+你可以从这个地址下载最新的源码 https://github.com/cannatag/ldap3/tree/master
 
 
-Contribuiting to this project
+对本项目作出贡献
 -----------------------------
 
-ldap3 source is hosted on github. You can contribute to the ldap3 project on https://github.com/cannatag/ldap3/dev
-forking the project and submitting a *pull request+ with your modifications.
+ldap3 的源代码托管在 github上，你可以通过fork https://github.com/cannatag/ldap3/dev 并提交 **pull request + 你的修改** 的方式来向本项目贡献代码。
 
 
-Continuous integration
+持续集成
 ----------------------
+持续集成的测试地址在这里： https://travis-ci.org/cannatag/ldap3
 
-Continuous integration for testing is at https://travis-ci.org/cannatag/ldap3
 
-
-Support
+支持
 -------
 
-You can submit support tickets on https://github.com/cannatag/ldap3/issues/new
+你可以在这里提交一个Support tickt: https://github.com/cannatag/ldap3/issues/new
 
 
-Contact me
+联系我
 ----------
 
-For information and suggestions you can contact me at cannatag@gmail.com. You can also open a support ticket on
-https://github.com/cannatag/ldap3/issues/new
+如果你要需获取更多信息或者给出建议，请发邮件到 cannatag@gmail.com。你也可以在https://github.com/cannatag/ldap3/issues/new 开一个open ticket 。
 
 
-Thanks to
+致谢
 ---------
 
-* **Ilya Etingof**, the author of the *pyasn1* package for his excellent work and support.
+* **Ilya Etingof**,  *pyasn1* 的作者，感谢他杰出的工作和支持。
 
-* **Mark Lutz** for his *Learning Python* and *Programming Python* excellent books series and **John Goerzen** and
-  **Brandon Rhodes** for their books *Foundations of Python Network Programming* (Second and Third edition).
-  These books are wonderful tools for learning Python and this project owes a lot to them.
+* **Mark Lutz** 他的 *Learning Python* 和 *Programming Python* 丛书， **John Goerzen** 与
+  **Brandon Rhodes** 共同编写的书 *Foundations of Python Network Programming* (第二版和第三版)。
+  我学习python和开发次项目，多亏了他们的书。
 
-* **JetBrains** for donating to this project the Open Source license of *PyCharm 4 Professional*.
+* **JetBrains** ，他们向开源软件捐赠了杰出的IDE： *PyCharm 4 Professional*.
 
-* **GitHub** for providing the *free source repository space and tools* used to develop this project.
+* **GitHub** 提供了 *免费的仓库空间和工具* 用来开发这个项目。
 
-* The **Python Software Foundation** for supporting the cloud lab infrastructure used for testing the library.
+*  **Python Software Foundation** 提供了云基础架构用于测试。
